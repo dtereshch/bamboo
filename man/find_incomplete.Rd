@@ -4,27 +4,28 @@
 \alias{find_incomplete}
 \title{Identify entities with incomplete observations (missing values)}
 \usage{
-find_incomplete(data, group = NULL)
+find_incomplete(data, group = NULL, time = NULL)
 }
 \arguments{
-\item{data}{The data frame, pdata.frame, or fixest panel object}
+\item{data}{The data frame}
 
-\item{group}{Entities' identifier (column name as character string). If NULL and data is a panel data object, the entity ID will be extracted automatically.}
+\item{group}{Entities' identifier (column name as character string)}
+
+\item{time}{Time identifier (optional, for checking panel balance)}
 }
 \value{
-A vector containing entities with missing values
+A vector containing entities with missing values, or a message if no incomplete entities found
 }
 \description{
 Identify entities with incomplete observations (missing values)
 }
 \examples{
-# Using base R dataset
-data("airquality")
-# Add a group variable
-airquality$City <- rep(c("NY", "LA"), length.out = nrow(airquality))
-find_incomplete(airquality, "City")
+data(production)
 
-# This will now throw an error:
-# find_incomplete(airquality, City)
+# Find firms with missing values in any variable
+find_incomplete(production, group = "firm", time = "year")
+
+# Example without time variable (no unbalanced check)
+find_incomplete(production, group = "firm")
 
 }

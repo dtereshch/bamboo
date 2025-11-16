@@ -1,7 +1,8 @@
 #' Providing a table of entities with incomplete observations (missing values)
 #'
-#' @param data The data frame, pdata.frame, or fixest panel object
-#' @param group Entities' identifier (optional for panel data objects)
+#' @param data The data frame
+#' @param group Entities' identifier
+#' @param time Time identifier (optional, for checking panel balance)
 #' @param detailed Logical indicating whether to include detailed missing counts
 #'        for each variable (TRUE) or just summary counts (FALSE). Default is FALSE.
 #' @return A data frame containing entities with number of variables that have
@@ -10,27 +11,27 @@
 #'         variables with missing values. If detailed = TRUE, includes additional
 #'         columns with NA counts for each variable.
 #' @examples
+#' data(production)
+#'
 #' # Using regular data frame - summary view
-#' data("USSeatBelts", package = "AER")
-#' explore_incomplete(USSeatBelts, "state")
+#' explore_incomplete(production, group = "firm")
 #'
 #' # Detailed view with variable-level NA counts
-#' explore_incomplete(USSeatBelts, "state", detailed = TRUE)
+#' explore_incomplete(production, group = "firm", detailed = TRUE)
 #'
-#' # Using pdata.frame (if available)
-#' # library(plm)
-#' # pdata <- pdata.frame(USSeatBelts, index = "state")
-#' # explore_incomplete(pdata)
+#' # Check for panel balance
+#' explore_incomplete(production, group = "firm", time = "year")
 #'
-#' # Using fixest panel (if available)
-#' # library(fixest)
-#' # pdata <- panel(USSeatBelts, ~ state + year)
-#' # explore_incomplete(pdata)
 #' @export
-explore_incomplete <- function(data, group = NULL, detailed = FALSE) {
+explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   # Check if data is provided
   if (missing(data)) {
     stop("Argument 'data' is required")
+  }
+
+  # Check if group is provided
+  if (missing(group)) {
+    stop("Argument 'group' is required")
   }
 
   # Validate detailed parameter
@@ -38,18 +39,7 @@ explore_incomplete <- function(data, group = NULL, detailed = FALSE) {
     stop("Argument 'detailed' must be a single logical value (TRUE or FALSE)")
   }
 
-  # Handle panel data objects
-  panel_info <- extract_panel_info(data, group)
-  data <- panel_info$data
-  group <- panel_info$group
-
   # Validate group variable
-  if (is.null(group)) {
-    stop(
-      "No group variable specified and could not be automatically extracted from panel data object"
-    )
-  }
-
   if (!group %in% names(data)) {
     stop("Group variable '", group, "' not found in data")
   }
@@ -59,18 +49,35 @@ explore_incomplete <- function(data, group = NULL, detailed = FALSE) {
     stop("Group variable has no observations")
   }
 
-  # Convert group to character for consistent handling
-  group_values <- as.character(data[[group]])
-  unique_groups <- unique(group_values)
+  # Check panel balance if time variable is provided
+  if (!is.null(time)) {
+    if (!time %in% names(data)) {
+      stop("Time variable '", time, "' not found in data")
+    }
 
-  # Get variable names excluding group variable
-  vars <- setdiff(names(data), group)
-
-  if (length(vars) == 0) {
-    stop("No variables to analyze (only group variable found)")
+    # Check if panel is unbalanced
+    # Use table with the original variables (preserving types)
+    time_counts <- table(data[[group]], data[[time]])
+    if (!all(time_counts == 1)) {
+      warning("The panel is unbalanced.")
+    }
   }
 
-  # Initialize base results
+  # Get unique groups while preserving original type and order
+  unique_groups <- unique(data[[group]])
+
+  # Get variable names excluding group and time variables
+  exclude_vars <- group
+  if (!is.null(time)) {
+    exclude_vars <- c(exclude_vars, time)
+  }
+  vars <- setdiff(names(data), exclude_vars)
+
+  if (length(vars) == 0) {
+    stop("No variables to analyze (only group and time variables found)")
+  }
+
+  # Initialize base results with original group type
   result <- data.frame(
     group = unique_groups,
     n_vars_with_na = 0,
@@ -89,13 +96,20 @@ explore_incomplete <- function(data, group = NULL, detailed = FALSE) {
   # For each group, calculate missing statistics
   for (i in seq_along(unique_groups)) {
     current_group <- unique_groups[i]
-    group_data <- data[group_values == current_group, vars, drop = FALSE]
+
+    # Use logical indexing that preserves data types
+    group_indices <- data[[group]] == current_group
+    group_data <- data[group_indices, vars, drop = FALSE]
 
     # Count variables with at least one NA
-    vars_with_na <- sum(apply(group_data, 2, function(x) any(is.na(x))))
+    vars_with_na <- sum(vapply(
+      group_data,
+      function(x) any(is.na(x)),
+      logical(1)
+    ))
 
     # Count total number of NA observations
-    total_na <- sum(is.na(group_data))
+    total_na <- sum(vapply(group_data, function(x) sum(is.na(x)), numeric(1)))
 
     result$n_vars_with_na[i] <- vars_with_na
     result$total_na[i] <- total_na
@@ -111,6 +125,11 @@ explore_incomplete <- function(data, group = NULL, detailed = FALSE) {
   # Filter groups with any missing variables and arrange
   result <- result[result$n_vars_with_na > 0, ]
 
+  # Check if there are any incomplete groups
+  if (nrow(result) == 0) {
+    return("There are no incomplete groups/entities in the data.")
+  }
+
   # Sort by primary and secondary criteria
   result <- result[order(-result$n_vars_with_na, -result$total_na), ]
 
@@ -118,43 +137,4 @@ explore_incomplete <- function(data, group = NULL, detailed = FALSE) {
   rownames(result) <- NULL
 
   return(result)
-}
-
-# Helper function to handle panel data objects
-extract_panel_info <- function(data, group) {
-  # Check for pdata.frame (plm package)
-  if (inherits(data, "pdata.frame")) {
-    if (!requireNamespace("plm", quietly = TRUE)) {
-      stop("plm package is required for handling pdata.frame objects")
-    }
-
-    index_attr <- attr(data, "index")
-    if (!is.null(index_attr) && ncol(index_attr) >= 1) {
-      group_var <- names(index_attr)[1]
-      if (is.null(group)) {
-        group <- group_var
-        message("Using automatically detected group variable: ", group)
-      }
-      # Convert to regular data frame for processing
-      data <- as.data.frame(data)
-    }
-  }
-
-  # Check for fixest panel data
-  if (inherits(data, "fixest_panel")) {
-    if (!requireNamespace("fixest", quietly = TRUE)) {
-      stop("fixest package is required for handling fixest panel objects")
-    }
-
-    panel_info <- fixest::panel_info(data)
-    if (!is.null(panel_info$panel.id)) {
-      group_var <- panel_info$panel.id[1]
-      if (is.null(group)) {
-        group <- group_var
-        message("Using automatically detected group variable: ", group)
-      }
-    }
-  }
-
-  return(list(data = data, group = group))
 }

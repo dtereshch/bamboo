@@ -4,12 +4,14 @@
 \alias{explore_incomplete}
 \title{Providing a table of entities with incomplete observations (missing values)}
 \usage{
-explore_incomplete(data, group = NULL, detailed = FALSE)
+explore_incomplete(data, group, time = NULL, detailed = FALSE)
 }
 \arguments{
-\item{data}{The data frame, pdata.frame, or fixest panel object}
+\item{data}{The data frame}
 
-\item{group}{Entities' identifier (optional for panel data objects)}
+\item{group}{Entities' identifier}
+
+\item{time}{Time identifier (optional, for checking panel balance)}
 
 \item{detailed}{Logical indicating whether to include detailed missing counts
 for each variable (TRUE) or just summary counts (FALSE). Default is FALSE.}
@@ -25,20 +27,15 @@ A data frame containing entities with number of variables that have
 Providing a table of entities with incomplete observations (missing values)
 }
 \examples{
+data(production)
+
 # Using regular data frame - summary view
-data("USSeatBelts", package = "AER")
-explore_incomplete(USSeatBelts, "state")
+explore_incomplete(production, group = "firm")
 
 # Detailed view with variable-level NA counts
-explore_incomplete(USSeatBelts, "state", detailed = TRUE)
+explore_incomplete(production, group = "firm", detailed = TRUE)
 
-# Using pdata.frame (if available)
-# library(plm)
-# pdata <- pdata.frame(USSeatBelts, index = "state")
-# explore_incomplete(pdata)
+# Check for panel balance
+explore_incomplete(production, group = "firm", time = "year")
 
-# Using fixest panel (if available)
-# library(fixest)
-# pdata <- panel(USSeatBelts, ~ state + year)
-# explore_incomplete(pdata)
 }

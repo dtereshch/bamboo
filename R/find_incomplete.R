@@ -2,15 +2,19 @@
 #'
 #' @param data The data frame
 #' @param group Entities' identifier (column name as character string)
+#' @param time Time identifier (optional, for checking panel balance)
 #' @return A vector containing entities with missing values, or a message if no incomplete entities found
 #' @examples
 #' data(production)
 #'
 #' # Find firms with missing values in any variable
+#' find_incomplete(production, group = "firm", time = "year")
+#'
+#' # Example without time variable (no unbalanced check)
 #' find_incomplete(production, group = "firm")
 #'
 #' @export
-find_incomplete <- function(data, group = NULL) {
+find_incomplete <- function(data, group = NULL, time = NULL) {
   # Input validation
   if (missing(data)) {
     stop("Argument 'data' is required")
@@ -40,6 +44,26 @@ find_incomplete <- function(data, group = NULL) {
 
   group_var <- data[[group_name]]
 
+  # Check if time variable is provided for unbalanced panel check
+  check_unbalanced <- FALSE
+  if (!is.null(time)) {
+    if (!is.character(time) || length(time) != 1) {
+      stop(
+        "'time' must be a single character string specifying the column name"
+      )
+    }
+    if (!time %in% names(data)) {
+      stop(sprintf("Time variable '%s' not found in data", time))
+    }
+    check_unbalanced <- TRUE
+    time_var <- data[[time]]
+
+    # Convert time variable to appropriate type for consistent handling
+    if (is.factor(time_var)) {
+      time_var <- as.character(time_var)
+    }
+  }
+
   # Convert group variable to appropriate type for consistent handling
   if (is.factor(group_var)) {
     group_var <- as.character(group_var)
@@ -50,6 +74,17 @@ find_incomplete <- function(data, group = NULL) {
     warning(
       "Group variable contains missing values. These will be included in the results."
     )
+  }
+
+  # Check for unbalanced panel if time variable is provided
+  if (check_unbalanced) {
+    # Count unique time periods per group
+    time_counts <- tapply(time_var, group_var, function(x) length(unique(x)))
+
+    # Check if all groups have the same number of time periods
+    if (length(unique(time_counts)) > 1) {
+      warning("The panel is unbalanced.")
+    }
   }
 
   # Identify complete cases by group
