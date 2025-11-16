@@ -1,258 +1,195 @@
-#' Draws a heatmap showing participation patterns in an unbalanced panel
+#' Visualize panel data participation patterns as a heatmap
 #'
-#' Creates a publication-ready heatmap visualization of panel data structure,
-#' showing participation patterns by entity and time period. Supports regular data frames.
+#' This function creates a heatmap visualization of participation patterns
+#' of entities in panel data over time, similar to Stata's xtdes command.
 #'
-#' @param data The data frame
-#' @param group Character string specifying the entities' identifier column name
-#' @param time Character string specifying the time identifier column name
-#' @param main Plot title (default: "Participation Patterns")
+#' @param data A data frame with panel data structure
+#' @param group Character string specifying the entity/group variable name
+#' @param time Character string specifying the time variable name
+#' @param colors Vector of two colors for present and missing observations
+#' (default: c("#0072B2", "#D55E00") - colorblind-friendly)
 #' @param xlab X-axis label (default: "Time Period")
-#' @param ylab Y-axis label (default: NULL - no y-axis label)
-#' @param show_stats Logical, whether to display summary statistics on plot (default: TRUE)
-#' @param colors Vector of two colors for present/missing observations
-#'               (default: c("#0072B2", "#D55E00") - blue/orange colorblind-friendly)
-#' @param cex.axis Axis text size (default: 0.8)
-#' @param cex.lab Label text size (default: 1)
-#' @param cex.pattern Pattern label text size (default: 0.7)
-#' @param mar Plot margins (default: c(5, 8, 4, 6) + 0.1)  # Increased right margin for legend
 #'
-#' @return Invisible list containing the cross-tabulation matrix and summary statistics
+#' @return A heatmap plot showing participation patterns
 #'
 #' @examples
 #' # Load the production dataset
 #' data(production)
 #'
-#' # Basic usage with production data
+#' # Basic usage with all patterns shown
 #' plot_participation(production, group = "firm", time = "year")
 #'
-#' # With custom options
+#' # Custom colors
 #' plot_participation(production, group = "firm", time = "year",
-#'                main = "Production Participation Patterns",
-#'                colors = c("darkgreen", "orange"),
-#'                show_stats = TRUE)
+#'                        colors = c("blue", "red"))
 #'
 #' @export
 plot_participation <- function(
   data,
   group = NULL,
   time = NULL,
-  main = "Participation Patterns",
-  xlab = "Time Period",
-  ylab = NULL,
-  show_stats = TRUE,
   colors = c("#0072B2", "#D55E00"),
-  cex.axis = 0.8,
-  cex.lab = 1,
-  cex.pattern = 0.7,
-  mar = c(5, 8, 4, 6) + 0.1 # Increased right margin for vertical legend
+  xlab = "Time Period"
 ) {
   # Input validation
   if (missing(data)) {
     stop("Argument 'data' is required")
   }
 
+  if (!is.data.frame(data)) {
+    stop("Argument 'data' must be a data frame")
+  }
+
+  # Check if group and time are specified for regular data frames
   if (is.null(group) || is.null(time)) {
-    stop("Both 'group' and 'time' arguments are required as character strings")
+    stop(
+      "Arguments 'group' and 'time' must be specified for regular data frames"
+    )
   }
 
-  if (
-    !is.character(group) ||
-      !is.character(time) ||
-      length(group) != 1 ||
-      length(time) != 1
-  ) {
-    stop("'group' and 'time' must be single character strings")
-  }
-
-  data_df <- as.data.frame(data)
-  group_var <- data_df[[group]]
-  time_var <- data_df[[time]]
-
-  if (is.null(group_var)) {
+  # Validate that group and time variables exist in data
+  if (!group %in% names(data)) {
     stop("Group variable '", group, "' not found in data")
   }
-  if (is.null(time_var)) {
+
+  if (!time %in% names(data)) {
     stop("Time variable '", time, "' not found in data")
   }
 
-  # Filter out rows with all NAs in non-group/time variables
-  other_vars <- setdiff(names(data_df), c(group, time))
-  if (length(other_vars) > 0) {
-    has_data <- apply(data_df[other_vars], 1, function(x) any(!is.na(x)))
-    data_df <- data_df[has_data, ]
-    group_var <- data_df[[group]]
-    time_var <- data_df[[time]]
+  # Identify data columns (excluding group and time)
+  data_cols <- setdiff(names(data), c(group, time))
 
-    if (nrow(data_df) == 0) {
-      stop("No observations with valid data after removing rows with all NAs")
+  if (length(data_cols) == 0) {
+    stop("No data columns found (excluding group and time variables)")
+  }
+
+  # Filter data: remove rows where ALL data columns are NA
+  data_filtered <- data
+  if (nrow(data_filtered) > 0) {
+    has_data <- apply(data_filtered[data_cols], 1, function(row) {
+      !all(is.na(row))
+    })
+    data_filtered <- data_filtered[has_data, ]
+  }
+
+  # Convert group and time to character to handle different classes
+  group_vec <- as.character(data_filtered[[group]])
+  time_vec <- as.character(data_filtered[[time]])
+
+  # Create unique combinations of group and time
+  unique_combinations <- unique(data.frame(group = group_vec, time = time_vec))
+
+  # Get all unique time periods and sort them
+  all_times <- sort(unique(time_vec))
+
+  # Create participation matrix
+  participation <- table(unique_combinations$group, unique_combinations$time)
+
+  # Convert to binary matrix (1 = present, 0 = missing)
+  participation_binary <- ifelse(participation > 0, 1, 0)
+
+  # Convert to data frame for pattern analysis
+  participation_df <- as.data.frame(participation_binary)
+  participation_df$group <- rownames(participation_df)
+
+  # Ensure all time periods are present as columns
+  for (t in all_times) {
+    if (!t %in% names(participation_df)) {
+      participation_df[[t]] <- 0
     }
   }
 
-  # Convert to character and get unique values
-  group_var <- as.character(group_var)
-  time_var <- as.character(time_var)
-  unique_groups <- unique(group_var)
-  unique_times <- unique(time_var)
+  # Reorder columns to have time periods in order
+  time_cols <- as.character(sort(all_times))
+  participation_df <- participation_df[c("group", time_cols)]
 
-  # Create presence matrix
-  presence_matrix <- matrix(
+  # Count patterns and create pattern matrix
+  pattern_cols <- setdiff(names(participation_df), "group")
+  pattern_strings <- apply(participation_df[pattern_cols], 1, function(x) {
+    paste(x, collapse = "")
+  })
+
+  pattern_counts <- table(pattern_strings)
+
+  # Create pattern matrix for heatmap
+  pattern_matrix <- matrix(
     0,
-    nrow = length(unique_groups),
-    ncol = length(unique_times),
-    dimnames = list(unique_groups, unique_times)
+    nrow = length(pattern_counts),
+    ncol = length(time_cols)
   )
+  colnames(pattern_matrix) <- time_cols
 
-  # Fill matrix with presence indicators
-  obs_indices <- cbind(
-    match(group_var, unique_groups),
-    match(time_var, unique_times)
-  )
-  presence_matrix[obs_indices] <- 1
-
-  # Group entities by missing value patterns
-  pattern_strings <- apply(presence_matrix, 1, paste, collapse = "")
-  pattern_groups <- split(rownames(presence_matrix), pattern_strings)
-
-  # Create pattern matrix
-  pattern_matrix <- do.call(
-    rbind,
-    lapply(names(pattern_groups), function(pat) {
-      as.numeric(strsplit(pat, "")[[1]])
-    })
-  )
-  rownames(pattern_matrix) <- paste0("Pattern ", seq_along(pattern_groups))
-  colnames(pattern_matrix) <- colnames(presence_matrix)
-
-  # Calculate pattern statistics
-  pattern_counts <- lengths(pattern_groups)
-  pattern_pcts <- pattern_counts / length(unique_groups) * 100
-
-  # Order patterns by frequency (most common first)
-  pattern_order <- order(pattern_counts, decreasing = TRUE)
-  pattern_matrix <- pattern_matrix[pattern_order, , drop = FALSE]
-  pattern_counts <- pattern_counts[pattern_order]
-  pattern_pcts <- pattern_pcts[pattern_order]
-  pattern_groups <- pattern_groups[pattern_order]
-
-  # Calculate summary statistics
-  total_cells <- nrow(presence_matrix) * ncol(presence_matrix)
-  missing_obs <- total_cells - sum(presence_matrix)
-
-  stats <- list(
-    n_entities = length(unique_groups),
-    n_periods = ncol(presence_matrix),
-    total_obs = sum(presence_matrix),
-    missing_obs = missing_obs,
-    pct_missing = missing_obs / total_cells * 100,
-    entities_with_gaps = sum(rowSums(presence_matrix) < ncol(presence_matrix)),
-    n_patterns = length(pattern_groups)
-  )
-
-  # Order time periods numerically if possible
-  if (all(grepl("^-?\\d+\\.?\\d*$", unique_times))) {
-    time_order <- order(as.numeric(unique_times))
-  } else {
-    time_order <- order(unique_times)
+  for (i in seq_along(pattern_counts)) {
+    pattern_matrix[i, ] <- as.numeric(strsplit(names(pattern_counts)[i], "")[[
+      1
+    ]])
   }
-  ordered_matrix <- pattern_matrix[, time_order, drop = FALSE]
 
-  # Set up plot
-  old_mar <- par("mar")
-  on.exit(par(mar = old_mar))
-  par(mar = mar)
+  # Sort by count (descending) and create labels
+  counts <- as.numeric(pattern_counts)
+  sorted_order <- order(-counts)
+  pattern_matrix <- pattern_matrix[sorted_order, ]
+  counts <- counts[sorted_order]
 
-  # Reverse matrix for plotting (most common pattern at top)
-  plot_matrix <- ordered_matrix[nrow(ordered_matrix):1, , drop = FALSE]
+  # Reverse the matrix to put most common pattern on top
+  pattern_matrix <- pattern_matrix[rev(seq_len(nrow(pattern_matrix))), ]
+  counts <- counts[rev(seq_len(length(counts)))]
 
-  # Use colors directly without reversal - ensure correct mapping
-  col_palette <- colors # Present = colors[1], Missing = colors[2]
+  # Create y-axis labels
+  y_labels <- paste0("Pattern ", rev(seq_along(counts)), " (n = ", counts, ")")
 
-  # Create heatmap with explicit breaks to ensure correct color mapping
+  # Reset graphical parameters on exit
+  old_par <- par(no.readonly = TRUE)
+  on.exit(par(old_par))
+
+  # Set up plot margins to accommodate legend at top and y-labels on right
+  par(mar = c(5, 1, 4, 8) + 0.1) # Top margin for legend, right margin for y-labels
+
+  # Create heatmap using image function with reversed colors
   image(
-    1:ncol(plot_matrix),
-    1:nrow(plot_matrix),
-    t(plot_matrix),
-    col = col_palette,
-    xlab = "",
+    x = seq_len(ncol(pattern_matrix)),
+    y = seq_len(nrow(pattern_matrix)),
+    z = t(pattern_matrix),
+    col = rev(colors), # Reverse colors to match the data correctly
+    xlab = xlab,
     ylab = "",
-    main = main,
     axes = FALSE,
-    cex.lab = cex.lab,
-    useRaster = TRUE,
-    breaks = c(-0.5, 0.5, 1.5) # Explicit breaks for correct color assignment
+    xaxs = "i",
+    yaxs = "i"
   )
 
-  # Add axes
+  # Add axes without ticks
+  axis(1, at = seq_len(ncol(pattern_matrix)), labels = time_cols, tick = FALSE)
   axis(
-    1,
-    at = 1:ncol(plot_matrix),
-    labels = colnames(plot_matrix),
+    4,
+    at = seq_len(nrow(pattern_matrix)),
+    labels = y_labels,
     las = 2,
-    cex.axis = cex.axis
+    tick = FALSE
   )
 
-  pattern_labels <- sprintf(
-    "Pattern %d (n=%d, %.1f%%)",
-    seq_along(pattern_counts),
-    pattern_counts,
-    pattern_pcts
-  )
-  axis(
-    2,
-    at = 1:nrow(plot_matrix),
-    labels = pattern_labels[nrow(plot_matrix):1],
-    las = 1,
-    cex.axis = cex.pattern
-  )
+  # Add grid lines
+  abline(h = seq(0.5, nrow(pattern_matrix) + 0.5, 1), col = "gray", lty = 3)
+  abline(v = seq(0.5, ncol(pattern_matrix) + 0.5, 1), col = "gray", lty = 3)
 
-  title(xlab = xlab, cex.lab = cex.lab, line = 3.5)
-
-  # Add grid
-  abline(h = 1:nrow(plot_matrix) - 0.5, col = "gray80", lty = 3)
-  abline(v = 1:ncol(plot_matrix) - 0.5, col = "gray80", lty = 3)
-
-  # Add statistics if requested
-  if (show_stats) {
-    stats_text <- sprintf(
-      "Entities: %d | Time periods: %d | Observations: %d | Missing: %d (%.1f%%) | Patterns: %d",
-      stats$n_entities,
-      stats$n_periods,
-      stats$total_obs,
-      stats$missing_obs,
-      stats$pct_missing,
-      stats$n_patterns
-    )
-    mtext(stats_text, side = 3, line = 0.5, cex = 0.7 * cex.lab)
-  }
-
-  # Add vertical legend on the right
+  # Add legend at the top
   legend(
-    "right",
+    "top",
     legend = c("Present", "Missing"),
     fill = colors,
+    bg = "white",
+    horiz = TRUE,
+    xpd = TRUE,
     bty = "n",
-    cex = 0.8,
-    title = "Observation Status",
-    inset = c(-0.15, 0),
-    xpd = TRUE
+    inset = c(0, -0.1), # Adjust position above plot
+    cex = 0.9
   )
 
-  # Return results
+  # Return the pattern matrix invisibly for further use
   invisible(list(
-    presence_matrix = presence_matrix,
-    pattern_matrix = ordered_matrix,
-    pattern_groups = pattern_groups,
-    pattern_stats = data.frame(
-      pattern_id = seq_along(pattern_counts),
-      pattern_string = names(pattern_groups),
-      n_entities = pattern_counts,
-      percent_entities = pattern_pcts,
-      entities = I(pattern_groups)
-    ),
-    statistics = stats,
-    group_var = group,
-    time_var = time,
-    color_mapping = c("1" = colors[1], "0" = colors[2]) # Document the mapping
+    pattern_matrix = pattern_matrix,
+    time_periods = time_cols,
+    pattern_labels = y_labels,
+    counts = counts
   ))
 }

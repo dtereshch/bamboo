@@ -2,67 +2,44 @@
 % Please edit documentation in R/plot_participation.R
 \name{plot_participation}
 \alias{plot_participation}
-\title{Draws a heatmap showing participation patterns in an unbalanced panel}
+\title{Visualize panel data participation patterns as a heatmap}
 \usage{
 plot_participation(
   data,
   group = NULL,
   time = NULL,
-  main = "Participation Patterns",
-  xlab = "Time Period",
-  ylab = NULL,
-  show_stats = TRUE,
   colors = c("#0072B2", "#D55E00"),
-  cex.axis = 0.8,
-  cex.lab = 1,
-  cex.pattern = 0.7,
-  mar = c(5, 8, 4, 6) + 0.1
+  xlab = "Time Period"
 )
 }
 \arguments{
-\item{data}{The data frame}
+\item{data}{A data frame with panel data structure}
 
-\item{group}{Character string specifying the entities' identifier column name}
+\item{group}{Character string specifying the entity/group variable name}
 
-\item{time}{Character string specifying the time identifier column name}
+\item{time}{Character string specifying the time variable name}
 
-\item{main}{Plot title (default: "Participation Patterns")}
+\item{colors}{Vector of two colors for present and missing observations
+(default: c("#0072B2", "#D55E00") - colorblind-friendly)}
 
 \item{xlab}{X-axis label (default: "Time Period")}
-
-\item{ylab}{Y-axis label (default: NULL - no y-axis label)}
-
-\item{show_stats}{Logical, whether to display summary statistics on plot (default: TRUE)}
-
-\item{colors}{Vector of two colors for present/missing observations
-(default: c("#0072B2", "#D55E00") - blue/orange colorblind-friendly)}
-
-\item{cex.axis}{Axis text size (default: 0.8)}
-
-\item{cex.lab}{Label text size (default: 1)}
-
-\item{cex.pattern}{Pattern label text size (default: 0.7)}
-
-\item{mar}{Plot margins (default: c(5, 8, 4, 6) + 0.1)  # Increased right margin for legend}
 }
 \value{
-Invisible list containing the cross-tabulation matrix and summary statistics
+A heatmap plot showing participation patterns
 }
 \description{
-Creates a publication-ready heatmap visualization of panel data structure,
-showing participation patterns by entity and time period. Supports regular data frames.
+This function creates a heatmap visualization of participation patterns
+of entities in panel data over time, similar to Stata's xtdes command.
 }
 \examples{
 # Load the production dataset
 data(production)
 
-# Basic usage with production data
+# Basic usage with all patterns shown
 plot_participation(production, group = "firm", time = "year")
 
-# With custom options
+# Custom colors
 plot_participation(production, group = "firm", time = "year",
-               main = "Production Participation Patterns",
-               colors = c("darkgreen", "orange"),
-               show_stats = TRUE)
+                       colors = c("blue", "red"))
 
 }
