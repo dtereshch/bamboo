@@ -20,13 +20,11 @@ plot_participation(
 )
 }
 \arguments{
-\item{data}{The data frame, plm::pdata.frame, or fixest::panel object}
+\item{data}{The data frame}
 
-\item{group}{Character string specifying the entities' identifier column name
-(optional for specialized panel objects)}
+\item{group}{Character string specifying the entities' identifier column name}
 
-\item{time}{Character string specifying the time identifier column name
-(optional for specialized panel objects)}
+\item{time}{Character string specifying the time identifier column name}
 
 \item{main}{Plot title (default: "Participation Patterns")}
 
@@ -52,30 +50,19 @@ Invisible list containing the cross-tabulation matrix and summary statistics
 }
 \description{
 Creates a publication-ready heatmap visualization of panel data structure,
-showing participation patterns by entity and time period. Supports various
-data object types including regular data frames, plm::pdata.frame, and
-fixest::panel objects.
+showing participation patterns by entity and time period. Supports regular data frames.
 }
 \examples{
-# Load required packages
-if (requireNamespace("plm", quietly = TRUE)) {
-  library(plm)
+# Load the production dataset
+data(production)
 
-  # Using regular data frame with quoted variable names
-  data("Grunfeld", package = "plm")
-  plot_participation(Grunfeld, group = "firm", time = "year")
-
-  # Using plm::pdata.frame (no need for group/time arguments)
-  pGrunfeld <- pdata.frame(Grunfeld, index = c("firm", "year"))
-  plot_participation(pGrunfeld)
-}
+# Basic usage with production data
+plot_participation(production, group = "firm", time = "year")
 
 # With custom options
-\donttest{
-plot_participation(Grunfeld, group = "firm", time = "year",
-               main = "Investment Participation Patterns",
+plot_participation(production, group = "firm", time = "year",
+               main = "Production Participation Patterns",
                colors = c("darkgreen", "orange"),
                show_stats = TRUE)
-}
 
 }

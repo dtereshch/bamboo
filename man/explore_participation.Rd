@@ -13,13 +13,11 @@ explore_participation(
 )
 }
 \arguments{
-\item{data}{The data frame, plm::pdata.frame, or fixest::panel object}
+\item{data}{The data frame object}
 
-\item{group}{Character string specifying the entities' identifier column name
-(optional for specialized panel objects)}
+\item{group}{Character string specifying the entities' identifier column name}
 
-\item{time}{Character string specifying the time identifier column name
-(optional for specialized panel objects)}
+\item{time}{Character string specifying the time identifier column name}
 
 \item{detailed}{Logical, whether to show detailed pattern information (default: TRUE)}
 
@@ -30,24 +28,19 @@ Invisible list containing detailed participation pattern statistics
 }
 \description{
 Provides comprehensive summary statistics and pattern analysis of panel data structure
-in text format. Supports various data object types including regular data frames,
-plm::pdata.frame, and fixest::panel objects.
+in text format. Supports regular data frames with explicit group and time identifiers.
 }
 \examples{
-# Load required packages
-if (requireNamespace("plm", quietly = TRUE)) {
-  library(plm)
+# Load the production dataset
+data(production)
 
-  # Using regular data frame with quoted variable names
-  data("Grunfeld", package = "plm")
-  explore_participation(Grunfeld, group = "firm", time = "year")
+# Analyze participation patterns
+explore_participation(production, group = "firm", time = "year")
 
-  # Using plm::pdata.frame (no need for group/time arguments)
-  pGrunfeld <- pdata.frame(Grunfeld, index = c("firm", "year"))
-  explore_participation(pGrunfeld)
+# Show only summary without detailed patterns
+explore_participation(production, group = "firm", time = "year", detailed = FALSE)
 
-  # Show only summary without detailed patterns
-  explore_participation(Grunfeld, group = "firm", time = "year", detailed = FALSE)
-}
+# Increase maximum patterns to display
+explore_participation(production, group = "firm", time = "year", max_patterns = 15)
 
 }

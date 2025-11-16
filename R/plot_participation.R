@@ -1,15 +1,11 @@
 #' Draws a heatmap showing participation patterns in an unbalanced panel
 #'
 #' Creates a publication-ready heatmap visualization of panel data structure,
-#' showing participation patterns by entity and time period. Supports various
-#' data object types including regular data frames, plm::pdata.frame, and
-#' fixest::panel objects.
+#' showing participation patterns by entity and time period. Supports regular data frames.
 #'
-#' @param data The data frame, plm::pdata.frame, or fixest::panel object
+#' @param data The data frame
 #' @param group Character string specifying the entities' identifier column name
-#'              (optional for specialized panel objects)
 #' @param time Character string specifying the time identifier column name
-#'             (optional for specialized panel objects)
 #' @param main Plot title (default: "Participation Patterns")
 #' @param xlab X-axis label (default: "Time Period")
 #' @param ylab Y-axis label (default: NULL - no y-axis label)
@@ -24,26 +20,17 @@
 #' @return Invisible list containing the cross-tabulation matrix and summary statistics
 #'
 #' @examples
-#' # Load required packages
-#' if (requireNamespace("plm", quietly = TRUE)) {
-#'   library(plm)
+#' # Load the production dataset
+#' data(production)
 #'
-#'   # Using regular data frame with quoted variable names
-#'   data("Grunfeld", package = "plm")
-#'   plot_participation(Grunfeld, group = "firm", time = "year")
-#'
-#'   # Using plm::pdata.frame (no need for group/time arguments)
-#'   pGrunfeld <- pdata.frame(Grunfeld, index = c("firm", "year"))
-#'   plot_participation(pGrunfeld)
-#' }
+#' # Basic usage with production data
+#' plot_participation(production, group = "firm", time = "year")
 #'
 #' # With custom options
-#' \donttest{
-#' plot_participation(Grunfeld, group = "firm", time = "year",
-#'                main = "Investment Participation Patterns",
+#' plot_participation(production, group = "firm", time = "year",
+#'                main = "Production Participation Patterns",
 #'                colors = c("darkgreen", "orange"),
 #'                show_stats = TRUE)
-#' }
 #'
 #' @export
 plot_participation <- function(
@@ -65,70 +52,46 @@ plot_participation <- function(
     stop("Argument 'data' is required")
   }
 
-  # Handle different object types
-  if (inherits(data, "pdata.frame")) {
-    # Extract indices from plm pdata.frame
-    indices <- attr(data, "index")
-    group_var <- indices[[1]]
-    time_var <- indices[[2]]
-    data_df <- as.data.frame(data)
-    group_name <- names(indices)[1]
-    time_name <- names(indices)[2]
-  } else if (inherits(data, "fixest")) {
-    # Extract panel info from fixest object
-    panel_info <- data$panel.info
-    if (is.null(panel_info)) {
-      stop(
-        "fixest object does not contain panel information. Use fixest::panel() to set panel structure."
-      )
-    }
-    group_var <- data[[panel_info$panel.id[1]]]
-    time_var <- data[[panel_info$panel.id[2]]]
-    data_df <- as.data.frame(data)
-    group_name <- panel_info$panel.id[1]
-    time_name <- panel_info$panel.id[2]
-  } else {
-    # Regular data frame - require group and time arguments as character strings
-    if (is.null(group) || is.null(time)) {
-      stop(
-        "For regular data frames, both 'group' and 'time' arguments are required as character strings"
-      )
-    }
+  # Regular data frame - require group and time arguments as character strings
+  if (is.null(group) || is.null(time)) {
+    stop(
+      "For regular data frames, both 'group' and 'time' arguments are required as character strings"
+    )
+  }
 
-    if (!is.character(group) || !is.character(time)) {
-      stop(
-        "For regular data frames, 'group' and 'time' arguments must be character strings"
-      )
-    }
+  if (!is.character(group) || !is.character(time)) {
+    stop(
+      "For regular data frames, 'group' and 'time' arguments must be character strings"
+    )
+  }
 
-    if (length(group) != 1 || length(time) != 1) {
-      stop("'group' and 'time' must be single character strings")
-    }
+  if (length(group) != 1 || length(time) != 1) {
+    stop("'group' and 'time' must be single character strings")
+  }
 
-    data_df <- as.data.frame(data)
-    group_name <- group
-    time_name <- time
+  data_df <- as.data.frame(data)
+  group_name <- group
+  time_name <- time
 
-    # Extract variables
-    group_var <- data_df[[group_name]]
-    time_var <- data_df[[time_name]]
+  # Extract variables
+  group_var <- data_df[[group_name]]
+  time_var <- data_df[[time_name]]
 
-    if (is.null(group_var)) {
-      stop(
-        "Group variable '",
-        group_name,
-        "' not found in data. Available variables: ",
-        paste(names(data_df), collapse = ", ")
-      )
-    }
-    if (is.null(time_var)) {
-      stop(
-        "Time variable '",
-        time_name,
-        "' not found in data. Available variables: ",
-        paste(names(data_df), collapse = ", ")
-      )
-    }
+  if (is.null(group_var)) {
+    stop(
+      "Group variable '",
+      group_name,
+      "' not found in data. Available variables: ",
+      paste(names(data_df), collapse = ", ")
+    )
+  }
+  if (is.null(time_var)) {
+    stop(
+      "Time variable '",
+      time_name,
+      "' not found in data. Available variables: ",
+      paste(names(data_df), collapse = ", ")
+    )
   }
 
   # Convert to character to handle different classes uniformly
@@ -277,7 +240,7 @@ plot_participation <- function(
 
   axis(
     2,
-    at = 1:nrow(ordered_matrix),
+    at = nrow(ordered_matrix):1, # Reverse y-axis so most common pattern is at top
     labels = pattern_labels,
     las = 1,
     cex.axis = cex.pattern
@@ -290,13 +253,14 @@ plot_participation <- function(
   abline(h = 1:nrow(ordered_matrix) - 0.5, col = "gray80", lty = 3)
   abline(v = 1:ncol(ordered_matrix) - 0.5, col = "gray80", lty = 3)
 
-  # Add legend
+  # Add legend with clear labels
   legend(
     "topright",
     legend = c("Present", "Missing"),
     fill = c(colors[1], colors[2]),
     bty = "n",
-    cex = 0.8
+    cex = 0.8,
+    title = "Observation Status"
   )
 
   # Add summary statistics if requested

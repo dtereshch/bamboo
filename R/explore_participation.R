@@ -1,35 +1,28 @@
 #' Describes participation patterns in an unbalanced panel
 #'
 #' Provides comprehensive summary statistics and pattern analysis of panel data structure
-#' in text format. Supports various data object types including regular data frames,
-#' plm::pdata.frame, and fixest::panel objects.
+#' in text format. Supports regular data frames with explicit group and time identifiers.
 #'
-#' @param data The data frame, plm::pdata.frame, or fixest::panel object
+#' @param data The data frame object
 #' @param group Character string specifying the entities' identifier column name
-#'              (optional for specialized panel objects)
 #' @param time Character string specifying the time identifier column name
-#'             (optional for specialized panel objects)
 #' @param detailed Logical, whether to show detailed pattern information (default: TRUE)
 #' @param max_patterns Maximum number of patterns to display in detail (default: 10)
 #'
 #' @return Invisible list containing detailed participation pattern statistics
 #'
 #' @examples
-#' # Load required packages
-#' if (requireNamespace("plm", quietly = TRUE)) {
-#'   library(plm)
+#' # Load the production dataset
+#' data(production)
 #'
-#'   # Using regular data frame with quoted variable names
-#'   data("Grunfeld", package = "plm")
-#'   explore_participation(Grunfeld, group = "firm", time = "year")
+#' # Analyze participation patterns
+#' explore_participation(production, group = "firm", time = "year")
 #'
-#'   # Using plm::pdata.frame (no need for group/time arguments)
-#'   pGrunfeld <- pdata.frame(Grunfeld, index = c("firm", "year"))
-#'   explore_participation(pGrunfeld)
+#' # Show only summary without detailed patterns
+#' explore_participation(production, group = "firm", time = "year", detailed = FALSE)
 #'
-#'   # Show only summary without detailed patterns
-#'   explore_participation(Grunfeld, group = "firm", time = "year", detailed = FALSE)
-#' }
+#' # Increase maximum patterns to display
+#' explore_participation(production, group = "firm", time = "year", max_patterns = 15)
 #'
 #' @export
 explore_participation <- function(
@@ -44,70 +37,46 @@ explore_participation <- function(
     stop("Argument 'data' is required")
   }
 
-  # Handle different object types
-  if (inherits(data, "pdata.frame")) {
-    # Extract indices from plm pdata.frame
-    indices <- attr(data, "index")
-    group_var <- indices[[1]]
-    time_var <- indices[[2]]
-    data_df <- as.data.frame(data)
-    group_name <- names(indices)[1]
-    time_name <- names(indices)[2]
-  } else if (inherits(data, "fixest")) {
-    # Extract panel info from fixest object
-    panel_info <- data$panel.info
-    if (is.null(panel_info)) {
-      stop(
-        "fixest object does not contain panel information. Use fixest::panel() to set panel structure."
-      )
-    }
-    group_var <- data[[panel_info$panel.id[1]]]
-    time_var <- data[[panel_info$panel.id[2]]]
-    data_df <- as.data.frame(data)
-    group_name <- panel_info$panel.id[1]
-    time_name <- panel_info$panel.id[2]
-  } else {
-    # Regular data frame - require group and time arguments as character strings
-    if (is.null(group) || is.null(time)) {
-      stop(
-        "For regular data frames, both 'group' and 'time' arguments are required as character strings"
-      )
-    }
+  # Regular data frame - require group and time arguments as character strings
+  if (is.null(group) || is.null(time)) {
+    stop(
+      "For regular data frames, both 'group' and 'time' arguments are required as character strings"
+    )
+  }
 
-    if (!is.character(group) || !is.character(time)) {
-      stop(
-        "For regular data frames, 'group' and 'time' arguments must be character strings"
-      )
-    }
+  if (!is.character(group) || !is.character(time)) {
+    stop(
+      "For regular data frames, 'group' and 'time' arguments must be character strings"
+    )
+  }
 
-    if (length(group) != 1 || length(time) != 1) {
-      stop("'group' and 'time' must be single character strings")
-    }
+  if (length(group) != 1 || length(time) != 1) {
+    stop("'group' and 'time' must be single character strings")
+  }
 
-    data_df <- as.data.frame(data)
-    group_name <- group
-    time_name <- time
+  data_df <- as.data.frame(data)
+  group_name <- group
+  time_name <- time
 
-    # Extract variables
-    group_var <- data_df[[group_name]]
-    time_var <- data_df[[time_name]]
+  # Extract variables
+  group_var <- data_df[[group_name]]
+  time_var <- data_df[[time_name]]
 
-    if (is.null(group_var)) {
-      stop(
-        "Group variable '",
-        group_name,
-        "' not found in data. Available variables: ",
-        paste(names(data_df), collapse = ", ")
-      )
-    }
-    if (is.null(time_var)) {
-      stop(
-        "Time variable '",
-        time_name,
-        "' not found in data. Available variables: ",
-        paste(names(data_df), collapse = ", ")
-      )
-    }
+  if (is.null(group_var)) {
+    stop(
+      "Group variable '",
+      group_name,
+      "' not found in data. Available variables: ",
+      paste(names(data_df), collapse = ", ")
+    )
+  }
+  if (is.null(time_var)) {
+    stop(
+      "Time variable '",
+      time_name,
+      "' not found in data. Available variables: ",
+      paste(names(data_df), collapse = ", ")
+    )
   }
 
   # Convert to character to handle different classes uniformly
@@ -234,64 +203,7 @@ explore_participation <- function(
   ))
   cat(sprintf("  Number of participation patterns: %d\n\n", stats$n_patterns))
 
-  # Print pattern coverage statistics
-  cat("Pattern Coverage:\n")
-  cumulative_pct <- 0
-  for (i in seq_len(min(length(pattern_counts), 5))) {
-    cumulative_pct <- cumulative_pct + pattern_pcts[i]
-    cat(sprintf(
-      "  Top %d patterns cover: %.1f%% of entities\n",
-      i,
-      cumulative_pct
-    ))
-  }
-  cat("\n")
-
-  if (detailed) {
-    # Print detailed pattern information
-    cat("Detailed Pattern Information:\n")
-    n_to_display <- min(length(pattern_groups), max_patterns)
-
-    for (i in seq_len(n_to_display)) {
-      pattern <- ordered_matrix[i, ]
-      pattern_visual <- ifelse(pattern == 1, "X", ".")
-
-      cat(sprintf(
-        "Pattern %d (n=%d, %.1f%%): [%s] %s\n",
-        i,
-        pattern_counts[i],
-        pattern_pcts[i],
-        paste(pattern_visual, collapse = ""),
-        ifelse(i == 1, "(Most Common)", "")
-      ))
-
-      # Show first few entities for this pattern
-      entities_in_pattern <- pattern_groups[[i]]
-      if (length(entities_in_pattern) <= 5) {
-        cat(sprintf(
-          "    Entities: %s\n",
-          paste(entities_in_pattern, collapse = ", ")
-        ))
-      } else {
-        cat(sprintf(
-          "    Entities: %s, ... (%d more)\n",
-          paste(entities_in_pattern[1:3], collapse = ", "),
-          length(entities_in_pattern) - 3
-        ))
-      }
-    }
-
-    if (length(pattern_groups) > max_patterns) {
-      cat(sprintf(
-        "\n... and %d more patterns (use max_patterns = %d to see all)\n",
-        length(pattern_groups) - max_patterns,
-        length(pattern_groups)
-      ))
-    }
-    cat("\n")
-  }
-
-  # Print time period coverage
+  # Print time period coverage FIRST (as requested)
   period_coverage <- colSums(presence_matrix)
   period_coverage_pct <- period_coverage / stats$n_entities * 100
 
@@ -303,6 +215,80 @@ explore_participation <- function(
       period_coverage[j],
       period_coverage_pct[j]
     ))
+  }
+  cat("\n")
+
+  # Print pattern coverage statistics with aligned separators
+  cat("Pattern Coverage:\n")
+  cumulative_pct <- 0
+  n_coverage_lines <- min(length(pattern_counts), 5)
+
+  # Calculate maximum width for alignment
+  max_width <- nchar(as.character(n_coverage_lines))
+
+  for (i in seq_len(n_coverage_lines)) {
+    cumulative_pct <- cumulative_pct + pattern_pcts[i]
+    cat(sprintf(
+      "  Top %*d patterns cover: %.1f%% of entities\n",
+      max_width,
+      i,
+      cumulative_pct
+    ))
+  }
+  cat("\n")
+
+  if (detailed) {
+    # Print detailed pattern information with aligned separators
+    cat("Detailed Pattern Information:\n")
+    n_to_display <- min(length(pattern_groups), max_patterns)
+
+    # Calculate maximum widths for alignment
+    max_pattern_width <- nchar(as.character(n_to_display))
+    max_count_width <- max(nchar(as.character(pattern_counts[1:n_to_display])))
+    max_pct_width <- 5 # "XX.X%" format
+
+    for (i in seq_len(n_to_display)) {
+      pattern <- ordered_matrix[i, ]
+      pattern_visual <- ifelse(pattern == 1, "X", ".")
+
+      # Format the pattern line with aligned separators
+      pattern_label <- sprintf("Pattern %*d", max_pattern_width, i)
+      count_label <- sprintf("n=%*d", max_count_width, pattern_counts[i])
+      pct_label <- sprintf("%*.1f%%", max_pct_width - 1, pattern_pcts[i])
+
+      # Show entities for this pattern
+      entities_in_pattern <- pattern_groups[[i]]
+      if (length(entities_in_pattern) <= 5) {
+        entities_label <- paste(entities_in_pattern, collapse = ", ")
+      } else {
+        entities_label <- paste(
+          paste(entities_in_pattern[1:3], collapse = ", "),
+          ", ... (",
+          length(entities_in_pattern) - 3,
+          " more)",
+          sep = ""
+        )
+      }
+
+      cat(sprintf(
+        "%s (%s, %s): [%s], entities: %s%s\n",
+        pattern_label,
+        count_label,
+        pct_label,
+        paste(pattern_visual, collapse = ""),
+        entities_label,
+        ifelse(i == 1, " (Most Common)", "")
+      ))
+    }
+
+    if (length(pattern_groups) > max_patterns) {
+      cat(sprintf(
+        "\n... and %d more patterns (use max_patterns = %d to see all)\n",
+        length(pattern_groups) - max_patterns,
+        length(pattern_groups)
+      ))
+    }
+    cat("\n")
   }
 
   # Return invisible results with detailed pattern information

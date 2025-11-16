@@ -3,10 +3,10 @@
 #' This function replicates Stata's xtdes command, showing the participation patterns
 #' of entities in panel data over time.
 #'
-#' @param data A data frame, pdata.frame, or an object with panel data structure
+#' @param data A data frame with panel data structure
 #' @param group Character string specifying the entity/group variable name
 #' @param time Character string specifying the time variable name
-#' @param show_patterns Logical indicating whether to return detailed patterns (default: TRUE)
+#' @param detailed Logical indicating whether to return detailed patterns (default: TRUE)
 #'
 #' @return A data frame with participation patterns containing:
 #' \itemize{
@@ -18,28 +18,30 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' # Using a regular data frame
-#' data(EmplUK, package = "plm")
-#' result <- describe_participation(EmplUK, "firm", "year")
+#' # Load the production dataset
+#' data(production)
 #'
-#' # Using a pdata.frame
-#' library(plm)
-#' pdata <- pdata.frame(EmplUK, index = c("firm", "year"))
-#' result <- describe_participation(pdata)
+#' # Basic usage with all patterns shown
+#' result <- describe_participation(production, "firm", "year")
+#' print(result)
 #'
-#' # Using fixest::panel data
-#' library(fixest)
-#' fe_data <- panel(EmplUK, ~ firm + year)
-#' result <- describe_participation(fe_data)
-#' }
+#' # Show simplified version without time period columns
+#' result_simple <- describe_participation(production, "firm", "year", detailed = FALSE)
+#' print(result_simple)
+#'
+#' # Example with unbalanced panel (introducing NAs)
+#' production_unbalanced <- production
+#' # Remove some observations to create unbalanced panel
+#' production_unbalanced <- production_unbalanced[-c(5, 15, 25), ]
+#' result_unbalanced <- describe_participation(production_unbalanced, "firm", "year")
+#' print(result_unbalanced)
 #'
 #' @export
 describe_participation <- function(
   data,
   group = NULL,
   time = NULL,
-  show_patterns = TRUE
+  detailed = TRUE
 ) {
   # Input validation
   if (missing(data)) {
@@ -47,53 +49,7 @@ describe_participation <- function(
   }
 
   if (!is.data.frame(data)) {
-    stop(
-      "Argument 'data' must be a data frame, pdata.frame, or panel data object"
-    )
-  }
-
-  # Handle pdata.frame objects
-  if (inherits(data, "pdata.frame")) {
-    if (is.null(group) || is.null(time)) {
-      index_attrs <- attr(data, "index")
-      if (!is.null(index_attrs)) {
-        group <- as.character(index_attrs[[1]])
-        time <- as.character(index_attrs[[2]])
-        message(
-          "Using group variable: '",
-          group,
-          "' and time variable: '",
-          time,
-          "' from pdata.frame"
-        )
-      } else {
-        stop(
-          "Cannot extract group and time variables from pdata.frame. Please specify them explicitly."
-        )
-      }
-    }
-  }
-
-  # Handle fixest panel objects
-  if (inherits(data, "fixest_panel")) {
-    if (is.null(group) || is.null(time)) {
-      panel_info <- attr(data, "panel_info")
-      if (!is.null(panel_info)) {
-        group <- panel_info$panel.id[1]
-        time <- panel_info$panel.id[2]
-        message(
-          "Using group variable: '",
-          group,
-          "' and time variable: '",
-          time,
-          "' from fixest panel"
-        )
-      } else {
-        stop(
-          "Cannot extract group and time variables from fixest panel. Please specify them explicitly."
-        )
-      }
-    }
+    stop("Argument 'data' must be a data frame")
   }
 
   # Check if group and time are specified for regular data frames
@@ -172,7 +128,7 @@ describe_participation <- function(
   result$Pattern <- seq_len(nrow(result))
   rownames(result) <- NULL
 
-  if (!show_patterns) {
+  if (!detailed) {
     # Return simplified version without individual time period columns
     simplified_result <- data.frame(
       Pattern = result$Pattern,

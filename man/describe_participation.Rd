@@ -4,16 +4,16 @@
 \alias{describe_participation}
 \title{Describe panel data participation patterns}
 \usage{
-describe_participation(data, group = NULL, time = NULL, show_patterns = TRUE)
+describe_participation(data, group = NULL, time = NULL, detailed = TRUE)
 }
 \arguments{
-\item{data}{A data frame, pdata.frame, or an object with panel data structure}
+\item{data}{A data frame with panel data structure}
 
 \item{group}{Character string specifying the entity/group variable name}
 
 \item{time}{Character string specifying the time variable name}
 
-\item{show_patterns}{Logical indicating whether to return detailed patterns (default: TRUE)}
+\item{detailed}{Logical indicating whether to return detailed patterns (default: TRUE)}
 }
 \value{
 A data frame with participation patterns containing:
@@ -30,20 +30,22 @@ This function replicates Stata's xtdes command, showing the participation patter
 of entities in panel data over time.
 }
 \examples{
-\dontrun{
-# Using a regular data frame
-data(EmplUK, package = "plm")
-result <- describe_participation(EmplUK, "firm", "year")
+# Load the production dataset
+data(production)
 
-# Using a pdata.frame
-library(plm)
-pdata <- pdata.frame(EmplUK, index = c("firm", "year"))
-result <- describe_participation(pdata)
+# Basic usage with all patterns shown
+result <- describe_participation(production, "firm", "year")
+print(result)
 
-# Using fixest::panel data
-library(fixest)
-fe_data <- panel(EmplUK, ~ firm + year)
-result <- describe_participation(fe_data)
-}
+# Show simplified version without time period columns
+result_simple <- describe_participation(production, "firm", "year", detailed = FALSE)
+print(result_simple)
+
+# Example with unbalanced panel (introducing NAs)
+production_unbalanced <- production
+# Remove some observations to create unbalanced panel
+production_unbalanced <- production_unbalanced[-c(5, 15, 25), ]
+result_unbalanced <- describe_participation(production_unbalanced, "firm", "year")
+print(result_unbalanced)
 
 }
