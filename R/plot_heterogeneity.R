@@ -9,15 +9,7 @@
 #' @param group The grouping variable(s) (character string or vector of character strings)
 #' @param xlab X-axis label (default: based on grouping variable)
 #' @param ylab Y-axis label (default: based on variable name)
-#' @param point_col Color for individual points (default: "#D55E00") # orange
-#' @param mean_col Color for mean line and points (default: "#0072B2") # blue
-#' @param point_alpha Transparency for individual points (default: 0.6)
-#' @param mean_lwd Line width for mean trend (default: 2)
-#' @param cex Point size multiplier (default: 1)
-#' @param las Orientation of axis labels (default: 1)
-#' @param plot Logical, whether to create the plot (default: TRUE)
-#' @param ncol Number of columns in facet grid (default: NULL, auto-determined)
-#' @param nrow Number of rows in facet grid (default: NULL, auto-determined)
+#' @param colors Vector of two colors: first for individual points, second for mean line and points (default: c("#D55E00", "#0072B2"))
 #'
 #' @return Invisibly returns a list with summary statistics. Creates a base R plot.
 #'
@@ -33,11 +25,9 @@
 #' # Plot sales with multiple grouping variables
 #' plot_heterogeneity(production, variable = "sales", group = c("firm", "year"))
 #'
-#' # Customize colors and appearance
+#' # Customize colors
 #' plot_heterogeneity(production, variable = "sales", group = "year",
-#'                   point_col = "gray50",
-#'                   mean_col = "black",
-#'                   mean_lwd = 3)
+#'                   colors = c("gray50", "black"))
 #'
 #' @export
 plot_heterogeneity <- function(
@@ -46,15 +36,7 @@ plot_heterogeneity <- function(
   group = NULL,
   xlab = NULL,
   ylab = NULL,
-  point_col = "#D55E00",
-  mean_col = "#0072B2",
-  point_alpha = 0.6,
-  mean_lwd = 2,
-  cex = 1,
-  las = 1,
-  plot = TRUE,
-  ncol = NULL,
-  nrow = NULL
+  colors = c("#D55E00", "#0072B2")
 ) {
   # Input validation
   if (!is.data.frame(data)) {
@@ -93,6 +75,24 @@ plot_heterogeneity <- function(
       "' not found in data"
     )
   }
+
+  # Validate colors parameter
+  if (!is.character(colors) || length(colors) != 2) {
+    stop("'colors' must be a character vector of length 2")
+  }
+
+  # Extract colors
+  point_col <- colors[1]
+  mean_col <- colors[2]
+
+  # Set default parameter values that were removed
+  point_alpha <- 0.6
+  mean_lwd <- 2
+  cex <- 1
+  las <- 1
+  plot <- TRUE
+  ncol <- NULL
+  nrow <- NULL
 
   # Extract the main variable
   y_var <- data[[variable]]
