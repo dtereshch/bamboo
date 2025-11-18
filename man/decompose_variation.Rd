@@ -4,7 +4,13 @@
 \alias{decompose_variation}
 \title{Decompose Variation in Panel Data}
 \usage{
-decompose_variation(data, variables = NULL, group = NULL, detailed = TRUE)
+decompose_variation(
+  data,
+  variables = NULL,
+  group = NULL,
+  detailed = TRUE,
+  digits = 3
+)
 }
 \arguments{
 \item{data}{A data frame containing the panel data.}
@@ -16,6 +22,9 @@ If NULL (default), all numeric variables in the dataset will be used.}
 
 \item{detailed}{Logical indicating whether to return detailed Stata-like output (TRUE) or
 simplified output with only key statistics (FALSE). Default is TRUE.}
+
+\item{digits}{Integer indicating the number of decimal places to round statistics.
+Default is 3.}
 }
 \value{
 If detailed = TRUE, returns a data frame with the following columns for each variable:
@@ -40,27 +49,20 @@ for panel data and decomposes variance into between and within components.
 Provides insights into variation across groups and over time.
 }
 \examples{
-# Create example panel data
-set.seed(123)
-production <- data.frame(
-  firm = rep(1:30, each = 5),
-  year = rep(2001:2005, 30),
-  sales = rnorm(150, 70, 50),
-  capital = rnorm(150, 30, 30),
-  labor = rnorm(150, 80, 70)
-)
+data(production)
 
-# Using default detailed = TRUE (Stata-like output)
+# Using default detailed = TRUE (Stata-like output) with default rounding
 decompose_variation(production, group = "firm")
 
-# Simplified output with detailed = FALSE
-decompose_variation(production, variables = "sales", group = "firm", detailed = FALSE)
+# Simplified output with custom rounding to 2 decimal places
+decompose_variation(production, variables = "sales", group = "firm",
+                   detailed = FALSE, digits = 2)
 
-# Specify group of numeric variables with simplified output
+# Detailed output with no rounding
 decompose_variation(production,
                    variables = c("sales", "capital"),
                    group = "firm",
-                   detailed = FALSE)
+                   digits = NA)
 
 }
 \references{

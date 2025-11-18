@@ -10,6 +10,8 @@
 #' @param group A character string specifying the group ID variable (e.g., individual, firm, country).
 #' @param detailed Logical indicating whether to return detailed Stata-like output (TRUE) or
 #'   simplified output with only key statistics (FALSE). Default is TRUE.
+#' @param digits Integer indicating the number of decimal places to round statistics.
+#'   Default is 3.
 #'
 #' @return If detailed = TRUE, returns a data frame with the following columns for each variable:
 #'   \item{variable}{The name of the variable}
@@ -32,38 +34,40 @@
 #' https://stackoverflow.com/questions/49282083/xtsum-command-for-r
 #'
 #' @examples
-#' # Create example panel data
-#' set.seed(123)
-#' production <- data.frame(
-#'   firm = rep(1:30, each = 5),
-#'   year = rep(2001:2005, 30),
-#'   sales = rnorm(150, 70, 50),
-#'   capital = rnorm(150, 30, 30),
-#'   labor = rnorm(150, 80, 70)
-#' )
+#' data(production)
 #'
-#' # Using default detailed = TRUE (Stata-like output)
+#' # Using default detailed = TRUE (Stata-like output) with default rounding
 #' decompose_variation(production, group = "firm")
 #'
-#' # Simplified output with detailed = FALSE
-#' decompose_variation(production, variables = "sales", group = "firm", detailed = FALSE)
+#' # Simplified output with custom rounding to 2 decimal places
+#' decompose_variation(production, variables = "sales", group = "firm",
+#'                    detailed = FALSE, digits = 2)
 #'
-#' # Specify group of numeric variables with simplified output
+#' # Detailed output with no rounding
 #' decompose_variation(production,
 #'                    variables = c("sales", "capital"),
 #'                    group = "firm",
-#'                    detailed = FALSE)
+#'                    digits = NA)
 #'
 #' @export
 decompose_variation <- function(
   data,
   variables = NULL,
   group = NULL,
-  detailed = TRUE
+  detailed = TRUE,
+  digits = 3
 ) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data frame")
+  }
+
+  # Validate digits parameter
+  if (
+    !is.na(digits) &&
+      (!is.numeric(digits) || digits < 0 || digits != round(digits))
+  ) {
+    stop("'digits' must be a non-negative integer or NA for no rounding")
   }
 
   # Convert to plain data frame to avoid any special class issues
@@ -145,7 +149,13 @@ decompose_variation <- function(
   }
 
   # Helper function to calculate panel statistics for one variable
-  decompose_variation_1 <- function(data, varname, group, detailed_output) {
+  decompose_variation_1 <- function(
+    data,
+    varname,
+    group,
+    detailed_output,
+    digits_val
+  ) {
     # Remove rows with NA in the variable or group
     complete_cases <- complete.cases(data[[varname]], data[[group]])
     df <- data[complete_cases, , drop = FALSE]
@@ -202,6 +212,27 @@ decompose_variation <- function(
     obs_per_group <- table(group_vec)
     avg_obs_per_group <- mean(obs_per_group, na.rm = TRUE)
 
+    # Apply rounding if digits is specified
+    round_if_needed <- function(value) {
+      if (!is.na(digits_val) && is.numeric(value)) {
+        round(value, digits_val)
+      } else {
+        value
+      }
+    }
+
+    overall_mean <- round_if_needed(overall_mean)
+    overall_sd <- round_if_needed(overall_sd)
+    min_val <- round_if_needed(min_val)
+    max_val <- round_if_needed(max_val)
+    between_sd <- round_if_needed(between_sd)
+    between_min <- round_if_needed(between_min)
+    between_max <- round_if_needed(between_max)
+    within_sd <- round_if_needed(within_sd)
+    within_min <- round_if_needed(within_min)
+    within_max <- round_if_needed(within_max)
+    avg_obs_per_group <- round_if_needed(avg_obs_per_group)
+
     if (detailed_output) {
       # Create Stata-like output with overall, between, and within rows
       result <- data.frame(
@@ -230,7 +261,7 @@ decompose_variation <- function(
 
   # Calculate statistics for each variable
   results <- lapply(variables, function(varname) {
-    decompose_variation_1(data_df, varname, group, detailed)
+    decompose_variation_1(data_df, varname, group, detailed, digits)
   })
 
   # Combine all results
@@ -241,6 +272,7 @@ decompose_variation <- function(
   attr(result_df, "group_var") <- group
   attr(result_df, "n_groups") <- n_groups
   attr(result_df, "detailed") <- detailed
+  attr(result_df, "digits") <- digits
 
   return(result_df)
 }
