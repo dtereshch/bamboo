@@ -14,6 +14,7 @@
 #'   \item Columns for each time period showing participation (1 = present, 0 = missing)
 #'   \item Count: Number of entities with this pattern
 #'   \item Share: Proportion of entities with this pattern
+#'   \item Cumul.: Cumulative proportion of entities
 #' }
 #'
 #' @examples
@@ -130,8 +131,13 @@ describe_participation <- function(
   result$Count <- as.numeric(pattern_counts)
   result$Share <- round(result$Count / sum(result$Count), 2)
 
-  # Sort by count (descending)
+  # FIX: Sort by count (descending) FIRST, then calculate cumulative sum
   result <- result[order(-result$Count), ]
+
+  # Now calculate cumulative sum on the sorted data
+  result$Cumul. <- round(cumsum(result$Share), 2)
+
+  # Reset pattern numbers to follow the new sorted order
   result$Pattern <- seq_len(nrow(result))
   rownames(result) <- NULL
 
@@ -140,7 +146,8 @@ describe_participation <- function(
     simplified_result <- data.frame(
       Pattern = result$Pattern,
       Count = result$Count,
-      Share = result$Share
+      Share = result$Share,
+      Cumul. = result$Cumul.
     )
     return(simplified_result)
   }

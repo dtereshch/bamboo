@@ -22,6 +22,7 @@ A data frame with participation patterns containing:
   \item Columns for each time period showing participation (1 = present, 0 = missing)
   \item Count: Number of entities with this pattern
   \item Share: Proportion of entities with this pattern
+  \item Cumul.: Cumulative proportion of entities
 }
 }
 \description{
