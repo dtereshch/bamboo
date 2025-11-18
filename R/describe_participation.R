@@ -127,13 +127,17 @@ describe_participation <- function(
     result[[time_cols[i]]] <- as.numeric(substr(names(pattern_counts), i, i))
   }
 
-  # Add count, share and cumulative columns with rounding
+  # Add count and share columns
   result$Count <- as.numeric(pattern_counts)
   result$Share <- round(result$Count / sum(result$Count), 2)
+
+  # FIX: Sort by count (descending) FIRST, then calculate cumulative sum
+  result <- result[order(-result$Count), ]
+
+  # Now calculate cumulative sum on the sorted data
   result$Cumul. <- round(cumsum(result$Share), 2)
 
-  # Sort by count (descending)
-  result <- result[order(-result$Count), ]
+  # Reset pattern numbers to follow the new sorted order
   result$Pattern <- seq_len(nrow(result))
   rownames(result) <- NULL
 
