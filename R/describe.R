@@ -12,8 +12,8 @@
 #' @param digits Integer specifying the number of decimal places for rounding
 #'        statistics (default = 3).
 #'
-#' @return A data frame with the following columns:
-#'   \item{group}{The grouping variable (or "Overall" if no group specified)}
+#' @return A data frame with descriptive statistics. When grouped, contains:
+#'   \item{group}{The grouping variable}
 #'   \item{variable}{The name of the numeric variable}
 #'   \item{n}{Number of non-NA observations}
 #'   \item{mean}{Arithmetic mean}
@@ -21,6 +21,7 @@
 #'   \item{sd}{Standard deviation}
 #'   \item{min}{Minimum value}
 #'   \item{max}{Maximum value}
+#'   When ungrouped, the group column is omitted.
 #'
 #' @examples
 #' data(production)
@@ -140,8 +141,8 @@ describe <- function(data, variables, group, digits = 3) {
       # Round numeric statistics
       stats_row[] <- lapply(stats_row, round_values)
 
-      # Add group information and variable name
-      data.frame(group = "Overall", variable = var, stats_row)
+      # Add variable name only (no group column)
+      data.frame(variable = var, stats_row)
     })
 
     result_df <- do.call(rbind, results)

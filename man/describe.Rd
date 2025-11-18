@@ -19,8 +19,8 @@ If not provided, overall statistics will be returned.}
 statistics (default = 3).}
 }
 \value{
-A data frame with the following columns:
-  \item{group}{The grouping variable (or "Overall" if no group specified)}
+A data frame with descriptive statistics. When grouped, contains:
+  \item{group}{The grouping variable}
   \item{variable}{The name of the numeric variable}
   \item{n}{Number of non-NA observations}
   \item{mean}{Arithmetic mean}
@@ -28,6 +28,7 @@ A data frame with the following columns:
   \item{sd}{Standard deviation}
   \item{min}{Minimum value}
   \item{max}{Maximum value}
+  When ungrouped, the group column is omitted.
 }
 \description{
 Provides comprehensive descriptive statistics for numeric variables. Can be
