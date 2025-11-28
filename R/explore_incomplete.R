@@ -49,11 +49,11 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
     stop("Group variable has no observations")
   }
 
-  # Extract and convert group variable - handle pseries and factor types
-  group_var_orig <- data[[group]]
-  group_var <- group_var_orig
+  # Extract group variable and handle special types (like pseries from plm)
+  group_var <- data[[group]]
 
-  # Convert to character for consistent handling (same as find_incomplete)
+  # Convert group variable to appropriate type for consistent handling
+  # This is the key fix - same as in find_incomplete
   if (is.factor(group_var) || inherits(group_var, "pseries")) {
     group_var <- as.character(group_var)
   }
@@ -64,9 +64,8 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
       stop("Time variable '", time, "' not found in data")
     }
 
-    # Extract and convert time variable
-    time_var_orig <- data[[time]]
-    time_var <- time_var_orig
+    # Extract time variable and handle special types
+    time_var <- data[[time]]
     if (is.factor(time_var) || inherits(time_var, "pseries")) {
       time_var <- as.character(time_var)
     }
@@ -112,15 +111,9 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   for (i in seq_along(unique_groups)) {
     current_group <- unique_groups[i]
 
-    # Use the CONVERTED group variable for comparison to avoid type conflicts
-    # This is the key fix - compare character to character, not character to pseries
+    # Use logical indexing with the converted group variable
+    # This avoids the "comparison of these types is not implemented" error
     group_indices <- group_var == current_group
-
-    # Handle NA values in group variable (same as find_incomplete)
-    if (is.na(current_group)) {
-      group_indices <- is.na(group_var)
-    }
-
     group_data <- data[group_indices, vars, drop = FALSE]
 
     # Count variables with at least one NA
@@ -159,7 +152,7 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   rownames(result) <- NULL
 
   # Convert back to original type if possible (same as find_incomplete)
-  original_type <- class(group_var_orig)
+  original_type <- class(data[[group]])
   if ("numeric" %in% original_type || "integer" %in% original_type) {
     # Handle numeric conversion carefully to avoid warnings
     numeric_groups <- suppressWarnings(as.numeric(result[[group]]))
@@ -169,7 +162,7 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   } else if ("factor" %in% original_type) {
     result[[group]] <- factor(
       result[[group]],
-      levels = levels(group_var_orig)
+      levels = levels(data[[group]])
     )
   }
 
