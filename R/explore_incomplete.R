@@ -1,19 +1,29 @@
-#' Providing a table of entities with incomplete observations (missing values)
+#' Explore entities with incomplete observations (missing values)
 #'
-#' @param data The data frame
-#' @param group Entities' identifier
-#' @param time Time identifier (optional, for checking panel balance)
+#' This function provides a detailed table of entities with incomplete observations,
+#' showing the number of variables with missing values and total missing observations
+#' for each entity. It works with both regular data frames and plm pdata.frame objects.
+#'
+#' @param data The data frame or pdata.frame to analyze
+#' @param group Character string specifying the entities' identifier (column name)
+#' @param time Character string specifying the time identifier (optional, for checking panel balance)
 #' @param detailed Logical indicating whether to include detailed missing counts
 #'        for each variable (TRUE) or just summary counts (FALSE). Default is FALSE.
-#' @return A data frame containing entities with number of variables that have
-#'         at least one missing value for that entity, as well as total number
-#'         of missing observations. The data frame is arranged by number of
-#'         variables with missing values. If detailed = TRUE, includes additional
-#'         columns with NA counts for each variable.
-#' @examples
-#' data(production)
 #'
+#' @return A data frame containing entities with missing values, including:
+#' \itemize{
+#'   \item The group identifier
+#'   \item Number of variables with at least one missing value for that entity
+#'   \item Total number of missing observations for that entity
+#'   \item (If detailed = TRUE) Additional columns with NA counts for each variable
+#' }
+#' The data frame is arranged in descending order by number of variables with
+#' missing values, then by total missing observations. If no incomplete entities
+#' are found, returns a character string message.
+#'
+#' @examples
 #' # Using regular data frame - summary view
+#' data(production)
 #' explore_incomplete(production, group = "firm")
 #'
 #' # Detailed view with variable-level NA counts
@@ -22,16 +32,32 @@
 #' # Check for panel balance
 #' explore_incomplete(production, group = "firm", time = "year")
 #'
+#' # With plm pdata.frame
+#' library(plm)
+#' pdf <- pdata.frame(production, index = c("firm", "year"))
+#' explore_incomplete(pdf, group = "firm", time = "year")
+#'
+#' @seealso \code{\link{find_incomplete}} for a simpler function that returns only
+#' the identifiers of incomplete entities
+#'
 #' @export
 explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
-  # Check if data is provided
+  # Input validation
   if (missing(data)) {
     stop("Argument 'data' is required")
   }
 
-  # Check if group is provided
-  if (missing(group)) {
+  if (!is.data.frame(data)) {
+    stop("'data' must be a data frame or pdata.frame")
+  }
+
+  if (missing(group) || is.null(group)) {
     stop("Argument 'group' is required")
+  }
+
+  # Validate group is a character string
+  if (!is.character(group) || length(group) != 1) {
+    stop("'group' must be a single character string specifying the column name")
   }
 
   # Validate detailed parameter
@@ -39,46 +65,57 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
     stop("Argument 'detailed' must be a single logical value (TRUE or FALSE)")
   }
 
-  # Validate group variable
-  if (!group %in% names(data)) {
-    stop("Group variable '", group, "' not found in data")
+  # Convert to regular data frame to avoid pdata.frame/pseries issues
+  # This ensures consistent behavior regardless of input data type
+  data_df <- as.data.frame(data)
+
+  # Validate group column exists
+  if (!group %in% names(data_df)) {
+    stop(sprintf("Group variable '%s' not found in data", group))
   }
 
-  # Check if group variable has valid values
-  if (length(data[[group]]) == 0) {
-    stop("Group variable has no observations")
+  group_var_orig <- data_df[[group]]
+
+  # Check if group variable has missing values itself
+  if (any(is.na(group_var_orig))) {
+    warning(
+      "Group variable contains missing values. These will be included in the results."
+    )
   }
 
-  # Extract and convert group variable - handle pseries and factor types
-  group_var_orig <- data[[group]]
+  # Convert group variable to appropriate type for consistent handling
   group_var <- group_var_orig
-
-  # Convert to character for consistent handling (same as find_incomplete)
-  if (is.factor(group_var) || inherits(group_var, "pseries")) {
+  if (is.factor(group_var)) {
     group_var <- as.character(group_var)
   }
 
-  # Check panel balance if time variable is provided
+  # Check if time variable is provided for unbalanced panel check
   if (!is.null(time)) {
-    if (!time %in% names(data)) {
-      stop("Time variable '", time, "' not found in data")
+    if (!is.character(time) || length(time) != 1) {
+      stop(
+        "'time' must be a single character string specifying the column name"
+      )
+    }
+    if (!time %in% names(data_df)) {
+      stop(sprintf("Time variable '%s' not found in data", time))
     }
 
-    # Extract and convert time variable
-    time_var_orig <- data[[time]]
+    time_var_orig <- data_df[[time]]
+
+    # Convert time variable to appropriate type for consistent handling
     time_var <- time_var_orig
-    if (is.factor(time_var) || inherits(time_var, "pseries")) {
+    if (is.factor(time_var)) {
       time_var <- as.character(time_var)
     }
 
-    # Check if panel is unbalanced using the converted variables
+    # Check for unbalanced panel
     time_counts <- tapply(time_var, group_var, function(x) length(unique(x)))
     if (length(unique(time_counts)) > 1) {
       warning("The panel is unbalanced.")
     }
   }
 
-  # Get unique groups using the converted group variable
+  # Get unique groups
   unique_groups <- unique(group_var)
 
   # Get variable names excluding group and time variables
@@ -86,7 +123,7 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   if (!is.null(time)) {
     exclude_vars <- c(exclude_vars, time)
   }
-  vars <- setdiff(names(data), exclude_vars)
+  vars <- setdiff(names(data_df), exclude_vars)
 
   if (length(vars) == 0) {
     stop("No variables to analyze (only group and time variables found)")
@@ -112,16 +149,14 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   for (i in seq_along(unique_groups)) {
     current_group <- unique_groups[i]
 
-    # Use the CONVERTED group variable for comparison to avoid type conflicts
-    # This is the key fix - compare character to character, not character to pseries
-    group_indices <- group_var == current_group
-
-    # Handle NA values in group variable (same as find_incomplete)
+    # Handle NA values in group variable
     if (is.na(current_group)) {
       group_indices <- is.na(group_var)
+    } else {
+      group_indices <- group_var == current_group
     }
 
-    group_data <- data[group_indices, vars, drop = FALSE]
+    group_data <- data_df[group_indices, vars, drop = FALSE]
 
     # Count variables with at least one NA
     vars_with_na <- sum(vapply(
@@ -158,7 +193,7 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   # Reset row names
   rownames(result) <- NULL
 
-  # Convert back to original type if possible (same as find_incomplete)
+  # Convert back to original type if possible
   original_type <- class(group_var_orig)
   if ("numeric" %in% original_type || "integer" %in% original_type) {
     # Handle numeric conversion carefully to avoid warnings
