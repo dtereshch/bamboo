@@ -19,7 +19,7 @@
 #' @export
 find_incomplete <- function(data, group = NULL, time = NULL) {
   # Input validation
-  data <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (missing(group) || is.null(group)) {
     stop("Argument 'group' is required")

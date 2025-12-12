@@ -35,7 +35,7 @@ explore_participation <- function(
   max_patterns = 10
 ) {
   # Input validation
-  data_df <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data_df <- .check_and_convert_data_robust(data, arg_name = "data")
 
   # Regular data frame - require group and time arguments as character strings
   if (is.null(group) || is.null(time)) {

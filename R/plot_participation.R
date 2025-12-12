@@ -34,7 +34,7 @@ plot_participation <- function(
   xlab = "Time Period"
 ) {
   # Input validation
-  data <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   # Check if group and time are specified for regular data frames
   if (is.null(group) || is.null(time)) {

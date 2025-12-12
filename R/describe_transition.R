@@ -31,7 +31,7 @@ describe_transition <- function(
   format = "wide"
 ) {
   # Input validation
-  data <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (!is.character(variable) || length(variable) != 1) {
     stop("'variable' must be a single character string")

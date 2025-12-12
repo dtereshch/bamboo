@@ -28,7 +28,7 @@
 #' @export
 explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   # Input validation
-  data <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   # Check if group is provided
   if (missing(group)) {

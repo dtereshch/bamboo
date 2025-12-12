@@ -60,7 +60,7 @@ decompose_variation <- function(
   digits = 3
 ) {
   # Input validation
-  data_df <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data_df <- .check_and_convert_data_robust(data, arg_name = "data")
 
   # Validate digits parameter
   if (

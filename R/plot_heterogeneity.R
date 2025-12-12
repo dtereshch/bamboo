@@ -41,7 +41,7 @@ plot_heterogeneity <- function(
   colors = c("#D55E00", "#0072B2")
 ) {
   # Input validation
-  data <- .check_and_convert_data_minimal(data, arg_name = "data")
+  data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (nrow(data) == 0) {
     stop("'data' must have at least one row")
