@@ -1,4 +1,4 @@
-# panelDT
+# panelDT: Panel DaTa analysis tools
 
 R package for exploring and describing panel data
 
@@ -27,6 +27,10 @@ library(panelDT)
 ?plot_heterogeneity
 ?plot_participation
 ```
+
+## Acknowledgments
+
+This package was developed using [DeepSeek](https://www.deepseek.com/) as a coding assistant.
 
 ## Contribution
 
