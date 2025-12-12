@@ -11,7 +11,8 @@
 #'
 #' @return Invisible list containing detailed participation pattern statistics
 #'
-#' @seealso [decompose_variation()], [describe_transition()], [describe_participation()], [plot_participation()]
+#' @seealso
+#' [decompose_variation()], [describe_transition()], [describe_participation()], [plot_participation()]
 #'
 #' @examples
 #' # Load the production dataset

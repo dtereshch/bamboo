@@ -16,7 +16,8 @@
 #'   \item Cumul.: Cumulative proportion of entities
 #' }
 #'
-#' @seealso [plot_participation()], [explore_participation()], [find_incomplete()], [explore_incomplete()]
+#' @seealso
+#' [plot_participation()], [explore_participation()], [find_incomplete()], [explore_incomplete()]
 #'
 #' @examples
 #' # Load the production dataset

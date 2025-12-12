@@ -11,7 +11,8 @@
 #'         variables with missing values. If detailed = TRUE, includes additional
 #'         columns with NA counts for each variable.
 #'
-#' @seealso [find_incomplete()], [describe_participation()], [plot_participation()], [explore_participation()]
+#' @seealso
+#' [find_incomplete()], [describe_participation()], [plot_participation()], [explore_participation()]
 #'
 #' @examples
 #' data(production)
