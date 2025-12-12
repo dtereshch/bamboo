@@ -25,6 +25,7 @@ library(panelDT)
 ?find_incomplete
 ?plot_heterogeneity
 ?plot_participation
+?production
 ```
 
 ## Acknowledgments
