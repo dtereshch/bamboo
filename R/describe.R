@@ -158,7 +158,7 @@ describe <- function(data, variables, group, digits = 3) {
 
       # Create subset for current group
       group_subset <- data[
-        as.factor(data[[group]]) == current_group & !is.na(data[[group]]),
+        data[[group]] == current_group & !is.na(data[[group]]),
       ]
 
       # Calculate statistics for each variable in current group
