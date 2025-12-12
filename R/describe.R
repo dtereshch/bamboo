@@ -45,9 +45,7 @@
 #' @export
 describe <- function(data, variables, group, digits = 3) {
   # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data frame")
-  }
+  data <- .check_and_convert_data_minimal(data, arg_name = "data")
 
   # Validate digits
   if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {

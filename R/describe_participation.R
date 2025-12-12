@@ -36,13 +36,7 @@ describe_participation <- function(
   detailed = TRUE
 ) {
   # Input validation
-  if (missing(data)) {
-    stop("Argument 'data' is required")
-  }
-
-  if (!is.data.frame(data)) {
-    stop("Argument 'data' must be a data frame")
-  }
+  data <- .check_and_convert_data_minimal(data, arg_name = "data")
 
   # Check if group and time are specified for regular data frames
   if (is.null(group) || is.null(time)) {

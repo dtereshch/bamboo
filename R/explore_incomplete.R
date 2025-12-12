@@ -27,10 +27,8 @@
 #'
 #' @export
 explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
-  # Check if data is provided
-  if (missing(data)) {
-    stop("Argument 'data' is required")
-  }
+  # Input validation
+  data <- .check_and_convert_data_minimal(data, arg_name = "data")
 
   # Check if group is provided
   if (missing(group)) {

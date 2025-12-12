@@ -60,9 +60,7 @@ decompose_variation <- function(
   digits = 3
 ) {
   # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data frame")
-  }
+  data_df <- .check_and_convert_data_minimal(data, arg_name = "data")
 
   # Validate digits parameter
   if (
@@ -71,9 +69,6 @@ decompose_variation <- function(
   ) {
     stop("'digits' must be a non-negative integer or NA for no rounding")
   }
-
-  # Convert to plain data frame to avoid any special class issues
-  data_df <- as.data.frame(data)
 
   # Validate group parameter
   if (

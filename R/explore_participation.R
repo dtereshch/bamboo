@@ -35,9 +35,7 @@ explore_participation <- function(
   max_patterns = 10
 ) {
   # Input validation
-  if (missing(data)) {
-    stop("Argument 'data' is required")
-  }
+  data_df <- .check_and_convert_data_minimal(data, arg_name = "data")
 
   # Regular data frame - require group and time arguments as character strings
   if (is.null(group) || is.null(time)) {
@@ -56,7 +54,6 @@ explore_participation <- function(
     stop("'group' and 'time' must be single character strings")
   }
 
-  data_df <- as.data.frame(data)
   group_name <- group
   time_name <- time
 
