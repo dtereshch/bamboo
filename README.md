@@ -19,7 +19,6 @@ library(panelDT)
 
 ?decompose_variation
 ?describe
-?describe_by
 ?describe_participation
 ?describe_transition
 ?explore_incomplete
