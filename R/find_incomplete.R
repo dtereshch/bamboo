@@ -17,6 +17,10 @@
 #' # Example without time variable (no unbalanced check)
 #' find_incomplete(production, group = "firm")
 #'
+#' # Create balanced panel data
+#' incomplete_entities <- find_incomplete(production, group = "firm")
+#' production_balanced <- subset(production, !(firm %in% incomplete_entities))
+#'
 #' @export
 find_incomplete <- function(data, group = NULL, time = NULL) {
   # Input validation
