@@ -4,7 +4,7 @@
 \alias{describe}
 \title{Calculate Descriptive Statistics}
 \usage{
-describe(data, variables, group, digits = 3)
+describe(data, variables, group, detailed = FALSE, digits = 3)
 }
 \arguments{
 \item{data}{A data frame containing the variables to analyze.}
@@ -14,6 +14,10 @@ If not specified, all numeric variables in the data frame will be used.}
 
 \item{group}{An optional character string specifying the grouping variable.
 If not provided, overall statistics will be returned.}
+
+\item{detailed}{Logical indicating whether to return additional statistics in
+the style of pandas describe method. If TRUE, includes count, mean, sd,
+min, p25, median, p75, and max (default = FALSE).}
 
 \item{digits}{Integer specifying the number of decimal places for rounding
 statistics (default = 3).}
@@ -28,6 +32,9 @@ A data frame with descriptive statistics. When grouped, contains:
 \item{sd}{Standard deviation}
 \item{min}{Minimum value}
 \item{max}{Maximum value}
+When \code{detailed = TRUE}, also includes:
+\item{p25}{25th percentile (first quartile)}
+\item{p75}{75th percentile (third quartile)}
 When ungrouped, the group column is omitted.
 }
 \description{
@@ -51,6 +58,10 @@ describe(production, variables = c("sales", "capital", "labor"), group = "firm")
 # Custom rounding
 describe(production, digits = 2)
 describe(production, group = "year", digits = 4)
+
+# Detailed statistics (pandas describe style)
+describe(production, detailed = TRUE)
+describe(production, group = "year", detailed = TRUE)
 
 }
 \seealso{

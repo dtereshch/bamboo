@@ -28,6 +28,10 @@ find_incomplete(production, group = "firm", time = "year")
 # Example without time variable (no unbalanced check)
 find_incomplete(production, group = "firm")
 
+# Create balanced panel data
+incomplete_entities <- find_incomplete(production, group = "firm")
+production_balanced <- subset(production, !(firm \%in\% incomplete_entities))
+
 }
 \seealso{
 \code{\link[=explore_incomplete]{explore_incomplete()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=explore_participation]{explore_participation()}}
