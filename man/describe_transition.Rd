@@ -4,7 +4,14 @@
 \alias{describe_transition}
 \title{Explore transition probabilities for panel data}
 \usage{
-describe_transition(data, variable, group = NULL, time = NULL, format = "wide")
+describe_transition(
+  data,
+  variable,
+  group = NULL,
+  time = NULL,
+  format = "wide",
+  digits = 3
+)
 }
 \arguments{
 \item{data}{A data frame containing panel data}
@@ -16,6 +23,8 @@ describe_transition(data, variable, group = NULL, time = NULL, format = "wide")
 \item{time}{Character string specifying the time variable}
 
 \item{format}{Character string specifying the output format: "wide (default)" or "long"}
+
+\item{digits}{Integer indicating the number of decimal places to round probabilities (default = 3)}
 }
 \value{
 A data frame in either wide or long format containing transition probabilities
@@ -32,6 +41,9 @@ describe_transition(production, variable = "status", group = "firm", time = "yea
 
 # Analyze transitions in long format
 describe_transition(production, variable = "status", group = "firm", time = "year", format = "long")
+
+# Specify number of decimal places
+describe_transition(production, variable = "status", group = "firm", time = "year", digits = 4)
 
 }
 \seealso{

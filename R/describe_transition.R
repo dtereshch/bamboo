@@ -8,6 +8,7 @@
 #' @param group Character string specifying the entity/group variable (e.g., individual ID)
 #' @param time Character string specifying the time variable
 #' @param format Character string specifying the output format: "wide (default)" or "long"
+#' @param digits Integer indicating the number of decimal places to round probabilities (default = 3)
 #'
 #' @return A data frame in either wide or long format containing transition probabilities
 #'
@@ -23,13 +24,17 @@
 #' # Analyze transitions in long format
 #' describe_transition(production, variable = "status", group = "firm", time = "year", format = "long")
 #'
+#' # Specify number of decimal places
+#' describe_transition(production, variable = "status", group = "firm", time = "year", digits = 4)
+#'
 #' @export
 describe_transition <- function(
   data,
   variable,
   group = NULL,
   time = NULL,
-  format = "wide"
+  format = "wide",
+  digits = 3
 ) {
   # Input validation
   data <- .check_and_convert_data_robust(data, arg_name = "data")
@@ -45,6 +50,16 @@ describe_transition <- function(
   # Validate format argument
   if (!format %in% c("long", "wide")) {
     stop("format must be either 'long' or 'wide'")
+  }
+
+  # Validate digits argument
+  if (
+    !is.numeric(digits) ||
+      length(digits) != 1 ||
+      digits < 0 ||
+      digits != round(digits)
+  ) {
+    stop("'digits' must be a single non-negative integer")
   }
 
   # Validate group and time for data frames
@@ -168,6 +183,9 @@ describe_transition <- function(
   )
   long_result$n[is.na(long_result$n)] <- 0
   long_result$prob[is.na(long_result$prob)] <- 0
+
+  # Round probabilities to specified digits
+  long_result$prob <- round(long_result$prob, digits = digits)
 
   # Order by from and to
   long_result <- long_result[order(long_result$from, long_result$to), ]
