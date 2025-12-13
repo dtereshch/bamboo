@@ -9,6 +9,9 @@
 #'        If not specified, all numeric variables in the data frame will be used.
 #' @param group An optional character string specifying the grouping variable.
 #'        If not provided, overall statistics will be returned.
+#' @param detailed Logical indicating whether to return additional statistics in
+#'        the style of pandas describe method. If TRUE, includes count, mean, sd,
+#'        min, p25, median, p75, and max (default = FALSE).
 #' @param digits Integer specifying the number of decimal places for rounding
 #'        statistics (default = 3).
 #'
@@ -21,6 +24,9 @@
 #'   \item{sd}{Standard deviation}
 #'   \item{min}{Minimum value}
 #'   \item{max}{Maximum value}
+#'   When `detailed = TRUE`, also includes:
+#'   \item{p25}{25th percentile (first quartile)}
+#'   \item{p75}{75th percentile (third quartile)}
 #'   When ungrouped, the group column is omitted.
 #'
 #' @seealso
@@ -43,10 +49,19 @@
 #' describe(production, digits = 2)
 #' describe(production, group = "year", digits = 4)
 #'
+#' # Detailed statistics (pandas describe style)
+#' describe(production, detailed = TRUE)
+#' describe(production, group = "year", detailed = TRUE)
+#'
 #' @export
-describe <- function(data, variables, group, digits = 3) {
+describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
   # Input validation
   data <- .check_and_convert_data_robust(data, arg_name = "data")
+
+  # Validate detailed parameter
+  if (!is.logical(detailed) || length(detailed) != 1) {
+    stop("'detailed' must be a single logical value (TRUE or FALSE)")
+  }
 
   # Validate digits
   if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
@@ -120,23 +135,49 @@ describe <- function(data, variables, group, digits = 3) {
 
       # Handle case where all values are NA
       if (all(is.na(x))) {
-        stats_row <- data.frame(
-          n = 0,
-          mean = NA_real_,
-          median = NA_real_,
-          sd = NA_real_,
-          min = NA_real_,
-          max = NA_real_
-        )
+        if (detailed) {
+          stats_row <- data.frame(
+            n = 0,
+            mean = NA_real_,
+            sd = NA_real_,
+            min = NA_real_,
+            p25 = NA_real_,
+            median = NA_real_,
+            p75 = NA_real_,
+            max = NA_real_
+          )
+        } else {
+          stats_row <- data.frame(
+            n = 0,
+            mean = NA_real_,
+            median = NA_real_,
+            sd = NA_real_,
+            min = NA_real_,
+            max = NA_real_
+          )
+        }
       } else {
-        stats_row <- data.frame(
-          n = count_non_na(x),
-          mean = mean(x, na.rm = TRUE),
-          median = median(x, na.rm = TRUE),
-          sd = stats::sd(x, na.rm = TRUE),
-          min = min(x, na.rm = TRUE),
-          max = max(x, na.rm = TRUE)
-        )
+        if (detailed) {
+          stats_row <- data.frame(
+            n = count_non_na(x),
+            mean = mean(x, na.rm = TRUE),
+            sd = stats::sd(x, na.rm = TRUE),
+            min = min(x, na.rm = TRUE),
+            p25 = stats::quantile(x, probs = 0.25, na.rm = TRUE, names = FALSE),
+            median = median(x, na.rm = TRUE),
+            p75 = stats::quantile(x, probs = 0.75, na.rm = TRUE, names = FALSE),
+            max = max(x, na.rm = TRUE)
+          )
+        } else {
+          stats_row <- data.frame(
+            n = count_non_na(x),
+            mean = mean(x, na.rm = TRUE),
+            median = median(x, na.rm = TRUE),
+            sd = stats::sd(x, na.rm = TRUE),
+            min = min(x, na.rm = TRUE),
+            max = max(x, na.rm = TRUE)
+          )
+        }
       }
 
       # Round numeric statistics
@@ -168,23 +209,59 @@ describe <- function(data, variables, group, digits = 3) {
 
         # Handle case where all values are NA
         if (all(is.na(x))) {
-          stats_row <- data.frame(
-            n = 0,
-            mean = NA_real_,
-            median = NA_real_,
-            sd = NA_real_,
-            min = NA_real_,
-            max = NA_real_
-          )
+          if (detailed) {
+            stats_row <- data.frame(
+              n = 0,
+              mean = NA_real_,
+              sd = NA_real_,
+              min = NA_real_,
+              p25 = NA_real_,
+              median = NA_real_,
+              p75 = NA_real_,
+              max = NA_real_
+            )
+          } else {
+            stats_row <- data.frame(
+              n = 0,
+              mean = NA_real_,
+              median = NA_real_,
+              sd = NA_real_,
+              min = NA_real_,
+              max = NA_real_
+            )
+          }
         } else {
-          stats_row <- data.frame(
-            n = count_non_na(x),
-            mean = mean(x, na.rm = TRUE),
-            median = median(x, na.rm = TRUE),
-            sd = stats::sd(x, na.rm = TRUE),
-            min = min(x, na.rm = TRUE),
-            max = max(x, na.rm = TRUE)
-          )
+          if (detailed) {
+            stats_row <- data.frame(
+              n = count_non_na(x),
+              mean = mean(x, na.rm = TRUE),
+              sd = stats::sd(x, na.rm = TRUE),
+              min = min(x, na.rm = TRUE),
+              p25 = stats::quantile(
+                x,
+                probs = 0.25,
+                na.rm = TRUE,
+                names = FALSE
+              ),
+              median = median(x, na.rm = TRUE),
+              p75 = stats::quantile(
+                x,
+                probs = 0.75,
+                na.rm = TRUE,
+                names = FALSE
+              ),
+              max = max(x, na.rm = TRUE)
+            )
+          } else {
+            stats_row <- data.frame(
+              n = count_non_na(x),
+              mean = mean(x, na.rm = TRUE),
+              median = median(x, na.rm = TRUE),
+              sd = stats::sd(x, na.rm = TRUE),
+              min = min(x, na.rm = TRUE),
+              max = max(x, na.rm = TRUE)
+            )
+          }
         }
 
         # Round numeric statistics
