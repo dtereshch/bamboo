@@ -68,13 +68,67 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
     stop("'digits' must be a single non-negative integer")
   }
 
-  # If variables not specified, use all numeric variables excluding group variable if provided
+  # If variables not specified, use all numeric variables with message
   if (missing(variables)) {
-    numeric_vars <- sapply(data, is.numeric)
+    message(
+      "Variables not specified. Automatically selecting numeric variables..."
+    )
+
+    # Use vapply for more robust type checking
+    numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
     variables <- names(data)[numeric_vars]
-    if (!missing(group)) {
-      variables <- variables[variables != group] # Exclude group variable
+
+    # If no numeric variables found, stop with error
+    if (length(variables) == 0) {
+      stop("No numeric variables found in the dataset")
     }
+
+    # Remove the group variable from variables if it's numeric
+    if (!missing(group) && group %in% variables) {
+      message(
+        "Removing grouping variable '",
+        group,
+        "' from analysis variables"
+      )
+      variables <- variables[variables != group]
+    }
+
+    # Remove other potential ID variables
+    id_like_vars <- c(
+      "id",
+      "ID",
+      "Id",
+      "year",
+      "time",
+      "period",
+      "date",
+      "firm",
+      "company",
+      "subject",
+      "participant"
+    )
+    removed_id_vars <- variables[variables %in% id_like_vars]
+    if (length(removed_id_vars) > 0) {
+      message(
+        "Removing ID-like variables: ",
+        paste(removed_id_vars, collapse = ", ")
+      )
+    }
+    variables <- variables[!variables %in% id_like_vars]
+
+    if (length(variables) == 0) {
+      stop("No numeric variables remaining after removing ID-like variables")
+    }
+
+    message(
+      "Analyzing ",
+      length(variables),
+      " numeric variable(s): ",
+      paste(variables, collapse = ", ")
+    )
+  } else {
+    # User specified variables - just log the count
+    message("Analyzing ", length(variables), " user-specified variable(s)")
   }
 
   # Validate variables
@@ -101,6 +155,8 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
 
   # Validate group if provided
   if (!missing(group)) {
+    message("Grouping analysis by variable: ", group)
+
     if (length(group) > 1) {
       stop("Only one grouping variable is supported")
     }
@@ -112,6 +168,27 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
         paste(missing_groups, collapse = ", ")
       )
     }
+
+    # Check if group variable is factor or character for better grouping
+    if (is.numeric(data[[group]])) {
+      message(
+        "Note: Grouping variable '",
+        group,
+        "' is numeric. Converting to character for grouping."
+      )
+    }
+  } else {
+    message("Calculating overall statistics (no grouping)")
+  }
+
+  # Log detailed statistics option
+  if (detailed) {
+    message("Computing detailed statistics (including quartiles)")
+  }
+
+  # Log rounding digits
+  if (digits != 3) {
+    message("Rounding statistics to ", digits, " decimal places")
   }
 
   # Helper function to count non-NA values
@@ -130,6 +207,9 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
 
   # Calculate statistics without grouping
   if (missing(group)) {
+    # Log calculation start
+    message("Computing statistics for ", length(variables), " variable(s)...")
+
     results <- lapply(variables, function(var) {
       x <- data[[var]]
 
@@ -190,8 +270,18 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
     result_df <- do.call(rbind, results)
   } else {
     # Calculate statistics with grouping
+    message("Computing statistics by group levels...")
+
     group_combinations <- unique(data[[group]])
     group_combinations <- sort(group_combinations[!is.na(group_combinations)])
+
+    # Log group information
+    message(
+      "Found ",
+      length(group_combinations),
+      " group level(s): ",
+      paste(group_combinations, collapse = ", ")
+    )
 
     results <- list()
 
@@ -202,6 +292,10 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
       group_subset <- data[
         data[[group]] == current_group & !is.na(data[[group]]),
       ]
+
+      # Log group size
+      group_size <- nrow(group_subset)
+      message("  Group '", current_group, "': ", group_size, " observation(s)")
 
       # Calculate statistics for each variable in current group
       group_results <- lapply(variables, function(var) {
@@ -283,6 +377,13 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
 
   # Reset row names
   rownames(result_df) <- NULL
+
+  # Final message
+  message(
+    "Analysis complete. Returning ",
+    nrow(result_df),
+    " row(s) of results."
+  )
 
   return(result_df)
 }
