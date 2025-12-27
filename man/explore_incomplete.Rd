@@ -2,29 +2,29 @@
 % Please edit documentation in R/explore_incomplete.R
 \name{explore_incomplete}
 \alias{explore_incomplete}
-\title{Providing a descriptive table of entities with incomplete observations (missing values)}
+\title{Incomplete Entities Analysis}
 \usage{
 explore_incomplete(data, group, time = NULL, detailed = FALSE)
 }
 \arguments{
-\item{data}{The data frame}
+\item{data}{A data.frame containing panel data.}
 
-\item{group}{Entities' identifier}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{time}{Time identifier (optional, for checking panel balance)}
+\item{time}{A character string specifying the name of the time variable (optional, for checking panel balance).}
 
-\item{detailed}{Logical indicating whether to include detailed missing counts
-for each variable (TRUE) or just summary counts (FALSE). Default is FALSE.}
+\item{detailed}{A logical flag indicating whether to include detailed missing counts
+for each variable. Default = FALSE.}
 }
 \value{
-A data frame containing entities with number of variables that have
+A data.frame containing entities with number of variables that have
 at least one missing value for that entity, as well as total number
-of missing observations. The data frame is arranged by number of
+of missing observations. The data.frame is arranged by number of
 variables with missing values. If detailed = TRUE, includes additional
 columns with NA counts for each variable.
 }
 \description{
-Providing a descriptive table of entities with incomplete observations (missing values)
+This function provides a descriptive table of entities with incomplete observations (missing values).
 }
 \examples{
 data(production)

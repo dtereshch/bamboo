@@ -2,21 +2,21 @@
 % Please edit documentation in R/describe_participation.R
 \name{describe_participation}
 \alias{describe_participation}
-\title{Describe panel data participation patterns}
+\title{Panel Data Participation Patterns}
 \usage{
 describe_participation(data, group = NULL, time = NULL, detailed = TRUE)
 }
 \arguments{
-\item{data}{A data frame with panel data structure}
+\item{data}{A data.frame containing panel data.}
 
-\item{group}{Character string specifying the entity/group variable name}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{time}{Character string specifying the time variable name}
+\item{time}{A character string specifying the name of the time variable.}
 
-\item{detailed}{Logical indicating whether to return detailed patterns (default: TRUE)}
+\item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
 }
 \value{
-A data frame with participation patterns containing:
+A data.frame with participation patterns containing:
 \itemize{
 \item Pattern: Pattern identifier (1, 2, 3, ...)
 \item Columns for each time period showing participation (1 = present, 0 = missing)
@@ -26,7 +26,7 @@ A data frame with participation patterns containing:
 }
 }
 \description{
-This function shows the table with participation patterns of entities in panel data over time.
+This function describes participation patterns of entities in panel data over time.
 }
 \examples{
 # Load the production dataset

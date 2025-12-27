@@ -2,22 +2,22 @@
 % Please edit documentation in R/find_incomplete.R
 \name{find_incomplete}
 \alias{find_incomplete}
-\title{Identify entities with incomplete observations (missing values)}
+\title{Incomplete Entities Identification}
 \usage{
 find_incomplete(data, group = NULL, time = NULL)
 }
 \arguments{
-\item{data}{The data frame}
+\item{data}{A data.frame containing panel data.}
 
-\item{group}{Entities' identifier (column name as character string)}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{time}{Time identifier (optional, for checking panel balance)}
+\item{time}{A character string specifying the name of the time variable (optional, for checking panel balance).}
 }
 \value{
-A vector containing entities with missing values, or a message if no incomplete entities found
+A vector containing entities with missing values, or a message if no incomplete entities found.
 }
 \description{
-Identify entities with incomplete observations (missing values)
+This function identifies entities with incomplete observations (missing values) in panel data.
 }
 \examples{
 data(production)

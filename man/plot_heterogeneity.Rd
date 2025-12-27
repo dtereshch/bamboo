@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_heterogeneity.R
 \name{plot_heterogeneity}
 \alias{plot_heterogeneity}
-\title{Plot Heterogeneity Among Groups}
+\title{Heterogeneity Visualization}
 \usage{
 plot_heterogeneity(
   data,
@@ -14,25 +14,24 @@ plot_heterogeneity(
 )
 }
 \arguments{
-\item{data}{A data frame in long panel format or tidy format}
+\item{data}{A data.frame containing the variables for analysis.}
 
-\item{variable}{The numeric variable of interest (character string)}
+\item{variable}{A character string specifying the numeric variable of interest.}
 
-\item{group}{The grouping variable(s) (character string or vector of character strings)}
+\item{group}{A character string or vector of character strings specifying the grouping variable(s).}
 
-\item{xlab}{X-axis label (default: based on grouping variable)}
+\item{xlab}{A character string specifying the X-axis label (default: based on grouping variable).}
 
-\item{ylab}{Y-axis label (default: based on variable name)}
+\item{ylab}{A character string specifying the Y-axis label (default: based on variable name).}
 
-\item{colors}{Vector of two colors: first for individual points, second for mean line and points (default: c("#D55E00", "#0072B2"))}
+\item{colors}{A character vector of two colors: first for individual points, second for mean line and points.
+Default = c("#D55E00", "#0072B2").}
 }
 \value{
 Invisibly returns a list with summary statistics. Creates a base R plot.
 }
 \description{
-Creates publication-ready visualizations of heterogeneity among groups using base R graphics.
-Designed for panel data to show variation across object identifiers or time periods. Supports
-multiple grouping variables (faceting).
+This function creates visualizations of heterogeneity among groups.
 }
 \examples{
 data(production)

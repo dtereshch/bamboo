@@ -2,7 +2,7 @@
 % Please edit documentation in R/describe_transition.R
 \name{describe_transition}
 \alias{describe_transition}
-\title{Explore transition probabilities for panel data}
+\title{Transition Probability Analysis}
 \usage{
 describe_transition(
   data,
@@ -14,24 +14,24 @@ describe_transition(
 )
 }
 \arguments{
-\item{data}{A data frame containing panel data}
+\item{data}{A data.frame containing panel data.}
 
-\item{variable}{Character string specifying the factor variable to analyze transitions for}
+\item{variable}{A character string specifying the factor variable to analyze transitions for.}
 
-\item{group}{Character string specifying the entity/group variable (e.g., individual ID)}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{time}{Character string specifying the time variable}
+\item{time}{A character string specifying the name of the time variable.}
 
-\item{format}{Character string specifying the output format: "wide (default)" or "long"}
+\item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
-\item{digits}{Integer indicating the number of decimal places to round probabilities (default = 3)}
+\item{digits}{An integer indicating the number of decimal places to round probabilities. Default = 3.}
 }
 \value{
-A data frame in either wide or long format containing transition probabilities
+A data.frame in either wide or long format containing transition probabilities.
 }
 \description{
-This function replicates Stata's xttrans command, calculating transition probabilities
-between states of a categorical variable across time periods for panel data.
+This function calculates transition probabilities between states of a categorical
+variable across time periods for panel data.
 }
 \examples{
 data(production)
@@ -45,6 +45,9 @@ describe_transition(production, variable = "status", group = "firm", time = "yea
 # Specify number of decimal places
 describe_transition(production, variable = "status", group = "firm", time = "year", digits = 4)
 
+}
+\references{
+For Stata users: This corresponds to the \code{xttrans} command.
 }
 \seealso{
 \code{\link[=decompose_variation]{decompose_variation()}}, \code{\link[=explore_participation]{explore_participation()}}

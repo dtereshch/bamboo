@@ -2,7 +2,7 @@
 % Please edit documentation in R/decompose_variation.R
 \name{decompose_variation}
 \alias{decompose_variation}
-\title{Decompose Variation in Panel Data}
+\title{Panel Data Variation Decomposition}
 \usage{
 decompose_variation(
   data,
@@ -13,21 +13,21 @@ decompose_variation(
 )
 }
 \arguments{
-\item{data}{A data frame containing the panel data.}
+\item{data}{A data.frame containing panel data.}
 
 \item{variables}{A character vector specifying which numeric variables to analyze.
-If NULL (default), all numeric variables in the dataset will be used.}
+If not specified, all numeric variables in the data.frame will be used.}
 
-\item{group}{A character string specifying the group ID variable (e.g., individual, firm, country).}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{detailed}{Logical indicating whether to return detailed Stata-like output (TRUE) or
-simplified output with only key statistics (FALSE). Default is TRUE.}
+\item{detailed}{A logical flag indicating whether to return detailed Stata-like output.
+Default = TRUE.}
 
-\item{digits}{Integer indicating the number of decimal places to round statistics.
-Default is 3.}
+\item{digits}{An integer indicating the number of decimal places to round statistics.
+Default = 3.}
 }
 \value{
-If detailed = TRUE, returns a data frame with the following columns for each variable:
+If detailed = TRUE, returns a data.frame with the following columns for each variable:
 \item{variable}{The name of the variable}
 \item{decomposition}{Type of decomposition: overall, between, or within}
 \item{mean}{Mean value (only for overall decomposition)}
@@ -36,7 +36,7 @@ If detailed = TRUE, returns a data frame with the following columns for each var
 \item{max}{Maximum value}
 \item{n}{Number of observations or groups}
 
-If detailed = FALSE, returns a simplified data frame with columns:
+If detailed = FALSE, returns a simplified data.frame with columns:
 \item{variable}{The name of the variable}
 \item{mean}{Overall mean}
 \item{sd_overall}{Overall standard deviation}
@@ -44,9 +44,8 @@ If detailed = FALSE, returns a simplified data frame with columns:
 \item{sd_within}{Within-group standard deviation}
 }
 \description{
-Inspired by Stata's xtsum command, this function calculates descriptive statistics
-for panel data and decomposes variance into between and within components.
-Provides insights into variation across groups and over time.
+This function calculates descriptive statistics for panel data and decomposes
+variance into between and within components.
 }
 \examples{
 data(production)
@@ -66,8 +65,7 @@ decompose_variation(production,
 
 }
 \references{
-Based on Stata's xtsum command and corresponding discussion at
-https://stackoverflow.com/questions/49282083/xtsum-command-for-r
+For Stata users: This corresponds to the \code{xtsum} command.
 }
 \seealso{
 \code{\link[=describe]{describe()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=describe_transition]{describe_transition()}}

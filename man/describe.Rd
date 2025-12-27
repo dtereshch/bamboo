@@ -2,28 +2,28 @@
 % Please edit documentation in R/describe.R
 \name{describe}
 \alias{describe}
-\title{Calculate Descriptive Statistics}
+\title{Descriptive Statistics}
 \usage{
 describe(data, variables, group, detailed = FALSE, digits = 3)
 }
 \arguments{
-\item{data}{A data frame containing the variables to analyze.}
+\item{data}{A data.frame containing the variables for analysis.}
 
 \item{variables}{A character vector specifying which numeric variables to analyze.
-If not specified, all numeric variables in the data frame will be used.}
+If not specified, all numeric variables in the data.frame will be used.}
 
-\item{group}{An optional character string specifying the grouping variable.
+\item{group}{A character string specifying the grouping variable name.
 If not provided, overall statistics will be returned.}
 
-\item{detailed}{Logical indicating whether to return additional statistics in
+\item{detailed}{A logical flag indicating whether to return additional statistics in
 the style of pandas describe method. If TRUE, includes count, mean, sd,
-min, p25, median, p75, and max (default = FALSE).}
+min, p25, median, p75, and max. Default = FALSE.}
 
-\item{digits}{Integer specifying the number of decimal places for rounding
-statistics (default = 3).}
+\item{digits}{An integer specifying the number of decimal places for rounding
+statistics. Default = 3.}
 }
 \value{
-A data frame with descriptive statistics. When grouped, contains:
+A data.frame with descriptive statistics. When grouped, contains:
 \item{group}{The grouping variable}
 \item{variable}{The name of the numeric variable}
 \item{n}{Number of non-NA observations}
@@ -38,9 +38,8 @@ When \code{detailed = TRUE}, also includes:
 When ungrouped, the group column is omitted.
 }
 \description{
-Provides comprehensive descriptive statistics for numeric variables. Can be
-calculated overall or grouped by a single grouping variable. Returns results
-in a clean data frame format.
+This function calculates comprehensive descriptive statistics for numeric variables,
+either overall or grouped by a single grouping variable.
 }
 \examples{
 data(production)

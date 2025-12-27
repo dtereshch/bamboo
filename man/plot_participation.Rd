@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_participation.R
 \name{plot_participation}
 \alias{plot_participation}
-\title{Visualize panel data participation patterns as a heatmap}
+\title{Participation Patterns Visualization}
 \usage{
 plot_participation(
   data,
@@ -14,26 +14,26 @@ plot_participation(
 )
 }
 \arguments{
-\item{data}{A data frame with panel data structure}
+\item{data}{A data.frame containing panel data.}
 
-\item{group}{Character string specifying the entity/group variable name}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{time}{Character string specifying the time variable name}
+\item{time}{A character string specifying the name of the time variable.}
 
-\item{detailed}{Logical indicating whether to show all patterns (TRUE) or
-only top-10 most frequent patterns (FALSE) (default: TRUE)}
+\item{detailed}{A logical flag indicating whether to show all patterns or
+only top-10 most frequent patterns. Default = TRUE.}
 
-\item{colors}{Vector of two colors for present and missing observations
-(default: c("#0072B2", "#D55E00") - colorblind-friendly)}
+\item{colors}{A character vector of two colors for present and missing observations.
+Default = c("#0072B2", "#D55E00").}
 
-\item{xlab}{X-axis label (default: "Time Period")}
+\item{xlab}{A character string specifying the X-axis label. Default = "Time Period".}
 }
 \value{
-A heatmap plot showing participation patterns
+A heatmap plot showing participation patterns.
 }
 \description{
 This function creates a heatmap visualization of participation patterns
-of entities in panel data over time, similar to Stata's xtdes command.
+of entities in panel data over time.
 }
 \examples{
 # Load the production dataset

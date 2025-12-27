@@ -2,7 +2,7 @@
 % Please edit documentation in R/explore_participation.R
 \name{explore_participation}
 \alias{explore_participation}
-\title{Describes participation patterns in an unbalanced panel}
+\title{Panel Data Participation Analysis}
 \usage{
 explore_participation(
   data,
@@ -13,22 +13,21 @@ explore_participation(
 )
 }
 \arguments{
-\item{data}{The data frame object}
+\item{data}{A data.frame containing panel data.}
 
-\item{group}{Character string specifying the entities' identifier column name}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
-\item{time}{Character string specifying the time identifier column name}
+\item{time}{A character string specifying the name of the time variable.}
 
-\item{detailed}{Logical, whether to show detailed pattern information (default: TRUE)}
+\item{detailed}{A logical flag indicating whether to show detailed pattern information. Default = TRUE.}
 
-\item{max_patterns}{Maximum number of patterns to display in detail (default: 10)}
+\item{max_patterns}{An integer specifying the maximum number of patterns to display in detail. Default = 10.}
 }
 \value{
-Invisible list containing detailed participation pattern statistics
+Invisible list containing detailed participation pattern statistics.
 }
 \description{
-This function replicates Stata's xtdes command, by providing comprehensive summary statistics and pattern analysis of panel data structure
-in text format. Supports regular data frames with explicit group and time identifiers.
+This function provides comprehensive summary statistics and pattern analysis of panel data structure.
 }
 \examples{
 # Load the production dataset
@@ -43,6 +42,9 @@ explore_participation(production, group = "firm", time = "year", detailed = FALS
 # Increase maximum patterns to display
 explore_participation(production, group = "firm", time = "year", max_patterns = 15)
 
+}
+\references{
+For Stata users: This corresponds to the \code{xtdes} command.
 }
 \seealso{
 \code{\link[=decompose_variation]{decompose_variation()}}, \code{\link[=describe_transition]{describe_transition()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}
