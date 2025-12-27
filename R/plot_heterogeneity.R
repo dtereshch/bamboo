@@ -42,37 +42,34 @@ plot_heterogeneity <- function(
 ) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop(
-      "plot_heterogeneity: 'data' must be a data.frame, not ",
-      class(data)[1]
-    )
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (!is.character(variable) || length(variable) != 1) {
     stop(
-      "plot_heterogeneity: 'variable' must be a single character string, not ",
+      "'variable' must be a single character string, not ",
       class(variable)[1]
     )
   }
 
   if (!variable %in% names(data)) {
-    stop('plot_heterogeneity: variable "', variable, '" not found in data')
+    stop('variable "', variable, '" not found in data')
   }
 
   if (!is.numeric(data[[variable]])) {
     stop(
-      "plot_heterogeneity: 'variable' must be a numeric variable, not ",
+      "'variable' must be a numeric variable, not ",
       class(data[[variable]])[1]
     )
   }
 
   if (is.null(group)) {
-    stop("plot_heterogeneity: 'group' must be provided")
+    stop("'group' must be provided")
   }
 
   if (!is.character(group)) {
     stop(
-      "plot_heterogeneity: 'group' must be a character string or vector of character strings, not ",
+      "'group' must be a character string or vector of character strings, not ",
       class(group)[1]
     )
   }
@@ -80,7 +77,7 @@ plot_heterogeneity <- function(
   missing_groups <- group[!group %in% names(data)]
   if (length(missing_groups) > 0) {
     stop(
-      'plot_heterogeneity: variable(s) "',
+      'variable(s) "',
       paste(missing_groups, collapse = '", "'),
       '" not found in data'
     )
@@ -88,7 +85,7 @@ plot_heterogeneity <- function(
 
   if (!is.character(colors) || length(colors) != 2) {
     stop(
-      "plot_heterogeneity: 'colors' must be a character vector of length 2, not ",
+      "'colors' must be a character vector of length 2, not ",
       class(colors)[1]
     )
   }
@@ -96,30 +93,28 @@ plot_heterogeneity <- function(
   data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (nrow(data) == 0) {
-    stop("plot_heterogeneity: 'data' must have at least one row")
+    stop("'data' must have at least one row")
   }
 
   # If group is NULL, error
   if (is.null(group)) {
-    stop("plot_heterogeneity: 'group' must be provided")
+    stop("'group' must be provided")
   }
 
   # Validate group parameter
   if (!is.character(group)) {
-    stop(
-      "plot_heterogeneity: 'group' must be a character string or vector of character strings"
-    )
+    stop("'group' must be a character string or vector of character strings")
   }
 
   # Check if variables exist in data
   if (!variable %in% names(data)) {
-    stop("plot_heterogeneity: variable '", variable, "' not found in data")
+    stop("variable '", variable, "' not found in data")
   }
 
   missing_groups <- setdiff(group, names(data))
   if (length(missing_groups) > 0) {
     stop(
-      "plot_heterogeneity: group variable(s) '",
+      "group variable(s) '",
       paste(missing_groups, collapse = "', '"),
       "' not found in data"
     )
@@ -127,7 +122,7 @@ plot_heterogeneity <- function(
 
   # Validate colors parameter
   if (!is.character(colors) || length(colors) != 2) {
-    stop("plot_heterogeneity: 'colors' must be a character vector of length 2")
+    stop("'colors' must be a character vector of length 2")
   }
 
   # Extract colors
@@ -148,7 +143,7 @@ plot_heterogeneity <- function(
 
   # Check variable type
   if (!is.numeric(y_var)) {
-    stop("plot_heterogeneity: 'variable' must be a numeric variable")
+    stop("'variable' must be a numeric variable")
   }
 
   # Function to create single plot
@@ -163,7 +158,7 @@ plot_heterogeneity <- function(
     # Check group variable type
     if (!is.factor(x_var) && !is.character(x_var) && !is.numeric(x_var)) {
       stop(
-        "plot_heterogeneity: group variable '",
+        "group variable '",
         group_var,
         "' must be a factor, character, or numeric variable, not ",
         class(x_var)[1]

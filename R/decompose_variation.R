@@ -60,42 +60,30 @@ decompose_variation <- function(
 ) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop(
-      "decompose_variation: 'data' must be a data.frame, not ",
-      class(data)[1]
-    )
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (!is.null(variables) && !is.character(variables)) {
     stop(
-      "decompose_variation: 'variables' must be a character vector or NULL, not ",
+      "'variables' must be a character vector or NULL, not ",
       class(variables)[1]
     )
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop(
-      "decompose_variation: 'group' must be a single character string, not ",
-      class(group)[1]
-    )
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!group %in% names(data)) {
-    stop('decompose_variation: variable "', group, '" not found in data')
+    stop('variable "', group, '" not found in data')
   }
 
   if (!is.logical(detailed) || length(detailed) != 1) {
-    stop(
-      "decompose_variation: 'detailed' must be a single logical value, not ",
-      class(detailed)[1]
-    )
+    stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
   if (!is.numeric(digits) || length(digits) != 1) {
-    stop(
-      "decompose_variation: 'digits' must be a single numeric value, not ",
-      class(digits)[1]
-    )
+    stop("'digits' must be a single numeric value, not ", class(digits)[1])
   }
 
   data_df <- .check_and_convert_data_robust(data, arg_name = "data")
@@ -105,21 +93,19 @@ decompose_variation <- function(
     !is.na(digits) &&
       (!is.numeric(digits) || digits < 0 || digits != round(digits))
   ) {
-    stop(
-      "decompose_variation: 'digits' must be a non-negative integer or NA for no rounding"
-    )
+    stop("'digits' must be a non-negative integer or NA for no rounding")
   }
 
   # Validate group parameter
   if (
     is.null(group) || !is.character(group) || length(group) == 0 || group == ""
   ) {
-    stop("decompose_variation: 'group' must be a non-empty character string")
+    stop("'group' must be a non-empty character string")
   }
 
   if (!group %in% names(data_df)) {
     stop(
-      "decompose_variation: variable '",
+      "variable '",
       group,
       "' not found in data. Available variables: ",
       paste(names(data_df), collapse = ", ")
@@ -141,11 +127,11 @@ decompose_variation <- function(
     variables <- variables[!variables %in% id_like_vars]
 
     if (length(variables) == 0) {
-      stop("decompose_variation: no numeric variables found in the dataset")
+      stop("no numeric variables found in the dataset")
     }
 
     message(
-      "Note: analyzing all numeric variables: ",
+      "Analyzing all numeric variables: ",
       paste(variables, collapse = ", ")
     )
   }
@@ -154,7 +140,7 @@ decompose_variation <- function(
   missing_vars <- variables[!variables %in% names(data_df)]
   if (length(missing_vars) > 0) {
     stop(
-      "decompose_variation: the following variables were not found in data: ",
+      "the following variables were not found in data: ",
       paste(missing_vars, collapse = ", ")
     )
   }
@@ -165,7 +151,7 @@ decompose_variation <- function(
   ]
   if (length(non_numeric_vars) > 0) {
     stop(
-      "decompose_variation: the following variables are not numeric: ",
+      "the following variables are not numeric: ",
       paste(non_numeric_vars, collapse = ", ")
     )
   }
@@ -173,15 +159,15 @@ decompose_variation <- function(
   # Check group variable
   group_vector <- data_df[[group]]
   if (length(group_vector) == 0) {
-    stop("decompose_variation: group variable '", group, "' has zero length")
+    stop("group variable '", group, "' has zero length")
   }
 
   n_groups <- length(unique(group_vector))
   if (n_groups > 10000) {
     warning(
-      "Note: large number of groups (",
+      "Large number of groups (",
       n_groups,
-      "). This may impact performance. (occurred in decompose_variation)"
+      "). This may impact performance."
     )
   }
 

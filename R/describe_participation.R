@@ -38,39 +38,27 @@ describe_participation <- function(
 ) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop(
-      "describe_participation: 'data' must be a data.frame, not ",
-      class(data)[1]
-    )
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop(
-      "describe_participation: 'group' must be a single character string, not ",
-      class(group)[1]
-    )
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!is.character(time) || length(time) != 1) {
-    stop(
-      "describe_participation: 'time' must be a single character string, not ",
-      class(time)[1]
-    )
+    stop("'time' must be a single character string, not ", class(time)[1])
   }
 
   if (!group %in% names(data)) {
-    stop('describe_participation: variable "', group, '" not found in data')
+    stop('variable "', group, '" not found in data')
   }
 
   if (!time %in% names(data)) {
-    stop('describe_participation: variable "', time, '" not found in data')
+    stop('variable "', time, '" not found in data')
   }
 
   if (!is.logical(detailed) || length(detailed) != 1) {
-    stop(
-      "describe_participation: 'detailed' must be a single logical value, not ",
-      class(detailed)[1]
-    )
+    stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
@@ -78,26 +66,24 @@ describe_participation <- function(
   # Check if group and time are specified for regular data frames
   if (is.null(group) || is.null(time)) {
     stop(
-      "describe_participation: arguments 'group' and 'time' must be specified"
+      "arguments 'group' and 'time' must be specified"
     )
   }
 
   # Validate that group and time variables exist in data
   if (!group %in% names(data)) {
-    stop("describe_participation: variable '", group, "' not found in data")
+    stop("variable '", group, "' not found in data")
   }
 
   if (!time %in% names(data)) {
-    stop("describe_participation: variable '", time, "' not found in data")
+    stop("variable '", time, "' not found in data")
   }
 
   # Identify data columns (excluding group and time)
   data_cols <- setdiff(names(data), c(group, time))
 
   if (length(data_cols) == 0) {
-    stop(
-      "describe_participation: no data columns found (excluding group and time variables)"
-    )
+    stop("no data columns found (excluding group and time variables)")
   }
 
   # Filter data: remove rows where ALL data columns are NA

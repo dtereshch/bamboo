@@ -39,46 +39,34 @@ explore_participation <- function(
 ) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop(
-      "explore_participation: 'data' must be a data.frame, not ",
-      class(data)[1]
-    )
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop(
-      "explore_participation: 'group' must be a single character string, not ",
-      class(group)[1]
-    )
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!is.character(time) || length(time) != 1) {
-    stop(
-      "explore_participation: 'time' must be a single character string, not ",
-      class(time)[1]
-    )
+    stop("'time' must be a single character string, not ", class(time)[1])
   }
 
   if (!group %in% names(data)) {
-    stop('explore_participation: variable "', group, '" not found in data')
+    stop('variable "', group, '" not found in data')
   }
 
   if (!time %in% names(data)) {
-    stop('explore_participation: variable "', time, '" not found in data')
+    stop('variable "', time, '" not found in data')
   }
 
   if (!is.logical(detailed) || length(detailed) != 1) {
-    stop(
-      "explore_participation: 'detailed' must be a single logical value, not ",
-      class(detailed)[1]
-    )
+    stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
   if (
     !is.numeric(max_patterns) || length(max_patterns) != 1 || max_patterns < 1
   ) {
     stop(
-      "explore_participation: 'max_patterns' must be a single positive integer, not ",
+      "'max_patterns' must be a single positive integer, not ",
       class(max_patterns)[1]
     )
   }
@@ -88,20 +76,18 @@ explore_participation <- function(
   # Regular data frame - require group and time arguments as character strings
   if (is.null(group) || is.null(time)) {
     stop(
-      "explore_participation: for regular data frames, both 'group' and 'time' arguments are required as character strings"
+      "for regular data frames, both 'group' and 'time' arguments are required as character strings"
     )
   }
 
   if (!is.character(group) || !is.character(time)) {
     stop(
-      "explore_participation: for regular data frames, 'group' and 'time' arguments must be character strings"
+      "for regular data frames, 'group' and 'time' arguments must be character strings"
     )
   }
 
   if (length(group) != 1 || length(time) != 1) {
-    stop(
-      "explore_participation: 'group' and 'time' must be single character strings"
-    )
+    stop("'group' and 'time' must be single character strings")
   }
 
   group_name <- group
@@ -113,7 +99,7 @@ explore_participation <- function(
 
   if (is.null(group_var)) {
     stop(
-      "explore_participation: variable '",
+      "variable '",
       group_name,
       "' not found in data. Available variables: ",
       paste(names(data_df), collapse = ", ")
@@ -121,7 +107,7 @@ explore_participation <- function(
   }
   if (is.null(time_var)) {
     stop(
-      "explore_participation: variable '",
+      "variable '",
       time_name,
       "' not found in data. Available variables: ",
       paste(names(data_df), collapse = ", ")
@@ -132,9 +118,7 @@ explore_participation <- function(
   substantive_vars <- setdiff(names(data_df), c(group_name, time_name))
 
   if (length(substantive_vars) == 0) {
-    stop(
-      "explore_participation: no substantive variables found (besides group and time variables)"
-    )
+    stop("no substantive variables found (besides group and time variables)")
   }
 
   # Identify rows that have at least one non-NA value in substantive variables

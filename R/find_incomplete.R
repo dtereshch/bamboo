@@ -28,41 +28,35 @@
 find_incomplete <- function(data, group = NULL, time = NULL) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop("find_incomplete: 'data' must be a data.frame, not ", class(data)[1])
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (is.null(group) || !is.character(group) || length(group) != 1) {
-    stop(
-      "find_incomplete: 'group' must be a single character string, not ",
-      class(group)[1]
-    )
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!group %in% names(data)) {
-    stop('find_incomplete: variable "', group, '" not found in data')
+    stop('variable "', group, '" not found in data')
   }
 
   if (!is.null(time) && (!is.character(time) || length(time) != 1)) {
-    stop(
-      "find_incomplete: 'time' must be a single character string, not ",
-      class(time)[1]
-    )
+    stop("'time' must be a single character string, not ", class(time)[1])
   }
 
   if (!is.null(time) && !time %in% names(data)) {
-    stop('find_incomplete: variable "', time, '" not found in data')
+    stop('variable "', time, '" not found in data')
   }
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (missing(group) || is.null(group)) {
-    stop("find_incomplete: argument 'group' is required")
+    stop("argument 'group' is required")
   }
 
   # Validate group is a character string
   if (!is.character(group) || length(group) != 1) {
     stop(
-      "find_incomplete: 'group' must be a single character string specifying the column name"
+      "'group' must be a single character string specifying the column name"
     )
   }
 
@@ -70,7 +64,7 @@ find_incomplete <- function(data, group = NULL, time = NULL) {
 
   # Validate group column exists
   if (!group_name %in% names(data)) {
-    stop("find_incomplete: variable '", group_name, "' not found in data")
+    stop("variable '", group_name, "' not found in data")
   }
 
   group_var <- data[[group_name]]
@@ -80,30 +74,30 @@ find_incomplete <- function(data, group = NULL, time = NULL) {
   if (!is.null(time)) {
     if (!is.character(time) || length(time) != 1) {
       stop(
-        "find_incomplete: 'time' must be a single character string specifying the column name"
+        "'time' must be a single character string specifying the column name"
       )
     }
     if (!time %in% names(data)) {
-      stop("find_incomplete: variable '", time, "' not found in data")
+      stop("variable '", time, "' not found in data")
     }
-    check_unbalanced <- TRUE
-    time_var <- data[[time]]
+    check_unbalanced = TRUE
+    time_var = data[[time]]
 
     # Convert time variable to appropriate type for consistent handling
     if (is.factor(time_var)) {
-      time_var <- as.character(time_var)
+      time_var = as.character(time_var)
     }
   }
 
   # Convert group variable to appropriate type for consistent handling
   if (is.factor(group_var)) {
-    group_var <- as.character(group_var)
+    group_var = as.character(group_var)
   }
 
   # Check if group variable has missing values itself
   if (any(is.na(group_var))) {
     warning(
-      "Note: group variable contains missing values. These will be included in the results. (occurred in find_incomplete)"
+      "Group variable contains missing values. These will be included in the results."
     )
   }
 
@@ -114,7 +108,7 @@ find_incomplete <- function(data, group = NULL, time = NULL) {
 
     # Check if all groups have the same number of time periods
     if (length(unique(time_counts)) > 1) {
-      warning("Note: the panel is unbalanced. (occurred in find_incomplete)")
+      warning("The panel is unbalanced.")
     }
   }
 

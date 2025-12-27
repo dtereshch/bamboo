@@ -33,76 +33,62 @@
 explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop(
-      "explore_incomplete: 'data' must be a data.frame, not ",
-      class(data)[1]
-    )
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop(
-      "explore_incomplete: 'group' must be a single character string, not ",
-      class(group)[1]
-    )
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!group %in% names(data)) {
-    stop('explore_incomplete: variable "', group, '" not found in data')
+    stop('variable "', group, '" not found in data')
   }
 
   if (!is.null(time) && (!is.character(time) || length(time) != 1)) {
-    stop(
-      "explore_incomplete: 'time' must be a single character string, not ",
-      class(time)[1]
-    )
+    stop("'time' must be a single character string, not ", class(time)[1])
   }
 
   if (!is.null(time) && !time %in% names(data)) {
-    stop('explore_incomplete: variable "', time, '" not found in data')
+    stop('variable "', time, '" not found in data')
   }
 
   if (!is.logical(detailed) || length(detailed) != 1) {
-    stop(
-      "explore_incomplete: 'detailed' must be a single logical value, not ",
-      class(detailed)[1]
-    )
+    stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   # Check if group is provided
   if (missing(group)) {
-    stop("explore_incomplete: argument 'group' is required")
+    stop("argument 'group' is required")
   }
 
   # Validate detailed parameter
   if (!is.logical(detailed) || length(detailed) != 1) {
-    stop(
-      "explore_incomplete: argument 'detailed' must be a single logical value"
-    )
+    stop("argument 'detailed' must be a single logical value")
   }
 
   # Validate group variable
   if (!group %in% names(data)) {
-    stop("explore_incomplete: variable '", group, "' not found in data")
+    stop("variable '", group, "' not found in data")
   }
 
   # Check if group variable has valid values
   if (length(data[[group]]) == 0) {
-    stop("explore_incomplete: group variable has no observations")
+    stop("group variable has no observations")
   }
 
   # Check panel balance if time variable is provided
   if (!is.null(time)) {
     if (!time %in% names(data)) {
-      stop("explore_incomplete: variable '", time, "' not found in data")
+      stop("variable '", time, "' not found in data")
     }
 
     # Check if panel is unbalanced
     # Use table with the original variables (preserving types)
     time_counts <- table(data[[group]], data[[time]])
     if (!all(time_counts == 1)) {
-      warning("Note: the panel is unbalanced. (occurred in explore_incomplete)")
+      warning("The panel is unbalanced.")
     }
   }
 
@@ -117,9 +103,7 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   vars <- setdiff(names(data), exclude_vars)
 
   if (length(vars) == 0) {
-    stop(
-      "explore_incomplete: no variables to analyze (only group and time variables found)"
-    )
+    stop("no variables to analyze (only group and time variables found)")
   }
 
   # Initialize base results with original group type

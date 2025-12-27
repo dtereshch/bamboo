@@ -41,63 +41,47 @@ describe_transition <- function(
 ) {
   # Input validation
   if (!is.data.frame(data)) {
-    stop(
-      "describe_transition: 'data' must be a data.frame, not ",
-      class(data)[1]
-    )
+    stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
   if (!is.character(variable) || length(variable) != 1) {
     stop(
-      "describe_transition: 'variable' must be a single character string, not ",
+      "'variable' must be a single character string, not ",
       class(variable)[1]
     )
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop(
-      "describe_transition: 'group' must be a single character string, not ",
-      class(group)[1]
-    )
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!is.character(time) || length(time) != 1) {
-    stop(
-      "describe_transition: 'time' must be a single character string, not ",
-      class(time)[1]
-    )
+    stop("'time' must be a single character string, not ", class(time)[1])
   }
 
   if (!variable %in% names(data)) {
-    stop('describe_transition: variable "', variable, '" not found in data')
+    stop('variable "', variable, '" not found in data')
   }
 
   if (!group %in% names(data)) {
-    stop('describe_transition: variable "', group, '" not found in data')
+    stop('variable "', group, '" not found in data')
   }
 
   if (!time %in% names(data)) {
-    stop('describe_transition: variable "', time, '" not found in data')
+    stop('variable "', time, '" not found in data')
   }
 
   if (!is.character(format) || length(format) != 1) {
-    stop(
-      "describe_transition: 'format' must be a single character string, not ",
-      class(format)[1]
-    )
+    stop("'format' must be a single character string, not ", class(format)[1])
   }
 
   if (!format %in% c("long", "wide")) {
-    stop(
-      'describe_transition: format must be either "long" or "wide", not "',
-      format,
-      '"'
-    )
+    stop('format must be either "long" or "wide", not "', format, '"')
   }
 
   if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
     stop(
-      "describe_transition: 'digits' must be a single non-negative integer, not ",
+      "'digits' must be a single non-negative integer, not ",
       class(digits)[1]
     )
   }
@@ -106,7 +90,7 @@ describe_transition <- function(
 
   # Validate format argument
   if (!format %in% c("long", "wide")) {
-    stop("describe_transition: format must be either 'long' or 'wide'")
+    stop("format must be either 'long' or 'wide'")
   }
 
   # Validate digits argument
@@ -116,28 +100,28 @@ describe_transition <- function(
       digits < 0 ||
       digits != round(digits)
   ) {
-    stop("describe_transition: 'digits' must be a single non-negative integer")
+    stop("'digits' must be a single non-negative integer")
   }
 
   # Validate group and time for data frames
   if (is.null(group) || is.null(time)) {
-    stop("describe_transition: both 'group' and 'time' must be specified")
+    stop("both 'group' and 'time' must be specified")
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop("describe_transition: 'group' must be a single character string")
+    stop("'group' must be a single character string")
   }
 
   if (!is.character(time) || length(time) != 1) {
-    stop("describe_transition: 'time' must be a single character string")
+    stop("'time' must be a single character string")
   }
 
   if (!group %in% names(data)) {
-    stop("describe_transition: variable '", group, "' not found in data")
+    stop("variable '", group, "' not found in data")
   }
 
   if (!time %in% names(data)) {
-    stop("describe_transition: variable '", time, "' not found in data")
+    stop("variable '", time, "' not found in data")
   }
 
   # Convert to data frame and ensure proper ordering
@@ -146,9 +130,9 @@ describe_transition <- function(
   # Check if variable is factor and convert if necessary
   if (!is.factor(df[[variable]])) {
     warning(
-      "Note: variable '",
+      "Variable '",
       variable,
-      "' is not a factor. Converting to factor. (occurred in describe_transition)"
+      "' is not a factor. Converting to factor."
     )
     df[[variable]] <- factor(df[[variable]])
   }
@@ -156,7 +140,7 @@ describe_transition <- function(
   # Check if factor has at least 2 levels
   if (length(levels(df[[variable]])) < 2) {
     stop(
-      "describe_transition: variable '",
+      "variable '",
       variable,
       "' must have at least 2 levels to analyze transitions"
     )
@@ -173,11 +157,11 @@ describe_transition <- function(
   complete_cases <- !is.na(df[[variable]])
   if (sum(!complete_cases) > 0) {
     warning(
-      "Note: removing ",
+      "Removing ",
       sum(!complete_cases),
       " rows with NA values in '",
       variable,
-      "' (occurred in describe_transition)"
+      "'"
     )
     df <- df[complete_cases, ]
   }
@@ -205,7 +189,7 @@ describe_transition <- function(
 
   if (is.null(transition_df)) {
     stop(
-      "describe_transition: no transitions found. Check if there are multiple time periods per group."
+      "no transitions found. Check if there are multiple time periods per group."
     )
   }
 
