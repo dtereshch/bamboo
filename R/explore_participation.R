@@ -269,7 +269,7 @@ explore_participation <- function(
 
     for (i in seq_len(n_to_display)) {
       pattern <- ordered_matrix[i, ]
-      pattern_visual <- ifelse(pattern == 1, "X", ".")
+      pattern_visual <- ifelse(pattern == 1, "1", "0")
 
       # Format the pattern line with aligned separators
       pattern_label <- sprintf("Pattern %*d", max_pattern_width, i)
