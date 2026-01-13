@@ -28,7 +28,7 @@ plot_heterogeneity(
 Default = c("#D55E00", "#0072B2").}
 }
 \value{
-Invisibly returns a list with summary statistics. Creates a base R plot.
+Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
 }
 \description{
 This function creates visualizations of heterogeneity among groups.

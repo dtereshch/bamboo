@@ -10,7 +10,7 @@
 #' @param colors A character vector of two colors: first for individual points, second for mean line and points.
 #'        Default = c("#D55E00", "#0072B2").
 #'
-#' @return Invisibly returns a list with summary statistics. Creates a base R plot.
+#' @return Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
 #'
 #' @seealso
 #' [decompose_variation()], [plot_participation()]

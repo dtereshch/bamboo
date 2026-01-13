@@ -12,7 +12,7 @@
 #'        Default = c("#0072B2", "#D55E00").
 #' @param xlab A character string specifying the X-axis label. Default = "Time Period".
 #'
-#' @return A heatmap plot showing participation patterns.
+#' @return Invisibly returns a list with summary statistics. Creates a plot showing participation patterns.
 #'
 #' @seealso
 #' [describe_participation()], [explore_participation()], [find_incomplete()], [explore_incomplete()]

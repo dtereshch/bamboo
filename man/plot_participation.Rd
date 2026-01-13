@@ -29,7 +29,7 @@ Default = c("#0072B2", "#D55E00").}
 \item{xlab}{A character string specifying the X-axis label. Default = "Time Period".}
 }
 \value{
-A heatmap plot showing participation patterns.
+Invisibly returns a list with summary statistics. Creates a plot showing participation patterns.
 }
 \description{
 This function creates a heatmap visualization of participation patterns
