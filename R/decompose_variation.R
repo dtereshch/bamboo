@@ -127,10 +127,6 @@ decompose_variation <- function(
       selection <- selection[selection != group]
     }
 
-    # Remove other potential ID variables
-    id_like_vars <- c("id", "ID", "Id", "year", "time", "period", "date")
-    selection <- selection[!selection %in% id_like_vars]
-
     if (length(selection) == 0) {
       stop("no numeric variables found in the dataset")
     }
