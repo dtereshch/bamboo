@@ -46,8 +46,7 @@ plot_heterogeneity(production, selection = "capital", group = "firm")
 plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
 
 # Customize colors
-plot_heterogeneity(production, selection = "sales", group = "year",
-                   colors = c("gray", "black"))
+plot_heterogeneity(production, selection = "sales", group = "year", colors = c("gray", "black"))
 
 }
 \seealso{
