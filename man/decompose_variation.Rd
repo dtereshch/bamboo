@@ -50,18 +50,23 @@ variance into between and within components.
 \examples{
 data(production)
 
-# Using default detailed = TRUE (Stata-like output) with default rounding
+# Basic usage with statistics for all numeric variables
 decompose_variation(production, group = "firm")
 
-# Simplified output with custom rounding to 2 decimal places
-decompose_variation(production, variables = "sales", group = "firm",
-                   detailed = FALSE, digits = 2)
+# Simplified output
+decompose_variation(production, group = "firm", detailed = FALSE)
 
-# Detailed output with no rounding
-decompose_variation(production,
-                   variables = c("sales", "capital"),
-                   group = "firm",
-                   digits = 999)
+# Show statistics for a single variable
+decompose_variation(production, variables = "sales", group = "firm")
+
+# Show statistics for multiple variables
+decompose_variation(production, variables = c("capital", "labor"), group = "firm")
+
+# Show statistics with two digits rounding
+decompose_variation(production, group = "firm", digits = 2)
+
+# Show statistics with no rounding
+decompose_variation(production, group = "firm", digits = 999999)
 
 }
 \references{

@@ -29,13 +29,12 @@ A data.frame with participation patterns containing:
 This function describes participation patterns of entities in panel data over time.
 }
 \examples{
-# Load the production dataset
 data(production)
 
-# Basic usage with all patterns shown
+# Basic usage
 describe_participation(production, group = "firm", time = "year")
 
-# Show simplified version without time period columns
+# Simplified version without time period columns
 describe_participation(production, group = "firm", time = "year", detailed = FALSE)
 
 }

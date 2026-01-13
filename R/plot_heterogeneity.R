@@ -29,7 +29,7 @@
 #'
 #' # Customize colors
 #' plot_heterogeneity(production, variable = "sales", group = "year",
-#'                   colors = c("gray50", "black"))
+#'                    colors = c("gray", "black"))
 #'
 #' @export
 plot_heterogeneity <- function(

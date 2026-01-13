@@ -36,23 +36,19 @@ This function creates a heatmap visualization of participation patterns
 of entities in panel data over time.
 }
 \examples{
-# Load the production dataset
 data(production)
 
 # Basic usage with top 10 patterns shown
 plot_participation(production, group = "firm", time = "year")
 
 # Show only top 5 patterns
-plot_participation(production, group = "firm", time = "year",
-                   max_patterns = 5)
+plot_participation(production, group = "firm", time = "year", max_patterns = 5)
 
 # Show all patterns
-plot_participation(production, group = "firm", time = "year",
-                   max_patterns = 999)
+plot_participation(production, group = "firm", time = "year", max_patterns = 999999)
 
 # Custom colors
-plot_participation(production, group = "firm", time = "year",
-                   colors = c("blue", "red"))
+plot_participation(production, group = "firm", time = "year", colors = c("black", "gray"))
 
 }
 \seealso{

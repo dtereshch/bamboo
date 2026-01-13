@@ -44,23 +44,26 @@ either overall or grouped by a single grouping variable.
 \examples{
 data(production)
 
-# Overall statistics (no grouping)
+# Basic usage with statistics for all numeric variables
 describe(production)
-describe(production, variables = "sales")
-describe(production, variables = c("sales", "capital", "labor"))
 
-# Grouped statistics
-describe(production, group = "year")
-describe(production, variables = "sales", group = "year")
-describe(production, variables = c("sales", "capital", "labor"), group = "firm")
-
-# Custom rounding
-describe(production, digits = 2)
-describe(production, group = "year", digits = 4)
-
-# Detailed statistics (pandas describe style)
+# Detailed output
 describe(production, detailed = TRUE)
-describe(production, group = "year", detailed = TRUE)
+
+# Show statistics for a single variable
+describe(production, variables = "sales")
+
+# Show statistics for multiple variables
+describe(production, variables = c("capital", "labor"))
+
+# Show grouped statistics
+describe(production, group = "year")
+
+# Show statistics with two digits rounding
+describe(production, digits = 2)
+
+# Show statistics with no rounding
+describe(production, digits = 999999)
 
 }
 \seealso{

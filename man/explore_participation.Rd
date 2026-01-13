@@ -30,17 +30,19 @@ Invisible list containing detailed participation pattern statistics.
 This function provides comprehensive summary statistics and pattern analysis of panel data structure.
 }
 \examples{
-# Load the production dataset
 data(production)
 
-# Analyze participation patterns
+# Basic usage
 explore_participation(production, group = "firm", time = "year")
 
 # Show only summary without detailed patterns
 explore_participation(production, group = "firm", time = "year", detailed = FALSE)
 
-# Increase maximum patterns to display
-explore_participation(production, group = "firm", time = "year", max_patterns = 15)
+# Show only top 5 patterns
+explore_participation(production, group = "firm", time = "year", max_patterns = 5)
+
+# Show all patterns
+explore_participation(production, group = "firm", time = "year", max_patterns = 999999)
 
 }
 \references{

@@ -14,11 +14,11 @@
 #' @examples
 #' data(production)
 #'
-#' # Find firms with missing values in any variable
-#' find_incomplete(production, group = "firm", time = "year")
-#'
-#' # Example without time variable (no unbalanced check)
+#' # Basic usage
 #' find_incomplete(production, group = "firm")
+#'
+#' # More careful usage with panel balance check
+#' find_incomplete(production, group = "firm", time = "year")
 #'
 #' # Create balanced panel data
 #' incomplete_entities <- find_incomplete(production, group = "firm")

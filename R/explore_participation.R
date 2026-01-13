@@ -17,17 +17,19 @@
 #' [decompose_variation()], [describe_transition()], [describe_participation()], [plot_participation()]
 #'
 #' @examples
-#' # Load the production dataset
 #' data(production)
 #'
-#' # Analyze participation patterns
+#' # Basic usage
 #' explore_participation(production, group = "firm", time = "year")
 #'
 #' # Show only summary without detailed patterns
 #' explore_participation(production, group = "firm", time = "year", detailed = FALSE)
 #'
-#' # Increase maximum patterns to display
-#' explore_participation(production, group = "firm", time = "year", max_patterns = 15)
+#' # Show only top 5 patterns
+#' explore_participation(production, group = "firm", time = "year", max_patterns = 5)
+#'
+#' # Show all patterns
+#' explore_participation(production, group = "firm", time = "year", max_patterns = 999999)
 #'
 #' @export
 explore_participation <- function(

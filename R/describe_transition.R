@@ -27,7 +27,7 @@
 #' # Analyze transitions in long format
 #' describe_transition(production, variable = "industry", group = "firm", time = "year", format = "long")
 #'
-#' # Specify number of decimal places
+#' # Customize rounding
 #' describe_transition(production, variable = "industry", group = "firm", time = "year", digits = 4)
 #'
 #' @export

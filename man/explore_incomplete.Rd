@@ -29,14 +29,14 @@ This function provides a descriptive table of entities with incomplete observati
 \examples{
 data(production)
 
-# Using regular data frame - summary view
+# Basic usage
 explore_incomplete(production, group = "firm")
+
+# More careful usage with panel balance check
+explore_incomplete(production, group = "firm", time = "year")
 
 # Detailed view with variable-level NA counts
 explore_incomplete(production, group = "firm", detailed = TRUE)
-
-# Check for panel balance
-explore_incomplete(production, group = "firm", time = "year")
 
 }
 \seealso{
