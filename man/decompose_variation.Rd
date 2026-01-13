@@ -6,7 +6,7 @@
 \usage{
 decompose_variation(
   data,
-  variables = NULL,
+  selection = NULL,
   group = NULL,
   detailed = TRUE,
   digits = 3
@@ -15,7 +15,7 @@ decompose_variation(
 \arguments{
 \item{data}{A data.frame containing panel data.}
 
-\item{variables}{A character vector specifying which numeric variables to analyze.
+\item{selection}{A character vector specifying which numeric variables to analyze.
 If not specified, all numeric variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the name of the entity/group variable in panel data.}
@@ -57,10 +57,10 @@ decompose_variation(production, group = "firm")
 decompose_variation(production, group = "firm", detailed = FALSE)
 
 # Show statistics for a single variable
-decompose_variation(production, variables = "sales", group = "firm")
+decompose_variation(production, selection = "sales", group = "firm")
 
 # Show statistics for multiple variables
-decompose_variation(production, variables = c("capital", "labor"), group = "firm")
+decompose_variation(production, selection = c("capital", "labor"), group = "firm")
 
 # Show statistics with two digits rounding
 decompose_variation(production, group = "firm", digits = 2)

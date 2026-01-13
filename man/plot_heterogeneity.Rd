@@ -6,7 +6,7 @@
 \usage{
 plot_heterogeneity(
   data,
-  variable,
+  selection,
   group = NULL,
   xlab = NULL,
   ylab = NULL,
@@ -16,7 +16,7 @@ plot_heterogeneity(
 \arguments{
 \item{data}{A data.frame containing the variables for analysis.}
 
-\item{variable}{A character string specifying the numeric variable of interest.}
+\item{selection}{A character string specifying the numeric variable of interest.}
 
 \item{group}{A character string or vector of character strings specifying the grouping variable(s).}
 
@@ -37,16 +37,16 @@ This function creates visualizations of heterogeneity among groups.
 data(production)
 
 # Plot labor by year
-plot_heterogeneity(production, variable = "labor", group = "year")
+plot_heterogeneity(production, selection = "labor", group = "year")
 
 # Plot capital by firm
-plot_heterogeneity(production, variable = "capital", group = "firm")
+plot_heterogeneity(production, selection = "capital", group = "firm")
 
 # Plot sales with multiple grouping variables
-plot_heterogeneity(production, variable = "sales", group = c("firm", "year"))
+plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
 
 # Customize colors
-plot_heterogeneity(production, variable = "sales", group = "year",
+plot_heterogeneity(production, selection = "sales", group = "year",
                    colors = c("gray", "black"))
 
 }

@@ -6,7 +6,7 @@
 \usage{
 describe_transition(
   data,
-  variable,
+  selection,
   group = NULL,
   time = NULL,
   format = "wide",
@@ -16,7 +16,7 @@ describe_transition(
 \arguments{
 \item{data}{A data.frame containing panel data.}
 
-\item{variable}{A character string specifying the factor variable to analyze transitions for.}
+\item{selection}{A character string specifying the factor variable to analyze transitions for.}
 
 \item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
@@ -37,13 +37,13 @@ variable across time periods for panel data.
 data(production)
 
 # Analyze transitions in wide format (default)
-describe_transition(production, variable = "industry", group = "firm", time = "year")
+describe_transition(production, selection = "industry", group = "firm", time = "year")
 
 # Analyze transitions in long format
-describe_transition(production, variable = "industry", group = "firm", time = "year", format = "long")
+describe_transition(production, selection = "industry", group = "firm", time = "year", format = "long")
 
 # Customize rounding
-describe_transition(production, variable = "industry", group = "firm", time = "year", digits = 4)
+describe_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
 
 }
 \references{

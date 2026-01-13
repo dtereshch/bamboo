@@ -4,7 +4,7 @@
 #' either overall or grouped by a single grouping variable.
 #'
 #' @param data A data.frame containing the variables for analysis.
-#' @param variables A character vector specifying which numeric variables to analyze.
+#' @param selection A character vector specifying which numeric variables to analyze.
 #'        If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the grouping variable name.
 #'        If not provided, overall statistics will be returned.
@@ -41,10 +41,10 @@
 #' describe(production, detailed = TRUE)
 #'
 #' # Show statistics for a single variable
-#' describe(production, variables = "sales")
+#' describe(production, selection = "sales")
 #'
 #' # Show statistics for multiple variables
-#' describe(production, variables = c("capital", "labor"))
+#' describe(production, selection = c("capital", "labor"))
 #'
 #' # Show grouped statistics
 #' describe(production, group = "year")
@@ -56,14 +56,14 @@
 #' describe(production, digits = 999999)
 #'
 #' @export
-describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
+describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!missing(variables) && !is.character(variables)) {
-    stop("'variables' must be a character vector, not ", class(variables)[1])
+  if (!missing(selection) && !is.character(selection)) {
+    stop("'selection' must be a character vector, not ", class(selection)[1])
   }
 
   if (!missing(group) && (!is.character(group) || length(group) != 1)) {
@@ -89,20 +89,20 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
     )
   }
 
-  # If variables not specified, use all numeric variables with message
-  if (missing(variables)) {
+  # If selection not specified, use all numeric variables with message
+  if (missing(selection)) {
     # Use vapply for more robust type checking
     numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
-    variables <- names(data)[numeric_vars]
+    selection <- names(data)[numeric_vars]
 
     # If no numeric variables found, stop with error
-    if (length(variables) == 0) {
+    if (length(selection) == 0) {
       stop("no numeric variables found in the dataset")
     }
 
-    # Remove the group variable from variables if it's numeric
-    if (!missing(group) && group %in% variables) {
-      variables <- variables[variables != group]
+    # Remove the group variable from selection if it's numeric
+    if (!missing(group) && group %in% selection) {
+      selection <- selection[selection != group]
     }
 
     # Remove other potential ID variables
@@ -119,24 +119,24 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
       "subject",
       "participant"
     )
-    variables <- variables[!variables %in% id_like_vars]
+    selection <- selection[!selection %in% id_like_vars]
 
-    if (length(variables) == 0) {
+    if (length(selection) == 0) {
       stop("no numeric variables remaining after removing ID-like variables")
     }
 
     message(
       "Analyzing all numeric variable(s): ",
-      paste(variables, collapse = ", ")
+      paste(selection, collapse = ", ")
     )
   }
 
-  # Validate variables
-  if (length(variables) == 0) {
+  # Validate selection
+  if (length(selection) == 0) {
     stop("no numeric variables found to analyze")
   }
 
-  missing_vars <- variables[!variables %in% names(data)]
+  missing_vars <- selection[!selection %in% names(data)]
   if (length(missing_vars) > 0) {
     stop(
       "the following variables were not found in data: ",
@@ -145,7 +145,7 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
   }
 
   # Check if specified columns are numeric
-  non_numeric_vars <- variables[!sapply(data[variables], is.numeric)]
+  non_numeric_vars <- selection[!sapply(data[selection], is.numeric)]
   if (length(non_numeric_vars) > 0) {
     stop(
       "the following variables are not numeric: ",
@@ -185,7 +185,7 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
 
   # Calculate statistics without grouping
   if (missing(group)) {
-    results <- lapply(variables, function(var) {
+    results <- lapply(selection, function(var) {
       x <- data[[var]]
 
       # Handle case where all values are NA
@@ -259,7 +259,7 @@ describe <- function(data, variables, group, detailed = FALSE, digits = 3) {
       ]
 
       # Calculate statistics for each variable in current group
-      group_results <- lapply(variables, function(var) {
+      group_results <- lapply(selection, function(var) {
         x <- group_subset[[var]]
 
         # Handle case where all values are NA

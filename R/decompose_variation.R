@@ -4,7 +4,7 @@
 #' variance into between and within components.
 #'
 #' @param data A data.frame containing panel data.
-#' @param variables A character vector specifying which numeric variables to analyze.
+#' @param selection A character vector specifying which numeric variables to analyze.
 #'   If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
@@ -44,10 +44,10 @@
 #' decompose_variation(production, group = "firm", detailed = FALSE)
 #'
 #' # Show statistics for a single variable
-#' decompose_variation(production, variables = "sales", group = "firm")
+#' decompose_variation(production, selection = "sales", group = "firm")
 #'
 #' # Show statistics for multiple variables
-#' decompose_variation(production, variables = c("capital", "labor"), group = "firm")
+#' decompose_variation(production, selection = c("capital", "labor"), group = "firm")
 #'
 #' # Show statistics with two digits rounding
 #' decompose_variation(production, group = "firm", digits = 2)
@@ -58,7 +58,7 @@
 #' @export
 decompose_variation <- function(
   data,
-  variables = NULL,
+  selection = NULL,
   group = NULL,
   detailed = TRUE,
   digits = 3
@@ -68,10 +68,10 @@ decompose_variation <- function(
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!is.null(variables) && !is.character(variables)) {
+  if (!is.null(selection) && !is.character(selection)) {
     stop(
-      "'variables' must be a character vector or NULL, not ",
-      class(variables)[1]
+      "'selection' must be a character vector or NULL, not ",
+      class(selection)[1]
     )
   }
 
@@ -117,32 +117,32 @@ decompose_variation <- function(
     )
   }
 
-  # If variables is not specified, use all numeric variables
-  if (is.null(variables)) {
+  # If selection is not specified, use all numeric variables
+  if (is.null(selection)) {
     numeric_vars <- vapply(data_df, is.numeric, FUN.VALUE = logical(1))
-    variables <- names(data_df)[numeric_vars]
+    selection <- names(data_df)[numeric_vars]
 
-    # Remove the group variable from variables if it's numeric
-    if (group %in% variables) {
-      variables <- variables[variables != group]
+    # Remove the group variable from selection if it's numeric
+    if (group %in% selection) {
+      selection <- selection[selection != group]
     }
 
     # Remove other potential ID variables
     id_like_vars <- c("id", "ID", "Id", "year", "time", "period", "date")
-    variables <- variables[!variables %in% id_like_vars]
+    selection <- selection[!selection %in% id_like_vars]
 
-    if (length(variables) == 0) {
+    if (length(selection) == 0) {
       stop("no numeric variables found in the dataset")
     }
 
     message(
       "Analyzing all numeric variables: ",
-      paste(variables, collapse = ", ")
+      paste(selection, collapse = ", ")
     )
   }
 
-  # Validate variables
-  missing_vars <- variables[!variables %in% names(data_df)]
+  # Validate selection
+  missing_vars <- selection[!selection %in% names(data_df)]
   if (length(missing_vars) > 0) {
     stop(
       "the following variables were not found in data: ",
@@ -151,8 +151,8 @@ decompose_variation <- function(
   }
 
   # Check if specified columns are numeric
-  non_numeric_vars <- variables[
-    !vapply(data_df[variables], is.numeric, FUN.VALUE = logical(1))
+  non_numeric_vars <- selection[
+    !vapply(data_df[selection], is.numeric, FUN.VALUE = logical(1))
   ]
   if (length(non_numeric_vars) > 0) {
     stop(
@@ -287,7 +287,7 @@ decompose_variation <- function(
   }
 
   # Calculate statistics for each variable
-  results <- lapply(variables, function(varname) {
+  results <- lapply(selection, function(varname) {
     decompose_variation_1(data_df, varname, group, detailed, digits)
   })
 

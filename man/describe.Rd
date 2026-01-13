@@ -4,12 +4,12 @@
 \alias{describe}
 \title{Descriptive Statistics}
 \usage{
-describe(data, variables, group, detailed = FALSE, digits = 3)
+describe(data, selection, group, detailed = FALSE, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing the variables for analysis.}
 
-\item{variables}{A character vector specifying which numeric variables to analyze.
+\item{selection}{A character vector specifying which numeric variables to analyze.
 If not specified, all numeric variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the grouping variable name.
@@ -51,10 +51,10 @@ describe(production)
 describe(production, detailed = TRUE)
 
 # Show statistics for a single variable
-describe(production, variables = "sales")
+describe(production, selection = "sales")
 
 # Show statistics for multiple variables
-describe(production, variables = c("capital", "labor"))
+describe(production, selection = c("capital", "labor"))
 
 # Show grouped statistics
 describe(production, group = "year")

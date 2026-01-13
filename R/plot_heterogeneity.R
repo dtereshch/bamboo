@@ -3,7 +3,7 @@
 #' This function creates visualizations of heterogeneity among groups.
 #'
 #' @param data A data.frame containing the variables for analysis.
-#' @param variable A character string specifying the numeric variable of interest.
+#' @param selection A character string specifying the numeric variable of interest.
 #' @param group A character string or vector of character strings specifying the grouping variable(s).
 #' @param xlab A character string specifying the X-axis label (default: based on grouping variable).
 #' @param ylab A character string specifying the Y-axis label (default: based on variable name).
@@ -19,22 +19,22 @@
 #' data(production)
 #'
 #' # Plot labor by year
-#' plot_heterogeneity(production, variable = "labor", group = "year")
+#' plot_heterogeneity(production, selection = "labor", group = "year")
 #'
 #' # Plot capital by firm
-#' plot_heterogeneity(production, variable = "capital", group = "firm")
+#' plot_heterogeneity(production, selection = "capital", group = "firm")
 #'
 #' # Plot sales with multiple grouping variables
-#' plot_heterogeneity(production, variable = "sales", group = c("firm", "year"))
+#' plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
 #'
 #' # Customize colors
-#' plot_heterogeneity(production, variable = "sales", group = "year",
+#' plot_heterogeneity(production, selection = "sales", group = "year",
 #'                    colors = c("gray", "black"))
 #'
 #' @export
 plot_heterogeneity <- function(
   data,
-  variable,
+  selection,
   group = NULL,
   xlab = NULL,
   ylab = NULL,
@@ -45,21 +45,21 @@ plot_heterogeneity <- function(
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!is.character(variable) || length(variable) != 1) {
+  if (!is.character(selection) || length(selection) != 1) {
     stop(
-      "'variable' must be a single character string, not ",
-      class(variable)[1]
+      "'selection' must be a single character string, not ",
+      class(selection)[1]
     )
   }
 
-  if (!variable %in% names(data)) {
-    stop('variable "', variable, '" not found in data')
+  if (!selection %in% names(data)) {
+    stop('variable "', selection, '" not found in data')
   }
 
-  if (!is.numeric(data[[variable]])) {
+  if (!is.numeric(data[[selection]])) {
     stop(
-      "'variable' must be a numeric variable, not ",
-      class(data[[variable]])[1]
+      "'selection' must be a numeric variable, not ",
+      class(data[[selection]])[1]
     )
   }
 
@@ -107,8 +107,8 @@ plot_heterogeneity <- function(
   }
 
   # Check if variables exist in data
-  if (!variable %in% names(data)) {
-    stop("variable '", variable, "' not found in data")
+  if (!selection %in% names(data)) {
+    stop("variable '", selection, "' not found in data")
   }
 
   missing_groups <- setdiff(group, names(data))
@@ -139,11 +139,11 @@ plot_heterogeneity <- function(
   nrow <- NULL
 
   # Extract the main variable
-  y_var <- data[[variable]]
+  y_var <- data[[selection]]
 
   # Check variable type
   if (!is.numeric(y_var)) {
-    stop("'variable' must be a numeric variable")
+    stop("'selection' must be a numeric variable")
   }
 
   # Function to create single plot
@@ -175,7 +175,7 @@ plot_heterogeneity <- function(
       xlab_single <- group_var
     }
     if (is.null(ylab_single)) {
-      ylab_single <- variable
+      ylab_single <- selection
     }
 
     # Create color with alpha
@@ -188,13 +188,13 @@ plot_heterogeneity <- function(
     )
 
     # Calculate group means
-    group_means <- tapply(data_sub[[variable]], x_var, mean, na.rm = TRUE)
+    group_means <- tapply(data_sub[[selection]], x_var, mean, na.rm = TRUE)
 
     # Create the plot
     plot(
       NA,
       xlim = c(0.5, length(levels(x_var)) + 0.5),
-      ylim = range(data_sub[[variable]], na.rm = TRUE),
+      ylim = range(data_sub[[selection]], na.rm = TRUE),
       xlab = xlab_single,
       ylab = ylab_single,
       main = "", # Remove title
@@ -209,7 +209,7 @@ plot_heterogeneity <- function(
     x_jitter <- jitter(as.numeric(x_var), amount = 0.2)
     points(
       x_jitter,
-      data_sub[[variable]],
+      data_sub[[selection]],
       col = point_col_alpha,
       pch = 16,
       cex = 0.8 * cex
@@ -244,8 +244,8 @@ plot_heterogeneity <- function(
     # Return summary statistics for this group
     list(
       means = group_means,
-      sd = tapply(data_sub[[variable]], x_var, sd, na.rm = TRUE),
-      n = tapply(data_sub[[variable]], x_var, function(x) sum(!is.na(x)))
+      sd = tapply(data_sub[[selection]], x_var, sd, na.rm = TRUE),
+      n = tapply(data_sub[[selection]], x_var, function(x) sum(!is.na(x)))
     )
   }
 
@@ -313,9 +313,9 @@ plot_heterogeneity <- function(
       }
 
       summary_stats$group_stats[[group_var]] <- list(
-        means = tapply(data[[variable]], x_var, mean, na.rm = TRUE),
-        sd = tapply(data[[variable]], x_var, sd, na.rm = TRUE),
-        n = tapply(data[[variable]], x_var, function(x) sum(!is.na(x)))
+        means = tapply(data[[selection]], x_var, mean, na.rm = TRUE),
+        sd = tapply(data[[selection]], x_var, sd, na.rm = TRUE),
+        n = tapply(data[[selection]], x_var, function(x) sum(!is.na(x)))
       )
     }
   }

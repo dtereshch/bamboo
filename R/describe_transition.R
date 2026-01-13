@@ -4,7 +4,7 @@
 #' variable across time periods for panel data.
 #'
 #' @param data A data.frame containing panel data.
-#' @param variable A character string specifying the factor variable to analyze transitions for.
+#' @param selection A character string specifying the factor variable to analyze transitions for.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param time A character string specifying the name of the time variable.
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
@@ -22,18 +22,18 @@
 #' data(production)
 #'
 #' # Analyze transitions in wide format (default)
-#' describe_transition(production, variable = "industry", group = "firm", time = "year")
+#' describe_transition(production, selection = "industry", group = "firm", time = "year")
 #'
 #' # Analyze transitions in long format
-#' describe_transition(production, variable = "industry", group = "firm", time = "year", format = "long")
+#' describe_transition(production, selection = "industry", group = "firm", time = "year", format = "long")
 #'
 #' # Customize rounding
-#' describe_transition(production, variable = "industry", group = "firm", time = "year", digits = 4)
+#' describe_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
 #'
 #' @export
 describe_transition <- function(
   data,
-  variable,
+  selection,
   group = NULL,
   time = NULL,
   format = "wide",
@@ -44,10 +44,10 @@ describe_transition <- function(
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!is.character(variable) || length(variable) != 1) {
+  if (!is.character(selection) || length(selection) != 1) {
     stop(
-      "'variable' must be a single character string, not ",
-      class(variable)[1]
+      "'selection' must be a single character string, not ",
+      class(selection)[1]
     )
   }
 
@@ -59,8 +59,8 @@ describe_transition <- function(
     stop("'time' must be a single character string, not ", class(time)[1])
   }
 
-  if (!variable %in% names(data)) {
-    stop('variable "', variable, '" not found in data')
+  if (!selection %in% names(data)) {
+    stop('variable "', selection, '" not found in data')
   }
 
   if (!group %in% names(data)) {
@@ -128,20 +128,20 @@ describe_transition <- function(
   df <- as.data.frame(data)
 
   # Check if variable is factor and convert if necessary
-  if (!is.factor(df[[variable]])) {
+  if (!is.factor(df[[selection]])) {
     warning(
       "Variable '",
-      variable,
+      selection,
       "' is not a factor. Converting to factor."
     )
-    df[[variable]] <- factor(df[[variable]])
+    df[[selection]] <- factor(df[[selection]])
   }
 
   # Check if factor has at least 2 levels
-  if (length(levels(df[[variable]])) < 2) {
+  if (length(levels(df[[selection]])) < 2) {
     stop(
       "variable '",
-      variable,
+      selection,
       "' must have at least 2 levels to analyze transitions"
     )
   }
@@ -154,13 +154,13 @@ describe_transition <- function(
   df <- df[order(df[[group]], df[[time]]), ]
 
   # Remove rows with NA in the variable of interest
-  complete_cases <- !is.na(df[[variable]])
+  complete_cases <- !is.na(df[[selection]])
   if (sum(!complete_cases) > 0) {
     warning(
       "Removing ",
       sum(!complete_cases),
       " rows with NA values in '",
-      variable,
+      selection,
       "'"
     )
     df <- df[complete_cases, ]
@@ -171,8 +171,8 @@ describe_transition <- function(
     if (nrow(group_data) > 1) {
       # Order within group by time
       group_data <- group_data[order(group_data[[time]]), ]
-      from_values <- group_data[[variable]][-nrow(group_data)]
-      to_values <- group_data[[variable]][-1]
+      from_values <- group_data[[selection]][-nrow(group_data)]
+      to_values <- group_data[[selection]][-1]
       data.frame(
         from = from_values,
         to = to_values,
@@ -194,7 +194,7 @@ describe_transition <- function(
   }
 
   # Ensure from and to are factors with the same levels
-  all_levels <- levels(df[[variable]])
+  all_levels <- levels(df[[selection]])
   transition_df$from <- factor(transition_df$from, levels = all_levels)
   transition_df$to <- factor(transition_df$to, levels = all_levels)
 
