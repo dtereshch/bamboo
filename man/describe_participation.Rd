@@ -4,7 +4,7 @@
 \alias{describe_participation}
 \title{Panel Data Participation Patterns}
 \usage{
-describe_participation(data, group = NULL, time = NULL, detailed = TRUE)
+describe_participation(data, group, time, detailed = TRUE)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}

@@ -34,8 +34,8 @@
 describe_transition <- function(
   data,
   selection,
-  group = NULL,
-  time = NULL,
+  group,
+  time,
   format = "wide",
   digits = 3
 ) {
@@ -101,27 +101,6 @@ describe_transition <- function(
       digits != round(digits)
   ) {
     stop("'digits' must be a single non-negative integer")
-  }
-
-  # Validate group and time for data frames
-  if (is.null(group) || is.null(time)) {
-    stop("both 'group' and 'time' must be specified")
-  }
-
-  if (!is.character(group) || length(group) != 1) {
-    stop("'group' must be a single character string")
-  }
-
-  if (!is.character(time) || length(time) != 1) {
-    stop("'time' must be a single character string")
-  }
-
-  if (!group %in% names(data)) {
-    stop("variable '", group, "' not found in data")
-  }
-
-  if (!time %in% names(data)) {
-    stop("variable '", time, "' not found in data")
   }
 
   # Convert to data frame and ensure proper ordering

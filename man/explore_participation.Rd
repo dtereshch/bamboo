@@ -4,13 +4,7 @@
 \alias{explore_participation}
 \title{Panel Data Participation Analysis}
 \usage{
-explore_participation(
-  data,
-  group = NULL,
-  time = NULL,
-  detailed = TRUE,
-  max_patterns = 10
-)
+explore_participation(data, group, time, detailed = TRUE, max_patterns = 10)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}

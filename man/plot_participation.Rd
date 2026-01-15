@@ -6,8 +6,8 @@
 \usage{
 plot_participation(
   data,
-  group = NULL,
-  time = NULL,
+  group,
+  time,
   max_patterns = 10,
   colors = c("#0072B2", "#D55E00"),
   xlab = "Time Period"

@@ -45,7 +45,10 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   }
 
   if (!is.null(time) && (!is.character(time) || length(time) != 1)) {
-    stop("'time' must be a single character string, not ", class(time)[1])
+    stop(
+      "'time' must be a single character string or NULL, not ",
+      class(time)[1]
+    )
   }
 
   if (!is.null(time) && !time %in% names(data)) {
@@ -57,11 +60,6 @@ explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   }
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
-
-  # Check if group is provided
-  if (missing(group)) {
-    stop("argument 'group' is required")
-  }
 
   # Validate detailed parameter
   if (!is.logical(detailed) || length(detailed) != 1) {

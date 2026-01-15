@@ -34,8 +34,8 @@
 #' @export
 explore_participation <- function(
   data,
-  group = NULL,
-  time = NULL,
+  group,
+  time,
   detailed = TRUE,
   max_patterns = 10
 ) {
@@ -74,23 +74,6 @@ explore_participation <- function(
   }
 
   data_df <- .check_and_convert_data_robust(data, arg_name = "data")
-
-  # Regular data frame - require group and time arguments as character strings
-  if (is.null(group) || is.null(time)) {
-    stop(
-      "for regular data frames, both 'group' and 'time' arguments are required as character strings"
-    )
-  }
-
-  if (!is.character(group) || !is.character(time)) {
-    stop(
-      "for regular data frames, 'group' and 'time' arguments must be character strings"
-    )
-  }
-
-  if (length(group) != 1 || length(time) != 1) {
-    stop("'group' and 'time' must be single character strings")
-  }
 
   group_name <- group
   time_name <- time

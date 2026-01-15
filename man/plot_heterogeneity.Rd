@@ -7,7 +7,7 @@
 plot_heterogeneity(
   data,
   selection,
-  group = NULL,
+  group,
   xlab = NULL,
   ylab = NULL,
   colors = c("#D55E00", "#0072B2")

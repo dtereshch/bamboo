@@ -35,8 +35,8 @@
 #' @export
 plot_participation <- function(
   data,
-  group = NULL,
-  time = NULL,
+  group,
+  time,
   max_patterns = 10,
   colors = c("#0072B2", "#D55E00"),
   xlab = "Time Period"
@@ -83,13 +83,6 @@ plot_participation <- function(
   }
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
-
-  # Check if group and time are specified for regular data frames
-  if (is.null(group) || is.null(time)) {
-    stop(
-      "arguments 'group' and 'time' must be specified"
-    )
-  }
 
   # Validate that group and time variables exist in data
   if (!group %in% names(data)) {

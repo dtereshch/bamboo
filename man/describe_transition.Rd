@@ -4,14 +4,7 @@
 \alias{describe_transition}
 \title{Transition Probability Analysis}
 \usage{
-describe_transition(
-  data,
-  selection,
-  group = NULL,
-  time = NULL,
-  format = "wide",
-  digits = 3
-)
+describe_transition(data, selection, group, time, format = "wide", digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}

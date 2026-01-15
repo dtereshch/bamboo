@@ -4,13 +4,7 @@
 \alias{decompose_variation}
 \title{Panel Data Variation Decomposition}
 \usage{
-decompose_variation(
-  data,
-  selection = NULL,
-  group = NULL,
-  detailed = TRUE,
-  digits = 3
-)
+decompose_variation(data, selection = NULL, group, detailed = TRUE, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}
@@ -18,7 +12,8 @@ decompose_variation(
 \item{selection}{A character vector specifying which numeric variables to analyze.
 If not specified, all numeric variables in the data.frame will be used.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Required for variance decomposition.}
 
 \item{detailed}{A logical flag indicating whether to return detailed Stata-like output.
 Default = TRUE.}

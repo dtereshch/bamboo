@@ -31,8 +31,8 @@
 #' @export
 describe_participation <- function(
   data,
-  group = NULL,
-  time = NULL,
+  group,
+  time,
   detailed = TRUE
 ) {
   # Input validation
@@ -61,22 +61,6 @@ describe_participation <- function(
   }
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
-
-  # Check if group and time are specified for regular data frames
-  if (is.null(group) || is.null(time)) {
-    stop(
-      "arguments 'group' and 'time' must be specified"
-    )
-  }
-
-  # Validate that group and time variables exist in data
-  if (!group %in% names(data)) {
-    stop("variable '", group, "' not found in data")
-  }
-
-  if (!time %in% names(data)) {
-    stop("variable '", time, "' not found in data")
-  }
 
   # Identify data columns (excluding group and time)
   data_cols <- setdiff(names(data), c(group, time))

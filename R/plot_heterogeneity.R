@@ -34,7 +34,7 @@
 plot_heterogeneity <- function(
   data,
   selection,
-  group = NULL,
+  group,
   xlab = NULL,
   ylab = NULL,
   colors = c("#D55E00", "#0072B2")
@@ -60,10 +60,6 @@ plot_heterogeneity <- function(
       "'selection' must be a numeric variable, not ",
       class(data[[selection]])[1]
     )
-  }
-
-  if (is.null(group)) {
-    stop("'group' must be provided")
   }
 
   if (!is.character(group)) {
@@ -93,16 +89,6 @@ plot_heterogeneity <- function(
 
   if (nrow(data) == 0) {
     stop("'data' must have at least one row")
-  }
-
-  # If group is NULL, error
-  if (is.null(group)) {
-    stop("'group' must be provided")
-  }
-
-  # Validate group parameter
-  if (!is.character(group)) {
-    stop("'group' must be a character string or vector of character strings")
   }
 
   # Check if variables exist in data

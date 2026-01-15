@@ -7,6 +7,7 @@
 #' @param selection A character vector specifying which numeric variables to analyze.
 #'   If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
+#'   Required for variance decomposition.
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
 #'   Default = TRUE.
 #' @param digits An integer indicating the number of decimal places to round statistics.
@@ -59,7 +60,7 @@
 decompose_variation <- function(
   data,
   selection = NULL,
-  group = NULL,
+  group,
   detailed = TRUE,
   digits = 3
 ) {
@@ -75,8 +76,9 @@ decompose_variation <- function(
     )
   }
 
+  # Group is now required, no NULL default
   if (!is.character(group) || length(group) != 1) {
-    stop("'group' must be a single character string, not ", class(group)[1])
+    stop("'group' must be a single character string")
   }
 
   if (!group %in% names(data)) {
@@ -101,10 +103,8 @@ decompose_variation <- function(
     stop("'digits' must be a non-negative integer or NA for no rounding")
   }
 
-  # Validate group parameter
-  if (
-    is.null(group) || !is.character(group) || length(group) == 0 || group == ""
-  ) {
+  # Validate group parameter (simplified since group is required)
+  if (group == "" || length(group) == 0) {
     stop("'group' must be a non-empty character string")
   }
 
