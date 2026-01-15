@@ -2,9 +2,9 @@
 % Please edit documentation in R/explore_participation.R
 \name{explore_participation}
 \alias{explore_participation}
-\title{Panel Data Participation Analysis}
+\title{Detailed Panel Data Participation Patterns}
 \usage{
-explore_participation(data, group, time, detailed = TRUE, max_patterns = 10)
+explore_participation(data, group, time, max_patterns = 10)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}
@@ -13,15 +13,20 @@ explore_participation(data, group, time, detailed = TRUE, max_patterns = 10)
 
 \item{time}{A character string specifying the name of the time variable.}
 
-\item{detailed}{A logical flag indicating whether to show detailed pattern information. Default = TRUE.}
-
 \item{max_patterns}{An integer specifying the maximum number of patterns to display in detail. Default = 10.}
 }
 \value{
 Invisible list containing detailed participation pattern statistics.
+The list includes:
+\itemize{
+\item \code{pattern_matrix}: Matrix showing presence patterns
+\item \code{pattern_groups}: List of entities belonging to each pattern
+\item \code{pattern_stats}: Data.frame with pattern statistics
+\item \code{entities_by_pattern}: Vector with the number of entities in each pattern
+}
 }
 \description{
-This function provides comprehensive summary statistics and pattern analysis of panel data structure.
+Provides detailed analysis of participation patterns in panel data.
 }
 \examples{
 data(production)
@@ -29,19 +34,12 @@ data(production)
 # Basic usage
 explore_participation(production, group = "firm", time = "year")
 
-# Show only summary without detailed patterns
-explore_participation(production, group = "firm", time = "year", detailed = FALSE)
-
 # Show only top 5 patterns
 explore_participation(production, group = "firm", time = "year", max_patterns = 5)
 
-# Show all patterns
-explore_participation(production, group = "firm", time = "year", max_patterns = 999999)
+# Access the number of entities per pattern
+result <- explore_participation(production, group = "firm", time = "year")
+entities_per_pattern <- result$entities_by_pattern
+print(entities_per_pattern)
 
-}
-\references{
-For Stata users: This corresponds to the \code{xtdes} command.
-}
-\seealso{
-\code{\link[=decompose_variation]{decompose_variation()}}, \code{\link[=describe_transition]{describe_transition()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}
 }
