@@ -7,7 +7,7 @@
 #' @param selection A character vector specifying which numeric variables to analyze.
 #'        If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the grouping variable name.
-#'        If not provided, overall statistics will be returned.
+#'        If not specified, overall statistics will be returned.
 #' @param detailed A logical flag indicating whether to return additional statistics in
 #'        the style of pandas describe method. If TRUE, includes count, mean, sd,
 #'        min, p25, median, p75, and max. Default = FALSE.
@@ -56,21 +56,33 @@
 #' describe(production, digits = 999999)
 #'
 #' @export
-describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
+describe <- function(
+  data,
+  selection = NULL,
+  group = NULL,
+  detailed = FALSE,
+  digits = 3
+) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!missing(selection) && !is.character(selection)) {
-    stop("'selection' must be a character vector, not ", class(selection)[1])
+  if (!is.null(selection) && !is.character(selection)) {
+    stop(
+      "'selection' must be a character vector or NULL, not ",
+      class(selection)[1]
+    )
   }
 
-  if (!missing(group) && (!is.character(group) || length(group) != 1)) {
-    stop("'group' must be a single character string, not ", class(group)[1])
+  if (!is.null(group) && (!is.character(group) || length(group) != 1)) {
+    stop(
+      "'group' must be a single character string or NULL, not ",
+      class(group)[1]
+    )
   }
 
-  if (!missing(group) && !group %in% names(data)) {
+  if (!is.null(group) && !group %in% names(data)) {
     stop('variable "', group, '" not found in data')
   }
 
@@ -89,8 +101,8 @@ describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
     )
   }
 
-  # If selection not specified, use all numeric variables with message
-  if (missing(selection)) {
+  # If selection is NULL, use all numeric variables with message
+  if (is.null(selection)) {
     # Use vapply for more robust type checking
     numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
     selection <- names(data)[numeric_vars]
@@ -100,8 +112,8 @@ describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
       stop("no numeric variables found in the dataset")
     }
 
-    # Remove the group variable from selection if it's numeric
-    if (!missing(group) && group %in% selection) {
+    # Remove the group variable from selection if it's numeric and provided
+    if (!is.null(group) && group %in% selection) {
       selection <- selection[selection != group]
     }
 
@@ -138,18 +150,13 @@ describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
   }
 
   # Validate group if provided
-  if (!missing(group)) {
+  if (!is.null(group)) {
     if (length(group) > 1) {
       stop("only one grouping variable is supported")
     }
 
-    missing_groups <- group[!group %in% names(data)]
-    if (length(missing_groups) > 0) {
-      stop(
-        'variable "',
-        paste(missing_groups, collapse = ", "),
-        '" not found in data'
-      )
+    if (!group %in% names(data)) {
+      stop('variable "', group, '" not found in data')
     }
   }
 
@@ -168,7 +175,7 @@ describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
   }
 
   # Calculate statistics without grouping
-  if (missing(group)) {
+  if (is.null(group)) {
     results <- lapply(selection, function(var) {
       x <- data[[var]]
 

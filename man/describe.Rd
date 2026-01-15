@@ -4,7 +4,7 @@
 \alias{describe}
 \title{Descriptive Statistics}
 \usage{
-describe(data, selection, group, detailed = FALSE, digits = 3)
+describe(data, selection = NULL, group = NULL, detailed = FALSE, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing the variables for analysis.}
@@ -13,7 +13,7 @@ describe(data, selection, group, detailed = FALSE, digits = 3)
 If not specified, all numeric variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the grouping variable name.
-If not provided, overall statistics will be returned.}
+If not specified, overall statistics will be returned.}
 
 \item{detailed}{A logical flag indicating whether to return additional statistics in
 the style of pandas describe method. If TRUE, includes count, mean, sd,
