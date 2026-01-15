@@ -308,7 +308,7 @@ describe <- function(data, selection, group, detailed = FALSE, digits = 3) {
 
         # Add group information and variable name
         data.frame(
-          group = as.character(current_group),
+          setNames(data.frame(as.character(current_group)), group),
           variable = var,
           stats_row
         )
