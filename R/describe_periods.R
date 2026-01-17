@@ -8,11 +8,10 @@
 #'
 #' @return A data.frame with coverage statistics for each time period.
 #'   The data.frame has the following columns:
-#'   - `time_var`: Time period identifier (name matches the input `time` argument)
-#'   - `Count (entities)`: Number of entities observed in each period
-#'   - `Share (entities)`: Share of entities observed in each period (percentage)
-#'   - `Count (obs.)`: Number of observations in each period
-#'   - `Share (obs.)`: Share of total observations in each period (percentage)
+#'   - Time period identifier (name matches the input `time` argument)
+#'   - `Count`: Number of entities observed in each period
+#'   - `Share (obs.)`: Share of total observations in each period (0 to 1)
+#'   - `Share (entities)`: Share of entities observed in each period (0 to 1)
 #'
 #' @examples
 #' data(production)
@@ -90,40 +89,26 @@ describe_periods <- function(data, group, time) {
   period_coverage <- colSums(presence_matrix)
   period_obs <- colSums(presence_matrix) # Same as coverage for binary presence
 
-  # Calculate shares
-  share_entities <- period_coverage / total_entities * 100
-  share_obs <- period_obs / total_obs * 100
+  # Calculate shares as proportions (0 to 1)
+  share_entities <- period_coverage / total_entities
+  share_obs <- period_obs / total_obs
 
-  # Create result data.frame
+  # Create result data.frame with new column names and order
   result_df <- data.frame(
     time_period = ordered_times,
     entities_count = period_coverage,
-    entities_share = share_entities,
-    obs_count = period_obs,
     obs_share = share_obs,
+    entities_share = share_entities,
     stringsAsFactors = FALSE
   )
 
-  # Rename columns according to specification
+  # Rename columns according to new specification
   names(result_df) <- c(
     time,
-    "Count (entities)",
-    "Share (entities)",
-    "Count (obs.)",
-    "Share (obs.)"
+    "Count",
+    "Share (obs.)",
+    "Share (entities)"
   )
-
-  # Print formatted output
-  cat("Time Period Coverage:\n")
-  for (i in seq_len(nrow(result_df))) {
-    cat(sprintf(
-      "  %s: %d entities (%.1f%%)\n",
-      result_df[i, 1],
-      result_df[i, 2],
-      result_df[i, 3]
-    ))
-  }
-  cat("\n")
 
   return(result_df)
 }

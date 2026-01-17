@@ -17,11 +17,10 @@ describe_periods(data, group, time)
 A data.frame with coverage statistics for each time period.
 The data.frame has the following columns:
 \itemize{
-\item \code{time_var}: Time period identifier (name matches the input \code{time} argument)
-\item \code{Count (entities)}: Number of entities observed in each period
-\item \code{Share (entities)}: Share of entities observed in each period (percentage)
-\item \code{Count (obs.)}: Number of observations in each period
-\item \code{Share (obs.)}: Share of total observations in each period (percentage)
+\item Time period identifier (name matches the input \code{time} argument)
+\item \code{Count}: Number of entities observed in each period
+\item \code{Share (obs.)}: Share of total observations in each period (0 to 1)
+\item \code{Share (entities)}: Share of entities observed in each period (0 to 1)
 }
 }
 \description{
