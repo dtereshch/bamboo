@@ -24,19 +24,13 @@
 #' }
 #'
 #' @examples
-#' # Create example panel data
-#' set.seed(123)
-#' panel_data <- data.frame(
-#'   firm = rep(1:30, each = 6),
-#'   year = rep(2010:2015, times = 30),
-#'   sales = rnorm(180, 100, 20)
-#' )
+#' data(production)
 #'
-#' # Basic validation (default)
-#' check_panel(panel_data, group = "firm", time = "year")
+#' # Basic validation
+#' check_panel(production, group = "firm", time = "year")
 #'
 #' # Detailed validation
-#' check_panel(panel_data, group = "firm", time = "year", detailed = TRUE)
+#' check_panel(production, group = "firm", time = "year", detailed = TRUE)
 #'
 #' @seealso
 #' [decompose_variation()] for variance decomposition in panel data
