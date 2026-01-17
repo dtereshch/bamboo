@@ -19,7 +19,7 @@
 #' For `format = "long"`:
 #' \itemize{
 #'   \item Pattern: Pattern identifier (1, 2, 3, ...)
-#'   \item [time]: The time period variable (named according to the `time` argument)
+#'   \item The time period variable (named according to the `time` argument)
 #'   \item Participation: 0/1 values indicating absence/presence in the period
 #'   \item Count: Number of entities with this pattern
 #'   \item Share: Proportion of entities with this pattern
