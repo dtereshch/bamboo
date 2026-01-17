@@ -14,7 +14,7 @@ describe_balance(data, group, time)
 \item{time}{A character string specifying the name of the time variable.}
 }
 \value{
-A data.frame with 4 columns and 3 rows containing panel data summary statistics.
+A data.frame with 6 columns and 3 rows containing panel data summary statistics.
 The data.frame has the following columns:
 \describe{
 \item{\code{Panel Info}}{Character vector describing the type of panel element.
@@ -30,16 +30,23 @@ For "Periods": number of time periods where all groups are present.}
 \item{\code{Share (balanced)}}{Numeric vector with proportions of balanced cases
 (ranging from 0 to 1). For "Observations": always NA. For "Entities" and "Periods":
 calculated as \code{Count (balanced)} / \code{Count (total)} for each row.}
+\item{\code{Count (without NA)}}{Numeric vector with counts of cases without missing values.
+For "Observations": number of rows with no NAs in substantive variables.
+For "Entities": number of groups with no NAs in any of their observations.
+For "Periods": number of time periods with no NAs in any observation.}
+\item{\code{Share (without NA)}}{Numeric vector with proportions of cases without missing values
+(ranging from 0 to 1). Calculated as \code{Count (without NA)} / \code{Count (total)} for each row.}
 }
 The data.frame has three rows corresponding to:
 \enumerate{
-\item{\strong{Observations}: Row-level information (balance concept not applicable)}
-\item{\strong{Entities}: Group-level balance across all time periods}
-\item{\strong{Periods}: Time-level balance of all groups}
+\item{\strong{Observations}: Row-level information}
+\item{\strong{Entities}: Group-level balance and data completeness}
+\item{\strong{Periods}: Time-level balance and data completeness}
 }
 }
 \description{
-Provides basic summary statistics for panel data structure with focus on balance.
+Provides comprehensive summary statistics for panel data structure with focus on balance
+and data completeness.
 }
 \examples{
 data(production)
