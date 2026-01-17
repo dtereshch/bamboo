@@ -1,0 +1,359 @@
+#' Panel Data Structure Validation
+#'
+#' This function performs comprehensive validation of panel data structure,
+#' checking for common issues that could affect panel data analysis.
+#'
+#' @param data A data.frame containing panel data.
+#' @param group A character string specifying the name of the entity/group variable in panel data.
+#' @param time A character string specifying the name of the time variable in panel data.
+#' @param detailed A logical flag indicating whether to return detailed vaildation results.
+#' Default = FALSE.
+#'
+#' @return A list with panel validation results. The structure depends on the `detailed` parameter.
+#'
+#' @details
+#' The function performs the following checks:
+#' \enumerate{
+#'   \item Validates that data is a data.frame
+#'   \item Checks that group and time variables exist in the data
+#'   \item Ensures group and time are not the same variable
+#'   \item Identifies duplicate group-time combinations
+#'   \item Checks for irregular time intervals within groups (for numeric/Date time variables)
+#'   \item Determines if panel is balanced (same time points for all groups)
+#'   \item Provides summary statistics of panel structure
+#' }
+#'
+#' @examples
+#' # Create example panel data
+#' set.seed(123)
+#' panel_data <- data.frame(
+#'   firm = rep(1:30, each = 6),
+#'   year = rep(2010:2015, times = 30),
+#'   sales = rnorm(180, 100, 20)
+#' )
+#'
+#' # Basic validation (default)
+#' check_panel(panel_data, group = "firm", time = "year")
+#'
+#' # Detailed validation
+#' check_panel(panel_data, group = "firm", time = "year", detailed = TRUE)
+#'
+#' @seealso
+#' [decompose_variation()] for variance decomposition in panel data
+#'
+#' @export
+check_panel <- function(data, group, time, detailed = FALSE) {
+  # Input validation
+  if (!is.data.frame(data)) {
+    stop("'data' must be a data.frame, not ", class(data)[1])
+  }
+
+  if (!is.character(group) || length(group) != 1) {
+    stop("'group' must be a single character string")
+  }
+
+  if (!group %in% names(data)) {
+    stop('group variable "', group, '" not found in data')
+  }
+
+  if (!is.character(time) || length(time) != 1) {
+    stop("'time' must be a single character string")
+  }
+
+  if (!time %in% names(data)) {
+    stop('time variable "', time, '" not found in data')
+  }
+
+  if (time == group) {
+    stop("'time' and 'group' cannot be the same variable")
+  }
+
+  if (!is.logical(detailed) || length(detailed) != 1) {
+    stop("'detailed' must be a single logical value, not ", class(detailed)[1])
+  }
+
+  # Check for missing values
+  if (any(is.na(data[[group]]))) {
+    warning("group variable '", group, "' contains missing values")
+  }
+
+  if (any(is.na(data[[time]]))) {
+    warning("time variable '", time, "' contains missing values")
+  }
+
+  # Initialize validation results
+  validation_results <- data.frame(
+    variable = character(),
+    status = character(),
+    message = character(),
+    stringsAsFactors = FALSE
+  )
+
+  # Panel structure
+  n_groups <- length(unique(data[[group]]))
+  n_periods <- length(unique(data[[time]]))
+  n_obs <- nrow(data)
+
+  # Check for duplicate group-time combinations
+  group_vector <- data[[group]]
+  time_vector <- data[[time]]
+  combos <- paste(group_vector, time_vector, sep = "|")
+  has_duplicates <- any(duplicated(combos))
+
+  # Check for balanced panel
+  time_by_group <- split(time_vector, group_vector)
+  unique_time_sets <- lapply(time_by_group, unique)
+  time_set_lengths <- sapply(unique_time_sets, length)
+
+  if (length(unique(time_set_lengths)) == 1) {
+    all_time_sets <- unique(unique_time_sets)
+    is_balanced <- length(all_time_sets) == 1
+  } else {
+    is_balanced <- FALSE
+  }
+
+  # Check for irregular time intervals
+  has_irregular_intervals <- FALSE
+  if (
+    is.numeric(time_vector) ||
+      inherits(time_vector, "Date") ||
+      inherits(time_vector, "POSIXt")
+  ) {
+    for (times in time_by_group) {
+      unique_times <- sort(unique(times))
+      if (length(unique_times) > 1) {
+        intervals <- diff(unique_times)
+        if (length(unique(intervals)) > 1) {
+          has_irregular_intervals <- TRUE
+          break
+        }
+      }
+    }
+  }
+
+  # Calculate observations per group
+  group_table <- table(data[[group]])
+  avg_obs_per_group <- mean(group_table)
+
+  # Build validation results
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "data",
+      status = "PASS",
+      message = "Valid data.frame structure",
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "group",
+      status = "PASS",
+      message = paste("Group variable '", group, "' found", sep = ""),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "group_completeness",
+      status = ifelse(any(is.na(data[[group]])), "WARNING", "PASS"),
+      message = ifelse(
+        any(is.na(data[[group]])),
+        paste("Group variable has", sum(is.na(data[[group]])), "NAs"),
+        "No missing values in group"
+      ),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "time",
+      status = "PASS",
+      message = paste("Time variable '", time, "' found", sep = ""),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "time_completeness",
+      status = ifelse(any(is.na(data[[time]])), "WARNING", "PASS"),
+      message = ifelse(
+        any(is.na(data[[time]])),
+        paste("Time variable has", sum(is.na(data[[time]])), "NAs"),
+        "No missing values in time"
+      ),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "group_time_distinct",
+      status = "PASS",
+      message = "Group and time are distinct variables",
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "duplicates",
+      status = ifelse(has_duplicates, "FAIL", "PASS"),
+      message = ifelse(
+        has_duplicates,
+        paste(sum(duplicated(combos)), "duplicate group-time pairs"),
+        "No duplicate group-time pairs"
+      ),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  validation_results <- rbind(
+    validation_results,
+    data.frame(
+      variable = "balance",
+      status = ifelse(is_balanced, "PASS", "FAIL"),
+      message = ifelse(is_balanced, "Panel is balanced", "Panel is unbalanced"),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  if (
+    is.numeric(time_vector) ||
+      inherits(time_vector, "Date") ||
+      inherits(time_vector, "POSIXt")
+  ) {
+    validation_results <- rbind(
+      validation_results,
+      data.frame(
+        variable = "intervals",
+        status = ifelse(has_irregular_intervals, "FAIL", "PASS"),
+        message = ifelse(
+          has_irregular_intervals,
+          "Irregular time intervals detected",
+          "Regular time intervals"
+        ),
+        stringsAsFactors = FALSE
+      )
+    )
+  } else {
+    validation_results <- rbind(
+      validation_results,
+      data.frame(
+        variable = "intervals",
+        status = "INFO",
+        message = "Time variable is not numeric/Date-like",
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+
+  # Determine overall status
+  overall_status <- ifelse(
+    any(validation_results$status %in% c("FAIL", "WARNING")),
+    ifelse(any(validation_results$status == "FAIL"), "FAIL", "WARNING"),
+    "PASS"
+  )
+
+  # Create panel summary string
+  balance_status <- ifelse(is_balanced, "balanced", "unbalanced")
+  issues <- c()
+  if (has_duplicates) {
+    issues <- c(issues, "with duplicates")
+  }
+  if (has_irregular_intervals) {
+    issues <- c(issues, "with irregular intervals")
+  }
+
+  panel_summary <- paste0(
+    "Panel structure: ",
+    n_groups,
+    " groups, ",
+    n_periods,
+    " time periods, ",
+    n_obs,
+    " observations, ",
+    balance_status
+  )
+
+  if (length(issues) > 0) {
+    panel_summary <- paste0(panel_summary, ", ", paste(issues, collapse = ", "))
+  }
+
+  # Create result object
+  result <- list(
+    panel_summary = panel_summary,
+    validation_status = overall_status,
+    validation_message = ifelse(
+      overall_status == "PASS",
+      "Panel structure is valid",
+      "Panel structure has issues"
+    ),
+    validation_results = validation_results,
+    detailed = detailed,
+    panel_info = list(
+      n_groups = n_groups,
+      n_periods = n_periods,
+      n_observations = n_obs,
+      avg_obs_per_group = round(avg_obs_per_group, 2),
+      is_balanced = is_balanced,
+      has_duplicates = has_duplicates,
+      has_irregular_intervals = has_irregular_intervals,
+      group_var = group,
+      time_var = time
+    )
+  )
+
+  class(result) <- "panel_check"
+  return(result)
+}
+
+#' @export
+print.panel_check <- function(x, ...) {
+  if (x$detailed) {
+    cat("Panel Data Structure Check\n")
+    cat("==============================================================\n\n")
+
+    cat("Summary\n")
+    cat("--------------------------------------------------------------\n")
+    cat(x$panel_summary, "\n")
+    cat("Validation Status:", x$validation_message, "\n\n")
+
+    cat("Validation Results\n")
+    cat("--------------------------------------------------------------\n")
+
+    for (i in 1:nrow(x$validation_results)) {
+      row <- x$validation_results[i, ]
+
+      # Color coding for status
+      status_str <- switch(
+        row$status,
+        PASS = paste0("\033[32m", row$status, "\033[0m"),
+        FAIL = paste0("\033[31m", row$status, "\033[0m"),
+        WARNING = paste0("\033[33m", row$status, "\033[0m"),
+        INFO = paste0("\033[34m", row$status, "\033[0m"),
+        row$status
+      )
+
+      cat(sprintf("  %-20s [%s] %s\n", row$variable, status_str, row$message))
+    }
+    cat("\n")
+  } else {
+    # For non-detailed output, just show the panel summary and validation status
+    # without any titles
+    cat(x$panel_summary, "\n")
+    cat("Validation Status:", x$validation_message, "\n")
+  }
+
+  invisible(x)
+}
