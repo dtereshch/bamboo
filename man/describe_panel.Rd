@@ -9,12 +9,35 @@ describe_panel(data, group, time)
 \arguments{
 \item{data}{A data.frame containing panel data.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable.}
 
 \item{time}{A character string specifying the name of the time variable.}
 }
 \value{
-Invisible list containing panel description statistics.
+A data.frame with 4 columns and 3 rows containing panel data summary statistics.
+The data.frame has the following columns:
+\describe{
+\item{\code{Panel Info}}{Character vector describing the type of panel element.
+Contains three values: "Observations", "Entities", and "Periods".}
+\item{\code{Count (total)}}{Numeric vector with total counts for each panel element.
+For "Observations": total number of rows in the original data.
+For "Entities": total number of unique groups present in the data.
+For "Periods": total number of unique time periods present in the data.}
+\item{\code{Count (complete)}}{Numeric vector with counts of complete cases.
+For "Observations": number of rows where all substantive variables (excluding
+group and time variables) have non-missing values.
+For "Entities": number of groups that are present in all time periods.
+For "Periods": number of time periods where all groups are present.}
+\item{\code{Share (complete)}}{Numeric vector with proportions of complete cases
+(ranging from 0 to 1). Calculated as \code{Count (complete)} / \code{Count (total)}
+for each row.}
+}
+The data.frame has three rows corresponding to:
+\enumerate{
+\item{\strong{Observations}: Row-level completeness of substantive variables}
+\item{\strong{Entities}: Group-level presence across all time periods}
+\item{\strong{Periods}: Time-level presence of all groups}
+}
 }
 \description{
 Provides basic summary statistics for panel data structure.
