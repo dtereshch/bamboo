@@ -1,6 +1,6 @@
-#' Panel Data Description
+#' Panel Data Balance Description
 #'
-#' Provides basic summary statistics for panel data structure.
+#' Provides basic summary statistics for panel data structure with focus on balance.
 #'
 #' @param data A data.frame containing panel data.
 #' @param group A character string specifying the name of the entity/group variable.
@@ -15,28 +15,27 @@
 #'       For "Observations": total number of rows in the original data.
 #'       For "Entities": total number of unique groups present in the data.
 #'       For "Periods": total number of unique time periods present in the data.}
-#'     \item{\code{Count (complete)}}{Numeric vector with counts of complete cases.
-#'       For "Observations": number of rows where all substantive variables (excluding
-#'       group and time variables) have non-missing values.
+#'     \item{\code{Count (balanced)}}{Numeric vector with counts of balanced cases.
+#'       For "Observations": always NA (balance concept not applicable at observation level).
 #'       For "Entities": number of groups that are present in all time periods.
 #'       For "Periods": number of time periods where all groups are present.}
-#'     \item{\code{Share (complete)}}{Numeric vector with proportions of complete cases
-#'       (ranging from 0 to 1). Calculated as \code{Count (complete)} / \code{Count (total)}
-#'       for each row.}
+#'     \item{\code{Share (balanced)}}{Numeric vector with proportions of balanced cases
+#'       (ranging from 0 to 1). For "Observations": always NA. For "Entities" and "Periods":
+#'       calculated as \code{Count (balanced)} / \code{Count (total)} for each row.}
 #'   }
 #'   The data.frame has three rows corresponding to:
 #'   \enumerate{
-#'     \item{\strong{Observations}: Row-level completeness of substantive variables}
-#'     \item{\strong{Entities}: Group-level presence across all time periods}
-#'     \item{\strong{Periods}: Time-level presence of all groups}
+#'     \item{\strong{Observations}: Row-level information (balance concept not applicable)}
+#'     \item{\strong{Entities}: Group-level balance across all time periods}
+#'     \item{\strong{Periods}: Time-level balance of all groups}
 #'   }
 #'
 #' @examples
 #' data(production)
-#' describe_panel(production, group = "firm", time = "year")
+#' describe_balance(production, group = "firm", time = "year")
 #'
 #' @export
-describe_panel <- function(data, group, time) {
+describe_balance <- function(data, group, time) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
@@ -90,31 +89,29 @@ describe_panel <- function(data, group, time) {
 
   # 1. Observations
   total_obs <- nrow(data)
-  complete_obs <- sum(apply(data[substantive_vars], 1, function(x) {
-    all(!is.na(x))
-  }))
-  share_obs <- complete_obs / total_obs
+  # For observations, balance concept is not applicable - set to NA
+  balanced_obs <- NA
 
-  # 2. Entities (complete = present in all periods)
+  # 2. Entities (balanced = present in all periods)
   total_entities_count <- total_entities
-  complete_entities_count <- sum(rowSums(presence_matrix) == total_periods)
-  share_entities <- complete_entities_count / total_entities_count
+  balanced_entities_count <- sum(rowSums(presence_matrix) == total_periods)
+  share_entities <- balanced_entities_count / total_entities_count
 
-  # 3. Periods (complete = all entities present)
+  # 3. Periods (balanced = all entities present)
   total_periods_count <- total_periods
-  complete_periods_count <- sum(colSums(presence_matrix) == total_entities)
-  share_periods <- complete_periods_count / total_periods_count
+  balanced_periods_count <- sum(colSums(presence_matrix) == total_entities)
+  share_periods <- balanced_periods_count / total_periods_count
 
   # Create and return the result data.frame
   result_df <- data.frame(
     `Panel Info` = c("Observations", "Entities", "Periods"),
     `Count (total)` = c(total_obs, total_entities_count, total_periods_count),
-    `Count (complete)` = c(
-      complete_obs,
-      complete_entities_count,
-      complete_periods_count
+    `Count (balanced)` = c(
+      balanced_obs,
+      balanced_entities_count,
+      balanced_periods_count
     ),
-    `Share (complete)` = c(share_obs, share_entities, share_periods),
+    `Share (balanced)` = c(NA, share_entities, share_periods),
     check.names = FALSE,
     stringsAsFactors = FALSE,
     row.names = NULL
