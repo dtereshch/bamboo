@@ -15,7 +15,7 @@
 #'         columns with NA counts for each variable.
 #'
 #' @seealso
-#' [find_incomplete()], [describe_participation()], [plot_participation()], [explore_participation()]
+#' [describe_participation()], [plot_participation()], [explore_participation()]
 #'
 #' @examples
 #' data(production)
