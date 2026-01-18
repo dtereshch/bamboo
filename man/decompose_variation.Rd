@@ -68,5 +68,5 @@ decompose_variation(production, group = "firm", digits = 999999)
 For Stata users: This corresponds to the \code{xtsum} command.
 }
 \seealso{
-\code{\link[=describe]{describe()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=describe_transition]{describe_transition()}}
+\code{\link[=describe]{describe()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}
 }

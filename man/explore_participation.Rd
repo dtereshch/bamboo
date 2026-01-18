@@ -53,3 +53,6 @@ entities_per_pattern <- participation_result$entities_by_pattern
 print(entities_per_pattern)
 
 }
+\seealso{
+\code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=explore_incomplete]{explore_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}
+}

@@ -15,7 +15,7 @@
 #'         columns with NA counts for each variable.
 #'
 #' @seealso
-#' [describe_participation()], [plot_participation()], [explore_participation()]
+#' [explore_participation()], [describe_participation()], [plot_participation()], [explore_balance()], [describe_balance()], [describe_periods()]
 #'
 #' @examples
 #' data(production)

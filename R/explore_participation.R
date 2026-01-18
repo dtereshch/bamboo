@@ -16,6 +16,9 @@
 #'   \item{pattern_stats}{Data.frame with pattern statistics}
 #'   \item{entities_by_pattern}{Vector with the number of entities in each pattern}
 #'
+#' @seealso
+#' [describe_participation()], [plot_participation()], [describe_periods()], [explore_incomplete()], [describe_balance()], [explore_balance()]
+#'
 #' @examples
 #' data(production)
 #'

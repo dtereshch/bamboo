@@ -31,3 +31,6 @@ data(production)
 describe_periods(production, group = "firm", time = "year")
 
 }
+\seealso{
+\code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=plot_participation]{plot_participation()}}
+}

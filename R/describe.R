@@ -29,7 +29,7 @@
 #'   When ungrouped, the group column is omitted.
 #'
 #' @seealso
-#' [decompose_variation()]
+#' [decompose_variation()], [describe_transition()]
 #'
 #' @examples
 #' data(production)

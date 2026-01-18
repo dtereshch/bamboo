@@ -67,5 +67,5 @@ describe(production, digits = 999999)
 
 }
 \seealso{
-\code{\link[=decompose_variation]{decompose_variation()}}
+\code{\link[=decompose_variation]{decompose_variation()}}, \code{\link[=describe_transition]{describe_transition()}}
 }

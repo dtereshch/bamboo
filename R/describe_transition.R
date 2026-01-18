@@ -16,7 +16,7 @@
 #' For Stata users: This corresponds to the `xttrans` command.
 #'
 #' @seealso
-#' [decompose_variation()], [explore_participation()]
+#' [describe()], [decompose_variation()], [describe_participation()]
 #'
 #' @examples
 #' data(production)

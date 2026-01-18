@@ -33,7 +33,7 @@
 #' For Stata users: This corresponds to the `xtsum` command.
 #'
 #' @seealso
-#' [describe()], [plot_heterogeneity()], [explore_participation()], [describe_transition()]
+#' [describe()], [plot_heterogeneity()]
 #'
 #' @examples
 #' data(production)

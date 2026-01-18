@@ -27,7 +27,7 @@
 #' }
 #'
 #' @seealso
-#' [plot_participation()], [explore_participation()], [find_incomplete()], [explore_incomplete()]
+#' [plot_participation()], [explore_participation()], [describe_periods()], [explore_incomplete()], [describe_balance()], [explore_balance()]
 #'
 #' @examples
 #' data(production)

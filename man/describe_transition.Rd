@@ -43,5 +43,5 @@ describe_transition(production, selection = "industry", group = "firm", time = "
 For Stata users: This corresponds to the \code{xttrans} command.
 }
 \seealso{
-\code{\link[=decompose_variation]{decompose_variation()}}, \code{\link[=explore_participation]{explore_participation()}}
+\code{\link[=describe]{describe()}}, \code{\link[=decompose_variation]{decompose_variation()}}, \code{\link[=describe_participation]{describe_participation()}}
 }

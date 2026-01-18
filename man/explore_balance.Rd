@@ -74,6 +74,8 @@ complete_data <- production[
 
 }
 \seealso{
+\code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=check_panel]{check_panel()}}, \code{\link[=explore_incomplete]{explore_incomplete()}}
+
 \code{\link[=check_panel]{check_panel()}} for basic panel structure validation,
 \code{\link[=describe_balance]{describe_balance()}} for summary statistics,
 \code{\link[=explore_participation]{explore_participation()}} for participation pattern analysis

@@ -26,6 +26,8 @@
 #'   \item \strong{Time periods}: Which periods have all entities, which have no NAs
 #'   \item \strong{Entities}: Which entities are present in all periods, which have no NAs
 #' }
+#' @seealso
+#' [describe_balance()], [describe_periods()], [explore_participation()], [describe_participation()], [plot_participation()], [check_panel()], [explore_incomplete()]
 #'
 #' @examples
 #' data(production)

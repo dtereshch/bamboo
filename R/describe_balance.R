@@ -37,6 +37,9 @@
 #'     \item{\strong{Periods}: Time-level balance and data completeness}
 #'   }
 #'
+#' @seealso
+#' [explore_balance()], [describe_periods()], [describe_participation()], [explore_participation], [plot_participation()]
+#'
 #' @examples
 #' data(production)
 #' describe_balance(production, group = "firm", time = "year")

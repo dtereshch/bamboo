@@ -13,6 +13,9 @@
 #'   - `Share (obs.)`: Share of total observations in each period (0 to 1)
 #'   - `Share (entities)`: Share of entities observed in each period (0 to 1)
 #'
+#' @seealso
+#' [describe_balance()], [explore_balance()], [describe_participation()], [explore_participation()], [plot_participation()]
+#'
 #' @examples
 #' data(production)
 #' describe_periods(production, group = "firm", time = "year")

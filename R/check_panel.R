@@ -51,7 +51,7 @@
 #' ))
 #'
 #' @seealso
-#' [decompose_variation()] for variance decomposition in panel data
+#' [explore_balance()], [explore_participation()]
 #'
 #' @export
 check_panel <- function(

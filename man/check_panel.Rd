@@ -65,5 +65,5 @@ check_result$vectors$missing_times
 
 }
 \seealso{
-\code{\link[=decompose_variation]{decompose_variation()}} for variance decomposition in panel data
+\code{\link[=explore_balance]{explore_balance()}}, \code{\link[=explore_participation]{explore_participation()}}
 }

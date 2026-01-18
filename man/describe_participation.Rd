@@ -53,5 +53,5 @@ describe_participation(production, group = "firm", time = "year", detailed = FAL
 
 }
 \seealso{
-\code{\link[=plot_participation]{plot_participation()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=find_incomplete]{find_incomplete()}}, \code{\link[=explore_incomplete]{explore_incomplete()}}
+\code{\link[=plot_participation]{plot_participation()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=explore_incomplete]{explore_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}
 }
