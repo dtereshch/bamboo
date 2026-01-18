@@ -18,13 +18,13 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage - will print automatically
+#' # Basic usage
 #' explore_participation(production, group = "firm", time = "year")
 #'
-#' # Show only top 5 patterns - will print automatically
+#' # Show only top 5 patterns
 #' explore_participation(production, group = "firm", time = "year", max_patterns = 5)
 #'
-#' # Access the number of entities per pattern - won't print
+#' # Access the number of entities per pattern
 #' result <- explore_participation(production, group = "firm", time = "year")
 #' entities_per_pattern <- result$entities_by_pattern
 #' print(entities_per_pattern)
@@ -148,9 +148,11 @@ explore_participation <- function(data, group, time, max_patterns = 10) {
   total_entities <- length(unique_groups)
   pattern_pcts <- pattern_counts / total_entities * 100
 
-  # Create vector with entities number for each pattern
+  # Create vector with entities number for each pattern - FIXED
+  # Recreate pattern names after reordering
+  pattern_names <- paste0("Pattern ", seq_len(length(pattern_counts)))
   entities_by_pattern <- pattern_counts
-  names(entities_by_pattern) <- rownames(pattern_matrix)
+  names(entities_by_pattern) <- pattern_names
 
   # Check if we're at the top level (called directly, not assigned)
   # Compare the current call to the first call in the call stack

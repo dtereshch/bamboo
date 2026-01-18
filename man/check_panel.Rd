@@ -39,13 +39,13 @@ The function performs the following checks:
 \examples{
 data(production)
 
-# Basic validation
+# Basic usage
 check_panel(production, group = "firm", time = "year")
 
-# Detailed validation
+# Detailed validation results
 check_panel(production, group = "firm", time = "year", detailed = TRUE)
 
-# Assigning to variable - will not print
+# Assigning to variable
 check_result <- check_panel(production, group = "firm", time = "year")
 
 # Access useful vectors for further analysis

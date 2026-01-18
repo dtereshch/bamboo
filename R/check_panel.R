@@ -27,13 +27,13 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic validation - will print automatically
+#' # Basic usage
 #' check_panel(production, group = "firm", time = "year")
 #'
-#' # Detailed validation - will print automatically
+#' # Detailed validation results
 #' check_panel(production, group = "firm", time = "year", detailed = TRUE)
 #'
-#' # Assigning to variable - will not print
+#' # Assigning to variable
 #' check_result <- check_panel(production, group = "firm", time = "year")
 #'
 #' # Access useful vectors for further analysis

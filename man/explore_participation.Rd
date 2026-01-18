@@ -30,13 +30,13 @@ Provides detailed analysis of participation patterns in panel data.
 \examples{
 data(production)
 
-# Basic usage - will print automatically
+# Basic usage
 explore_participation(production, group = "firm", time = "year")
 
-# Show only top 5 patterns - will print automatically
+# Show only top 5 patterns
 explore_participation(production, group = "firm", time = "year", max_patterns = 5)
 
-# Access the number of entities per pattern - won't print
+# Access the number of entities per pattern
 result <- explore_participation(production, group = "firm", time = "year")
 entities_per_pattern <- result$entities_by_pattern
 print(entities_per_pattern)

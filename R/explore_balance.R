@@ -29,10 +29,10 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage - will print automatically
+#' # Basic usage
 #' explore_balance(production, group = "firm", time = "year")
 #'
-#' # Access returned vectors for further analysis - won't print
+#' # Access returned vectors for further analysis
 #' result <- explore_balance(production, group = "firm", time = "year")
 #'
 #' # Balanced periods (all entities present)
