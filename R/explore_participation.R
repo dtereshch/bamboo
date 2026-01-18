@@ -193,12 +193,15 @@ explore_participation <- function(
 
   # Print if requested
   if (print_result) {
+    cat("Panel Data Participation Patterns\n")
+    cat("==============================================================\n\n")
     # Print formatted output
     n_to_display <- min(length(pattern_groups), max_patterns)
     cat(sprintf(
-      "Information on Top %d Participation Patterns\n\n",
+      "Information on Top %d Participation Patterns\n",
       n_to_display
     ))
+    cat("--------------------------------------------------------------\n")
 
     # Calculate maximum widths for alignment
     max_pattern_width <- nchar(as.character(n_to_display))

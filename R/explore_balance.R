@@ -258,7 +258,7 @@ explore_balance <- function(data, group, time, print_result = TRUE) {
   # Print if requested
   if (print_result) {
     cat("Panel Data Balance Check\n")
-    cat("===========================================\n\n")
+    cat("==============================================================\n\n")
 
     cat("Basic Information\n")
     cat("--------------------------------------------------------------\n")
