@@ -481,8 +481,8 @@ explore_panel <- function(
       cat(
         "-------------------------------------------------------------------\n"
       )
-      cat(result$panel_summary, "\n")
-      cat("Exploration Status:", result$exploration_message, "\n\n")
+      cat(" ", result$panel_summary, "\n")
+      cat("  Exploration Status:", result$exploration_message, "\n\n")
 
       cat("Exploration Results\n")
       cat(
@@ -508,8 +508,8 @@ explore_panel <- function(
     } else {
       # For non-detailed output, just show the panel summary and exploration status
       # without any titles
-      cat(" ", result$panel_summary, "\n")
-      cat("  Exploration Status:", result$exploration_message, "\n")
+      cat(result$panel_summary, "\n")
+      cat("Exploration Status:", result$exploration_message, "\n")
     }
   }
 
