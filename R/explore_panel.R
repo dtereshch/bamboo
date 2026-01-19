@@ -393,8 +393,7 @@ explore_panel <- function(
     n_periods,
     " time periods, ",
     n_obs,
-    " observations, ",
-    balance_status
+    " observations, "
   )
 
   if (length(issues) > 0) {
@@ -474,15 +473,21 @@ explore_panel <- function(
   if (print_result) {
     if (result$detailed) {
       cat("Panel Data Structure Exploration\n")
-      cat("==============================================================\n\n")
+      cat(
+        "===================================================================\n\n"
+      )
 
       cat("Summary\n")
-      cat("--------------------------------------------------------------\n")
+      cat(
+        "-------------------------------------------------------------------\n"
+      )
       cat(result$panel_summary, "\n")
       cat("Exploration Status:", result$exploration_message, "\n\n")
 
       cat("Exploration Results\n")
-      cat("--------------------------------------------------------------\n")
+      cat(
+        "-------------------------------------------------------------------\n"
+      )
 
       for (i in 1:nrow(result$exploration_results)) {
         row <- result$exploration_results[i, ]
