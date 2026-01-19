@@ -252,12 +252,14 @@ explore_participation <- function(
   if (print_result) {
     cat("Panel Data Participation Analysis\n")
     cat(
-      "===================================================================\n\n"
+      "====================================================================\n\n"
     )
 
     # Print time coverage statistics
     cat("Distribution of Entities by Time Periods Coverage\n")
-    cat("-------------------------------------------------------------------\n")
+    cat(
+      "--------------------------------------------------------------------\n"
+    )
 
     # Format the time coverage statistics - round them to nearest whole number
     # since they represent counts of time periods
@@ -296,7 +298,9 @@ explore_participation <- function(
       "Information on Top %d Participation Patterns\n",
       n_to_display
     ))
-    cat("-------------------------------------------------------------------\n")
+    cat(
+      "--------------------------------------------------------------------\n"
+    )
 
     # Calculate maximum widths for alignment
     max_pattern_width <- nchar(as.character(n_to_display))

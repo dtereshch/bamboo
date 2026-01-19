@@ -272,11 +272,13 @@ explore_balance <- function(data, group, time, print_result = TRUE) {
   if (print_result) {
     cat("Panel Data Balance Exploration\n")
     cat(
-      "===================================================================\n\n"
+      "====================================================================\n\n"
     )
 
     cat("Basic Information\n")
-    cat("-------------------------------------------------------------------\n")
+    cat(
+      "--------------------------------------------------------------------\n"
+    )
     cat(sprintf("  Total observations: %d \n", total_obs))
     cat(sprintf(
       "  Observations without NAs: %d (%.1f%%) \n",
@@ -290,7 +292,9 @@ explore_balance <- function(data, group, time, print_result = TRUE) {
     ))
 
     cat("Time Periods\n")
-    cat("-------------------------------------------------------------------\n")
+    cat(
+      "--------------------------------------------------------------------\n"
+    )
     cat(sprintf("  Number of time periods: %d \n", n_periods))
     cat(sprintf(
       "  Observations per entity: %d - %d (avg: %.1f )\n",

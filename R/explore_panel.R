@@ -474,19 +474,19 @@ explore_panel <- function(
     if (result$detailed) {
       cat("Panel Data Structure Exploration\n")
       cat(
-        "===================================================================\n\n"
+        "====================================================================\n\n"
       )
 
       cat("Summary\n")
       cat(
-        "-------------------------------------------------------------------\n"
+        "--------------------------------------------------------------------\n"
       )
       cat(" ", result$panel_summary, "\n")
       cat("  Exploration Status:", result$exploration_message, "\n\n")
 
       cat("Exploration Results\n")
       cat(
-        "-------------------------------------------------------------------\n"
+        "--------------------------------------------------------------------\n"
       )
 
       for (i in 1:nrow(result$exploration_results)) {
