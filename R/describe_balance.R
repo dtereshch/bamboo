@@ -7,35 +7,40 @@
 #' @param group A character string specifying the name of the entity/group variable.
 #' @param time A character string specifying the name of the time variable.
 #'
-#' @return A data.frame with 6 columns and 3 rows containing panel data summary statistics.
-#'   The data.frame has the following columns:
-#'   \describe{
-#'     \item{\code{Panel Info}}{Character vector describing the type of panel element.
-#'       Contains three values: "Observations", "Entities", and "Periods".}
-#'     \item{\code{Count (total)}}{Numeric vector with total counts for each panel element.
-#'       For "Observations": total number of rows in the original data.
-#'       For "Entities": total number of unique groups present in the data.
-#'       For "Periods": total number of unique time periods present in the data.}
-#'     \item{\code{Count (balanced)}}{Numeric vector with counts of balanced cases.
-#'       For "Observations": always NA (balance concept not applicable at observation level).
-#'       For "Entities": number of groups that are present in all time periods.
-#'       For "Periods": number of time periods where all groups are present.}
-#'     \item{\code{Share (balanced)}}{Numeric vector with proportions of balanced cases
-#'       (ranging from 0 to 1). For "Observations": always NA. For "Entities" and "Periods":
-#'       calculated as \code{Count (balanced)} / \code{Count (total)} for each row.}
-#'     \item{\code{Count (without NA)}}{Numeric vector with counts of cases without missing values.
-#'       For "Observations": number of rows with no NAs in substantive variables.
-#'       For "Entities": number of groups with no NAs in any of their observations.
-#'       For "Periods": number of time periods with no NAs in any observation.}
-#'     \item{\code{Share (without NA)}}{Numeric vector with proportions of cases without missing values
-#'       (ranging from 0 to 1). Calculated as \code{Count (without NA)} / \code{Count (total)} for each row.}
-#'   }
-#'   The data.frame has three rows corresponding to:
-#'   \enumerate{
-#'     \item{\strong{Observations}: Row-level information}
-#'     \item{\strong{Entities}: Group-level balance and data completeness}
-#'     \item{\strong{Periods}: Time-level balance and data completeness}
-#'   }
+#' @return A data.frame with panel data balance statistics.
+#'
+#' @details
+#' The data.frame has 6 columns and 3 rows containing panel data summary statistics:
+#'
+#' \strong{Columns:}
+#' \describe{
+#'   \item{\code{Panel Info}}{Character vector describing the type of panel element.
+#'     Contains three values: "Observations", "Entities", and "Periods".}
+#'   \item{\code{Count (total)}}{Numeric vector with total counts for each panel element.
+#'     For "Observations": total number of rows in the original data.
+#'     For "Entities": total number of unique groups present in the data.
+#'     For "Periods": total number of unique time periods present in the data.}
+#'   \item{\code{Count (balanced)}}{Numeric vector with counts of balanced cases.
+#'     For "Observations": always NA (balance concept not applicable at observation level).
+#'     For "Entities": number of groups that are present in all time periods.
+#'     For "Periods": number of time periods where all groups are present.}
+#'   \item{\code{Share (balanced)}}{Numeric vector with proportions of balanced cases
+#'     (ranging from 0 to 1). For "Observations": always NA. For "Entities" and "Periods":
+#'     calculated as \code{Count (balanced)} / \code{Count (total)} for each row.}
+#'   \item{\code{Count (without NA)}}{Numeric vector with counts of cases without missing values.
+#'     For "Observations": number of rows with no NAs in substantive variables.
+#'     For "Entities": number of groups with no NAs in any of their observations.
+#'     For "Periods": number of time periods with no NAs in any observation.}
+#'   \item{\code{Share (without NA)}}{Numeric vector with proportions of cases without missing values
+#'     (ranging from 0 to 1). Calculated as \code{Count (without NA)} / \code{Count (total)} for each row.}
+#' }
+#'
+#' \strong{Rows:}
+#' \describe{
+#'   \item{\strong{Observations}}{Row-level information about data completeness}
+#'   \item{\strong{Entities}}{Group-level balance and data completeness}
+#'   \item{\strong{Periods}}{Time-level balance and data completeness}
+#' }
 #'
 #' @seealso
 #' [explore_balance()], [describe_periods()], [describe_participation()], [explore_participation], [plot_participation()]

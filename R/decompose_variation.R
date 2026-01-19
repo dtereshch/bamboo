@@ -13,21 +13,36 @@
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'   Default = 3.
 #'
-#' @return If detailed = TRUE, returns a data.frame with the following columns for each variable:
-#'   \item{variable}{The name of the variable}
-#'   \item{decomposition}{Type of decomposition: overall, between, or within}
-#'   \item{mean}{Mean value (only for overall decomposition)}
-#'   \item{sd}{Standard deviation}
-#'   \item{min}{Minimum value}
-#'   \item{max}{Maximum value}
-#'   \item{n}{Number of observations or groups}
+#' @return A data.frame with variance decomposition statistics.
 #'
-#'   If detailed = FALSE, returns a simplified data.frame with columns:
-#'   \item{variable}{The name of the variable}
-#'   \item{mean}{Overall mean}
-#'   \item{sd_overall}{Overall standard deviation}
-#'   \item{sd_between}{Between-group standard deviation}
-#'   \item{sd_within}{Within-group standard deviation}
+#' @details
+#' When `detailed = TRUE` (default), returns a data.frame with the following columns:
+#' \describe{
+#'   \item{\code{variable}}{The name of the analyzed variable}
+#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{mean}}{Mean value (only for "overall" decomposition)}
+#'   \item{\code{sd}}{Standard deviation}
+#'   \item{\code{min}}{Minimum value}
+#'   \item{\code{max}}{Maximum value}
+#'   \item{\code{n}}{Number of observations or groups}
+#' }
+#'
+#' When `detailed = FALSE`, returns a simplified data.frame with columns:
+#' \describe{
+#'   \item{\code{variable}}{The name of the variable}
+#'   \item{\code{mean}}{Overall mean}
+#'   \item{\code{sd_overall}}{Overall standard deviation}
+#'   \item{\code{sd_between}}{Between-group standard deviation}
+#'   \item{\code{sd_within}}{Within-group standard deviation}
+#' }
+#'
+#' The data.frame has additional attributes:
+#' \describe{
+#'   \item{\code{group_var}}{The grouping variable name}
+#'   \item{\code{n_groups}}{Number of unique groups}
+#'   \item{\code{detailed}}{Logical indicating detailed output}
+#'   \item{\code{digits}}{Number of decimal places used for rounding}
+#' }
 #'
 #' @references
 #' For Stata users: This corresponds to the `xtsum` command.

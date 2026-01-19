@@ -11,18 +11,34 @@
 #' @param print_result A logical flag indicating whether to print the validation results.
 #' Default = TRUE.
 #'
-#' @return A list with panel validation results. The structure depends on the `detailed` parameter.
+#' @return A list containing panel validation results.
 #'
 #' @details
-#' The function performs the following checks:
-#' \enumerate{
-#'   \item Validates that data is a data.frame
-#'   \item Checks that group and time variables exist in the data
-#'   \item Ensures group and time are not the same variable
-#'   \item Identifies duplicate group-time combinations
-#'   \item Checks for irregular time intervals within groups (for numeric/Date time variables)
-#'   \item Determines if panel is balanced (same time points for all groups)
-#'   \item Provides summary statistics of panel structure
+#' The returned list contains the following components:
+#' \describe{
+#'   \item{\code{panel_summary}}{Character string summarizing panel structure}
+#'   \item{\code{validation_status}}{Overall validation status ("PASS", "WARNING", or "FAIL")}
+#'   \item{\code{validation_message}}{Descriptive message about validation status}
+#'   \item{\code{validation_results}}{Data frame with detailed validation results}
+#'   \item{\code{detailed}}{Logical indicating whether detailed results were requested}
+#'   \item{\code{panel_info}}{List with panel structure information including:
+#'     \itemize{
+#'       \item \code{n_groups}: Number of unique groups
+#'       \item \code{n_periods}: Number of unique time periods
+#'       \item \code{n_observations}: Total number of observations
+#'       \item \code{is_balanced}: Logical indicating if panel is balanced
+#'       \item \code{has_duplicates}: Logical indicating duplicate group-time pairs
+#'       \item \code{has_irregular_intervals}: Logical indicating irregular time intervals
+#'     }
+#'   }
+#'   \item{\code{vectors}}{List containing useful vectors for further analysis including:
+#'     \itemize{
+#'       \item \code{duplicate_indices}: Indices of duplicate observations
+#'       \item \code{unbalanced_groups}: Groups causing imbalance
+#'       \item \code{irregular_groups}: Groups with irregular time intervals
+#'       \item \code{observations_per_group}: Table of observations per group
+#'     }
+#'   }
 #' }
 #'
 #' @examples

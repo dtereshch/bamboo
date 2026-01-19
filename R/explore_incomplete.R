@@ -8,11 +8,29 @@
 #' @param detailed A logical flag indicating whether to include detailed missing counts
 #'        for each variable. Default = FALSE.
 #'
-#' @return A data.frame containing entities with number of variables that have
-#'         at least one missing value for that entity, as well as total number
-#'         of missing observations. The data.frame is arranged by number of
-#'         variables with missing values. If detailed = TRUE, includes additional
-#'         columns with NA counts for each variable.
+#' @return A data.frame with incomplete entities analysis or a character message.
+#'
+#' @details
+#' When incomplete entities exist, returns a data.frame with:
+#' \describe{
+#'   \item{\code{[group]}}{The entity/group identifier (name matches input `group`)}
+#'   \item{\code{n_vars_with_na}}{Number of variables with at least one missing value for that entity}
+#'   \item{\code{total_na}}{Total number of missing observations for the entity}
+#' }
+#'
+#' When `detailed = TRUE`, additional columns are included:
+#' \describe{
+#'   \item{\code{[variable1]}}{Number of NAs in variable1 for the entity}
+#'   \item{\code{[variable2]}}{Number of NAs in variable2 for the entity}
+#'   \item{...}{Additional columns for each substantive variable in the data}
+#' }
+#'
+#' The data.frame is sorted by:
+#' 1. Number of variables with NAs (descending)
+#' 2. Total number of NAs (descending)
+#'
+#' If no entities have incomplete data, returns the character message:
+#' "There are no incomplete groups/entities in the data."
 #'
 #' @seealso
 #' [explore_participation()], [describe_participation()], [plot_participation()], [explore_balance()], [describe_balance()], [describe_periods()]

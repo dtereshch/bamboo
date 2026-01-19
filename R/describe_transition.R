@@ -10,7 +10,31 @@
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round probabilities. Default = 3.
 #'
-#' @return A data.frame in either wide or long format containing transition probabilities.
+#' @return A data.frame containing transition probabilities.
+#'
+#' @details
+#' The output format depends on the `format` parameter:
+#'
+#' \strong{When `format = "wide"` (default):}
+#' Returns a transition matrix as a data.frame with:
+#' \describe{
+#'   \item{\code{ }}{First column containing the "from" state labels}
+#'   \item{\code{[state1]}}{Column with transition probabilities from each state to state1}
+#'   \item{\code{[state2]}}{Column with transition probabilities from each state to state2}
+#'   \item{...}{Additional columns for each possible "to" state}
+#' }
+#' Rows represent the "from" states, columns represent the "to" states.
+#'
+#' \strong{When `format = "long"`:}
+#' Returns a data.frame with:
+#' \describe{
+#'   \item{\code{from}}{The originating state}
+#'   \item{\code{to}}{The destination state}
+#'   \item{\code{n}}{Number of transitions observed from `from` to `to`}
+#'   \item{\code{prob}}{Transition probability (rounded to specified digits)}
+#' }
+#'
+#' Includes all possible state combinations, even those with zero transitions.
 #'
 #' @references
 #' For Stata users: This corresponds to the `xttrans` command.

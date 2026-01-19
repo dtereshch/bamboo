@@ -14,19 +14,29 @@
 #' @param digits An integer specifying the number of decimal places for rounding
 #'        statistics. Default = 3.
 #'
-#' @return A data.frame with descriptive statistics. When grouped, contains:
-#'   \item{group}{The grouping variable}
-#'   \item{variable}{The name of the numeric variable}
-#'   \item{n}{Number of non-NA observations}
-#'   \item{mean}{Arithmetic mean}
-#'   \item{median}{Median value}
-#'   \item{sd}{Standard deviation}
-#'   \item{min}{Minimum value}
-#'   \item{max}{Maximum value}
-#'   When `detailed = TRUE`, also includes:
-#'   \item{p25}{25th percentile (first quartile)}
-#'   \item{p75}{75th percentile (third quartile)}
-#'   When ungrouped, the group column is omitted.
+#' @return A data.frame with descriptive statistics.
+#'
+#' @details
+#' The returned data.frame contains the following columns:
+#' \describe{
+#'   \item{\code{variable}}{The name of the numeric variable (always present)}
+#'   \item{\code{group}}{The grouping variable (present only when `group` is specified)}
+#'   \item{\code{n}}{Number of non-NA observations}
+#'   \item{\code{mean}}{Arithmetic mean}
+#'   \item{\code{median}}{Median value}
+#'   \item{\code{sd}}{Standard deviation}
+#'   \item{\code{min}}{Minimum value}
+#'   \item{\code{max}}{Maximum value}
+#' }
+#'
+#' When `detailed = TRUE`, additional columns are included:
+#' \describe{
+#'   \item{\code{p25}}{25th percentile (first quartile)}
+#'   \item{\code{p75}}{75th percentile (third quartile)}
+#' }
+#'
+#' When no grouping variable is specified, statistics are calculated overall.
+#' When a grouping variable is specified, statistics are calculated for each group.
 #'
 #' @seealso
 #' [decompose_variation()], [describe_transition()]

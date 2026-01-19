@@ -8,23 +8,35 @@
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param format A character string specifying the output format: "wide" (default) or "long".
 #'
-#' @return A data.frame with participation patterns. For `format = "wide"`:
-#' \itemize{
-#'   \item Pattern: Pattern identifier (1, 2, 3, ...)
-#'   \item Columns for each time period showing participation (1 = present, 0 = missing)
-#'   \item Count: Number of entities with this pattern
-#'   \item Share: Proportion of entities with this pattern
-#'   \item Cumul.: Cumulative proportion of entities
+#' @return A data.frame with participation patterns.
+#'
+#' @details
+#' The output format depends on the `format` and `detailed` parameters:
+#'
+#' \strong{When `format = "wide"` and `detailed = TRUE` (default):}
+#' \describe{
+#'   \item{\code{Pattern}}{Pattern identifier (1, 2, 3, ...)}
+#'   \item{\code{[time_period]}}{Columns for each time period showing participation
+#'     (1 = present, 0 = missing). Column names match the time variable values.}
+#'   \item{\code{Count}}{Number of entities with this pattern}
+#'   \item{\code{Share}}{Proportion of entities with this pattern (0 to 1)}
+#'   \item{\code{Cumul.}}{Cumulative proportion of entities}
 #' }
-#' For `format = "long"`:
-#' \itemize{
-#'   \item Pattern: Pattern identifier (1, 2, 3, ...)
-#'   \item The time period variable (named according to the `time` argument)
-#'   \item Participation: 0/1 values indicating absence/presence in the period
-#'   \item Count: Number of entities with this pattern
-#'   \item Share: Proportion of entities with this pattern
-#'   \item Cumul.: Cumulative proportion of entities
+#'
+#' \strong{When `format = "long"` and `detailed = TRUE`:}
+#' \describe{
+#'   \item{\code{Pattern}}{Pattern identifier (1, 2, 3, ...)}
+#'   \item{\code{[time]}}{The time period variable (named according to the `time` argument)}
+#'   \item{\code{Participation}}{0/1 values indicating absence/presence in the period}
+#'   \item{\code{Count}}{Number of entities with this pattern}
+#'   \item{\code{Share}}{Proportion of entities with this pattern}
+#'   \item{\code{Cumul.}}{Cumulative proportion of entities}
 #' }
+#'
+#' \strong{When `detailed = FALSE`:}
+#' Returns only the Pattern and time period columns (without Count, Share, or Cumul.).
+#'
+#' Patterns are sorted by frequency (most common first).
 #'
 #' @seealso
 #' [plot_participation()], [explore_participation()], [describe_periods()], [explore_incomplete()], [describe_balance()], [explore_balance()]

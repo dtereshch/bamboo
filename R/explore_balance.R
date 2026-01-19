@@ -10,22 +10,33 @@
 #' @param print_result A logical flag indicating whether to print the validation results.
 #' Default = TRUE.
 #'
-#' @return A list containing the following components:
-#'   \item{summary}{A list with summary statistics}
-#'   \item{balanced_periods}{Vector of time periods where all entities are present}
-#'   \item{periods_without_na}{Vector of time periods with no missing values in substantive variables}
-#'   \item{balanced_entities}{Vector of entities present in all time periods}
-#'   \item{entities_without_na}{Vector of entities with no missing values in substantive variables}
-#'   \item{presence_matrix}{Binary matrix showing entity-time presence (1=present, 0=missing)}
-#'
+#' @return A list with panel balance analysis results.
 #'
 #' @details
-#' The function analyzes panel data balance from multiple perspectives:
-#' \enumerate{
-#'   \item \strong{Overall data quality}: Counts of observations with/without NAs
-#'   \item \strong{Time periods}: Which periods have all entities, which have no NAs
-#'   \item \strong{Entities}: Which entities are present in all periods, which have no NAs
+#' The returned list contains the following components:
+#' \describe{
+#'   \item{\code{summary}}{List with summary statistics including:
+#'     \itemize{
+#'       \item \code{total_observations}: Total number of rows
+#'       \item \code{observations_without_na}: Rows with no NAs in substantive variables
+#'       \item \code{n_time_periods}: Number of unique time periods
+#'       \item \code{n_balanced_periods}: Periods where all entities are present
+#'       \item \code{n_periods_without_na}: Periods with no NAs in any observation
+#'       \item \code{n_entities}: Number of unique groups
+#'       \item \code{n_balanced_entities}: Entities present in all periods
+#'       \item \code{n_entities_without_na}: Entities with no NAs in any observation
+#'     }
+#'   }
+#'   \item{\code{balanced_periods}}{Vector of time periods where all entities are present}
+#'   \item{\code{periods_without_na}}{Vector of time periods with no missing values}
+#'   \item{\code{balanced_entities}}{Vector of entities present in all time periods}
+#'   \item{\code{entities_without_na}}{Vector of entities with no missing values}
+#'   \item{\code{presence_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0)}
+#'   \item{\code{na_matrix}}{Binary matrix showing which entity-period combinations have no NAs}
+#'   \item{\code{group_var}}{The group variable name}
+#'   \item{\code{time_var}}{The time variable name}
 #' }
+#'
 #' @seealso
 #' [describe_balance()], [describe_periods()], [explore_participation()], [describe_participation()], [plot_participation()], [check_panel()], [explore_incomplete()]
 #'

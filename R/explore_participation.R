@@ -9,12 +9,30 @@
 #' @param print_result A logical flag indicating whether to print the validation results.
 #' Default = TRUE.
 #'
-#' @return A list containing detailed participation pattern statistics.
-#' The list includes:
-#'   \item{pattern_matrix}{Matrix showing presence patterns}
-#'   \item{pattern_groups}{List of entities belonging to each pattern}
-#'   \item{pattern_stats}{Data.frame with pattern statistics}
-#'   \item{entities_by_pattern}{Vector with the number of entities in each pattern}
+#' @return A list with detailed participation pattern analysis.
+#'
+#' @details
+#' The returned list contains the following components:
+#' \describe{
+#'   \item{\code{pattern_matrix}}{Matrix showing presence patterns (rows = patterns, columns = time periods)}
+#'   \item{\code{pattern_groups}}{List of entities belonging to each pattern}
+#'   \item{\code{pattern_stats}}{Data.frame with pattern statistics including:
+#'     \itemize{
+#'       \item \code{pattern_id}: Pattern identifier
+#'       \item \code{pattern_string}: Binary string representation
+#'       \item \code{n_entities}: Number of entities with this pattern
+#'       \item \code{percent_entities}: Percentage of entities with this pattern
+#'       \item \code{entities}: List of entity identifiers with this pattern
+#'     }
+#'   }
+#'   \item{\code{entities_by_pattern}}{Named vector with number of entities in each pattern}
+#'   \item{\code{presence_matrix}}{Original presence matrix used for analysis}
+#'   \item{\code{group_var}}{The group variable name}
+#'   \item{\code{time_var}}{The time variable name}
+#'   \item{\code{filtered_data}}{The filtered data used for analysis (excluding rows with all NAs)}
+#' }
+#'
+#' Patterns are sorted by frequency (most common first).
 #'
 #' @seealso
 #' [describe_participation()], [plot_participation()], [describe_periods()], [explore_incomplete()], [describe_balance()], [explore_balance()]

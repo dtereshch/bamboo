@@ -6,12 +6,20 @@
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param time A character string specifying the name of the time variable.
 #'
-#' @return A data.frame with coverage statistics for each time period.
-#'   The data.frame has the following columns:
-#'   - Time period identifier (name matches the input `time` argument)
-#'   - `Count`: Number of entities observed in each period
-#'   - `Share (obs.)`: Share of total observations in each period (0 to 1)
-#'   - `Share (entities)`: Share of entities observed in each period (0 to 1)
+#' @return A data.frame with time period coverage statistics.
+#'
+#' @details
+#' The data.frame contains the following columns:
+#' \describe{
+#'   \item{\code{[time]}}{Time period identifier (name matches the input `time` argument)}
+#'   \item{\code{Count}}{Number of entities observed in each period}
+#'   \item{\code{Share (obs.)}}{Share of total observations in each period (0 to 1)}
+#'   \item{\code{Share (entities)}}{Share of entities observed in each period (0 to 1)}
+#' }
+#'
+#' Time periods are sorted naturally (numeric values as numbers, others alphabetically).
+#' Statistics are calculated using only rows with substantive data (at least one
+#' non-NA value in substantive variables).
 #'
 #' @seealso
 #' [describe_balance()], [explore_balance()], [describe_participation()], [explore_participation()], [plot_participation()]
