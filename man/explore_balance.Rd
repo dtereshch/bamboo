@@ -30,21 +30,23 @@ The returned list contains the following components:
 \item{\code{summary}}{List with summary statistics including:
 \itemize{
 \item \code{total_observations}: Total number of rows
-\item \code{observations_without_na}: Rows with no NAs in substantive variables
+\item \code{observations_balanced}: Rows with at least one non-NA substantive variable
+\item \code{observations_complete}: Rows with no NAs in substantive variables
 \item \code{n_time_periods}: Number of unique time periods
-\item \code{n_balanced_periods}: Periods where all entities are present
-\item \code{n_periods_without_na}: Periods with no NAs in any observation
+\item \code{n_balanced_periods}: Periods where all entities have at least one non-NA
+\item \code{n_periods_complete}: Periods with no NAs in any observation
 \item \code{n_entities}: Number of unique groups
-\item \code{n_balanced_entities}: Entities present in all periods
-\item \code{n_entities_without_na}: Entities with no NAs in any observation
+\item \code{n_balanced_entities}: Entities where all periods have at least one non-NA
+\item \code{n_entities_complete}: Entities with no NAs in any observation
 }
 }
-\item{\code{balanced_periods}}{Vector of time periods where all entities are present}
-\item{\code{periods_without_na}}{Vector of time periods with no missing values}
-\item{\code{balanced_entities}}{Vector of entities present in all time periods}
-\item{\code{entities_without_na}}{Vector of entities with no missing values}
+\item{\code{balanced_periods}}{Vector of time periods where all entities have at least one non-NA}
+\item{\code{periods_complete}}{Vector of time periods with no missing values}
+\item{\code{balanced_entities}}{Vector of entities where all time periods have at least one non-NA}
+\item{\code{entities_complete}}{Vector of entities with no missing values}
 \item{\code{presence_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0)}
-\item{\code{na_matrix}}{Binary matrix showing which entity-period combinations have no NAs}
+\item{\code{balanced_matrix}}{Binary matrix showing which entity-period pairs have at least one non-NA}
+\item{\code{complete_matrix}}{Binary matrix showing which entity-period combinations have no NAs}
 \item{\code{group_var}}{The group variable name}
 \item{\code{time_var}}{The time variable name}
 }
@@ -58,29 +60,29 @@ explore_balance(production, group = "firm", time = "year")
 # Assign the results without printing
 balance_result <- explore_balance(production, group = "firm", time = "year", print_result = FALSE)
 
-# Balanced periods (all entities present)
+# Balanced periods (all entities have at least one non-NA)
 balanced_periods <- balance_result$balanced_periods
 print(balanced_periods)
 
 # Time periods with no missing values
-clean_periods <- balance_result$periods_without_na
-print(clean_periods)
+complete_periods <- balance_result$periods_complete
+print(complete_periods)
 
-# Balanced entities (present in all time periods)
-complete_entities <- balance_result$balanced_entities
-print(complete_entities)
+# Balanced entities (all periods have at least one non-NA)
+balanced_entities <- balance_result$balanced_entities
+print(balanced_entities)
 
 # Entities with no missing values
-clean_entities <- balance_result$entities_without_na
-print(clean_entities)
+complete_entities <- balance_result$entities_complete
+print(complete_entities)
 
 # Create a balanced subset
-balanced_data <- production[production$firm \%in\% complete_entities, ]
+balanced_data <- production[production$firm \%in\% balanced_entities, ]
 
 # Create a complete subset (balanced and no NAs)
 complete_data <- production[
-  production$firm \%in\% complete_entities &
-  production$year \%in\% clean_periods,
+  production$firm \%in\% balanced_entities &
+  production$year \%in\% complete_periods,
 ]
 
 }

@@ -18,21 +18,23 @@
 #'   \item{\code{summary}}{List with summary statistics including:
 #'     \itemize{
 #'       \item \code{total_observations}: Total number of rows
-#'       \item \code{observations_without_na}: Rows with no NAs in substantive variables
+#'       \item \code{observations_balanced}: Rows with at least one non-NA substantive variable
+#'       \item \code{observations_complete}: Rows with no NAs in substantive variables
 #'       \item \code{n_time_periods}: Number of unique time periods
-#'       \item \code{n_balanced_periods}: Periods where all entities are present
-#'       \item \code{n_periods_without_na}: Periods with no NAs in any observation
+#'       \item \code{n_balanced_periods}: Periods where all entities have at least one non-NA
+#'       \item \code{n_periods_complete}: Periods with no NAs in any observation
 #'       \item \code{n_entities}: Number of unique groups
-#'       \item \code{n_balanced_entities}: Entities present in all periods
-#'       \item \code{n_entities_without_na}: Entities with no NAs in any observation
+#'       \item \code{n_balanced_entities}: Entities where all periods have at least one non-NA
+#'       \item \code{n_entities_complete}: Entities with no NAs in any observation
 #'     }
 #'   }
-#'   \item{\code{balanced_periods}}{Vector of time periods where all entities are present}
-#'   \item{\code{periods_without_na}}{Vector of time periods with no missing values}
-#'   \item{\code{balanced_entities}}{Vector of entities present in all time periods}
-#'   \item{\code{entities_without_na}}{Vector of entities with no missing values}
+#'   \item{\code{balanced_periods}}{Vector of time periods where all entities have at least one non-NA}
+#'   \item{\code{periods_complete}}{Vector of time periods with no missing values}
+#'   \item{\code{balanced_entities}}{Vector of entities where all time periods have at least one non-NA}
+#'   \item{\code{entities_complete}}{Vector of entities with no missing values}
 #'   \item{\code{presence_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0)}
-#'   \item{\code{na_matrix}}{Binary matrix showing which entity-period combinations have no NAs}
+#'   \item{\code{balanced_matrix}}{Binary matrix showing which entity-period pairs have at least one non-NA}
+#'   \item{\code{complete_matrix}}{Binary matrix showing which entity-period combinations have no NAs}
 #'   \item{\code{group_var}}{The group variable name}
 #'   \item{\code{time_var}}{The time variable name}
 #' }
@@ -49,29 +51,29 @@
 #' # Assign the results without printing
 #' balance_result <- explore_balance(production, group = "firm", time = "year", print_result = FALSE)
 #'
-#' # Balanced periods (all entities present)
+#' # Balanced periods (all entities have at least one non-NA)
 #' balanced_periods <- balance_result$balanced_periods
 #' print(balanced_periods)
 #'
 #' # Time periods with no missing values
-#' clean_periods <- balance_result$periods_without_na
-#' print(clean_periods)
+#' complete_periods <- balance_result$periods_complete
+#' print(complete_periods)
 #'
-#' # Balanced entities (present in all time periods)
-#' complete_entities <- balance_result$balanced_entities
-#' print(complete_entities)
+#' # Balanced entities (all periods have at least one non-NA)
+#' balanced_entities <- balance_result$balanced_entities
+#' print(balanced_entities)
 #'
 #' # Entities with no missing values
-#' clean_entities <- balance_result$entities_without_na
-#' print(clean_entities)
+#' complete_entities <- balance_result$entities_complete
+#' print(complete_entities)
 #'
 #' # Create a balanced subset
-#' balanced_data <- production[production$firm %in% complete_entities, ]
+#' balanced_data <- production[production$firm %in% balanced_entities, ]
 #'
 #' # Create a complete subset (balanced and no NAs)
 #' complete_data <- production[
-#'   production$firm %in% complete_entities &
-#'   production$year %in% clean_periods,
+#'   production$firm %in% balanced_entities &
+#'   production$year %in% complete_periods,
 #' ]
 #'
 #' @seealso
@@ -144,77 +146,96 @@ explore_balance <- function(
   # Total observations
   total_obs <- nrow(data)
 
-  # Count observations with/without NAs in substantive variables
-  has_any_na <- apply(data[substantive_vars], 1, function(x) any(is.na(x)))
-  obs_without_na <- sum(!has_any_na)
-  obs_with_na <- sum(has_any_na)
+  # Pre-compute row statistics
+  # Balanced: at least one non-NA in substantive variables
+  has_at_least_one_non_na <- apply(data[substantive_vars], 1, function(x) {
+    any(!is.na(x))
+  })
 
-  # Create presence matrix (1 = observation exists for entity-time pair)
+  # Complete: no NAs in substantive variables
+  has_no_na <- apply(data[substantive_vars], 1, function(x) {
+    all(!is.na(x))
+  })
+
+  obs_balanced <- sum(has_at_least_one_non_na)
+  obs_complete <- sum(has_no_na)
+
+  # Create matrices
+  n_entities <- length(unique_groups)
+  n_periods <- length(unique_times)
+
+  # Presence matrix (1 = observation exists for entity-time pair)
   presence_matrix <- matrix(
     0,
-    nrow = length(unique_groups),
-    ncol = length(unique_times),
+    nrow = n_entities,
+    ncol = n_periods,
     dimnames = list(unique_groups, unique_times)
   )
 
-  # Fill presence matrix
-  for (i in seq_along(group_vec)) {
-    row_idx <- which(unique_groups == group_vec[i])
-    col_idx <- which(unique_times == time_vec[i])
-    presence_matrix[row_idx, col_idx] <- 1
-  }
-
-  # Create NA matrix for substantive variables (1 = no NA for entity-time pair)
-  na_matrix <- matrix(
+  # Balanced matrix (1 = observation has at least one non-NA substantive variable)
+  balanced_matrix <- matrix(
     0,
-    nrow = length(unique_groups),
-    ncol = length(unique_times),
+    nrow = n_entities,
+    ncol = n_periods,
     dimnames = list(unique_groups, unique_times)
   )
 
-  # Fill NA matrix
+  # Complete matrix (1 = observation has no NAs in substantive variables)
+  complete_matrix <- matrix(
+    0,
+    nrow = n_entities,
+    ncol = n_periods,
+    dimnames = list(unique_groups, unique_times)
+  )
+
+  # Fill all matrices
   for (i in seq_along(group_vec)) {
     row_idx <- which(unique_groups == group_vec[i])
     col_idx <- which(unique_times == time_vec[i])
-    # Check if this observation has no NAs in substantive variables
-    if (!has_any_na[i]) {
-      na_matrix[row_idx, col_idx] <- 1
+
+    # Presence: always 1 if row exists
+    presence_matrix[row_idx, col_idx] <- 1
+
+    # Balanced: at least one non-NA
+    if (has_at_least_one_non_na[i]) {
+      balanced_matrix[row_idx, col_idx] <- 1
+    }
+
+    # Complete: no NAs
+    if (has_no_na[i]) {
+      complete_matrix[row_idx, col_idx] <- 1
     }
   }
 
   # Calculate statistics
   # 1. Time periods
-  n_periods <- length(unique_times)
-
   # Observations per entity (from presence matrix)
   obs_per_entity <- rowSums(presence_matrix)
   min_obs_per_entity <- min(obs_per_entity)
   max_obs_per_entity <- max(obs_per_entity)
   avg_obs_per_entity <- mean(obs_per_entity)
 
-  # Balanced time periods (all entities present)
+  # Balanced time periods (all entities have at least one non-NA)
   balanced_periods <- unique_times[
-    colSums(presence_matrix) == length(unique_groups)
+    colSums(balanced_matrix) == n_entities
   ]
   n_balanced_periods <- length(balanced_periods)
 
-  # Time periods without NAs (all observations have no NAs)
-  periods_without_na <- unique_times[
-    colSums(na_matrix) == colSums(presence_matrix)
+  # Complete time periods (all observations have no NAs)
+  complete_periods <- unique_times[
+    colSums(complete_matrix) == colSums(presence_matrix)
   ]
-  n_periods_without_na <- length(periods_without_na)
+  n_periods_complete <- length(complete_periods)
 
   # 2. Entities
-  n_entities <- length(unique_groups)
-
   # Observations per time period
   obs_per_period <- colSums(presence_matrix)
   min_obs_per_period <- min(obs_per_period)
   max_obs_per_period <- max(obs_per_period)
   avg_obs_per_period <- mean(obs_per_period)
 
-  # Balanced entities (present in all time periods)
-  balanced_entities <- unique_groups[rowSums(presence_matrix) == n_periods]
+  # Balanced entities (all periods have at least one non-NA)
+  balanced_entities <- unique_groups[rowSums(balanced_matrix) == n_periods]
   n_balanced_entities <- length(balanced_entities)
   pct_balanced_entities <- ifelse(
     n_entities > 0,
@@ -222,21 +243,22 @@ explore_balance <- function(
     0
   )
 
-  # Entities without NAs (all observations have no NAs)
-  # Alternative calculation for entities without NAs
-  entities_without_na <- c()
+  # Complete entities (all observations have no NAs)
+  complete_entities <- c()
   for (i in seq_along(unique_groups)) {
     entity <- unique_groups[i]
     entity_present <- which(presence_matrix[i, ] == 1)
-    entity_no_na <- which(na_matrix[i, ] == 1)
-    if (length(entity_present) > 0 && all(entity_present %in% entity_no_na)) {
-      entities_without_na <- c(entities_without_na, entity)
+    entity_complete <- which(complete_matrix[i, ] == 1)
+    if (
+      length(entity_present) > 0 && all(entity_present %in% entity_complete)
+    ) {
+      complete_entities <- c(complete_entities, entity)
     }
   }
-  n_entities_without_na <- length(entities_without_na)
-  pct_entities_without_na <- ifelse(
+  n_entities_complete <- length(complete_entities)
+  pct_entities_complete <- ifelse(
     n_entities > 0,
-    round(n_entities_without_na / n_entities * 100, 1),
+    round(n_entities_complete / n_entities * 100, 1),
     0
   )
 
@@ -244,29 +266,30 @@ explore_balance <- function(
   result <- list(
     summary = list(
       total_observations = total_obs,
-      observations_without_na = obs_without_na,
-      observations_with_na = obs_with_na,
+      observations_balanced = obs_balanced,
+      observations_complete = obs_complete,
       n_time_periods = n_periods,
       min_obs_per_entity = min_obs_per_entity,
       max_obs_per_entity = max_obs_per_entity,
       avg_obs_per_entity = avg_obs_per_entity,
       n_balanced_periods = n_balanced_periods,
-      n_periods_without_na = n_periods_without_na,
+      n_periods_complete = n_periods_complete,
       n_entities = n_entities,
       min_obs_per_period = min_obs_per_period,
       max_obs_per_period = max_obs_per_period,
       avg_obs_per_period = avg_obs_per_period,
       n_balanced_entities = n_balanced_entities,
       pct_balanced_entities = pct_balanced_entities,
-      n_entities_without_na = n_entities_without_na,
-      pct_entities_without_na = pct_entities_without_na
+      n_entities_complete = n_entities_complete,
+      pct_entities_complete = pct_entities_complete
     ),
     balanced_periods = balanced_periods,
-    periods_without_na = periods_without_na,
+    periods_complete = complete_periods,
     balanced_entities = balanced_entities,
-    entities_without_na = entities_without_na,
+    entities_complete = complete_entities,
     presence_matrix = presence_matrix,
-    na_matrix = na_matrix,
+    balanced_matrix = balanced_matrix,
+    complete_matrix = complete_matrix,
     group_var = group,
     time_var = time
   )
@@ -286,14 +309,14 @@ explore_balance <- function(
     )
     cat(sprintf("  Total observations: %d \n", total_obs))
     cat(sprintf(
-      "  Observations without NAs: %d (%.1f%%) \n",
-      obs_without_na,
-      ifelse(total_obs > 0, obs_without_na / total_obs * 100, 0)
+      "  Balanced observations (≥1 non-NA): %d (%.1f%%) \n",
+      obs_balanced,
+      ifelse(total_obs > 0, obs_balanced / total_obs * 100, 0)
     ))
     cat(sprintf(
-      "  Observations with NAs: %d (%.1f%%) \n\n",
-      obs_with_na,
-      ifelse(total_obs > 0, obs_with_na / total_obs * 100, 0)
+      "  Complete observations (no NAs): %d (%.1f%%) \n\n",
+      obs_complete,
+      ifelse(total_obs > 0, obs_complete / total_obs * 100, 0)
     ))
 
     cat("Time Periods\n")
@@ -307,10 +330,13 @@ explore_balance <- function(
       max_obs_per_entity,
       avg_obs_per_entity
     ))
-    cat(sprintf("  Number of balanced time periods: %d\n", n_balanced_periods))
     cat(sprintf(
-      "  Number of time periods without NAs: %d\n\n",
-      n_periods_without_na
+      "  Balanced time periods (all entities have ≥1 non-NA): %d\n",
+      n_balanced_periods
+    ))
+    cat(sprintf(
+      "  Complete time periods (no NAs): %d\n\n",
+      n_periods_complete
     ))
 
     cat("Entities\n")
@@ -323,14 +349,14 @@ explore_balance <- function(
       avg_obs_per_period
     ))
     cat(sprintf(
-      "  Number of balanced entities: %d (%.1f%%)\n",
+      "  Balanced entities (all periods have ≥1 non-NA): %d (%.1f%%)\n",
       n_balanced_entities,
       pct_balanced_entities
     ))
     cat(sprintf(
-      "  Number of entities without NAs: %d (%.1f%%)\n",
-      n_entities_without_na,
-      pct_entities_without_na
+      "  Complete entities (no NAs): %d (%.1f%%)\n",
+      n_entities_complete,
+      pct_entities_complete
     ))
     cat("\n")
   }
