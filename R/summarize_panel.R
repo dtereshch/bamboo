@@ -13,14 +13,14 @@
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'   Default = 3.
 #'
-#' @return A data.frame with variance summary statistics.
+#' @return A data.frame with panel data summary statistics.
 #'
 #' @details
 #' When `detailed = TRUE` (default), returns a data.frame with the following columns:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
-#'   \item{\code{summary}}{Type of summary: "overall", "between", or "within"}
-#'   \item{\code{mean}}{Mean value (only for "overall" summary)}
+#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{mean}}{Mean value (only for "overall" row)}
 #'   \item{\code{sd}}{Standard deviation}
 #'   \item{\code{min}}{Minimum value}
 #'   \item{\code{max}}{Maximum value}
@@ -203,7 +203,7 @@ summarize_panel <- function(
       if (detailed_output) {
         return(data.frame(
           variable = character(),
-          summary = character(),
+          decomposition = character(),
           mean = numeric(),
           sd = numeric(),
           min = numeric(),
@@ -275,7 +275,7 @@ summarize_panel <- function(
       # Create Stata-like output with overall, between, and within rows
       result <- data.frame(
         variable = c(varname, varname, varname),
-        summary = c("overall", "between", "within"),
+        decomposition = c("overall", "between", "within"),
         mean = c(overall_mean, NA, NA),
         sd = c(overall_sd, between_sd, within_sd),
         min = c(min_val, between_min, within_min),

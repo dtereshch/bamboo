@@ -22,7 +22,7 @@ Default = TRUE.}
 Default = 3.}
 }
 \value{
-A data.frame with variance summary statistics.
+A data.frame with panel data summary statistics.
 }
 \description{
 This function calculates summary statistics for panel data and decomposes
@@ -32,8 +32,8 @@ variance into between and within components.
 When \code{detailed = TRUE} (default), returns a data.frame with the following columns:
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
-\item{\code{summary}}{Type of summary: "overall", "between", or "within"}
-\item{\code{mean}}{Mean value (only for "overall" summary)}
+\item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+\item{\code{mean}}{Mean value (only for "overall" row)}
 \item{\code{sd}}{Standard deviation}
 \item{\code{min}}{Minimum value}
 \item{\code{max}}{Maximum value}
