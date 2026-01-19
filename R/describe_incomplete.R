@@ -48,7 +48,12 @@
 #' describe_incomplete(production, group = "firm", detailed = TRUE)
 #'
 #' @export
-describe_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
+describe_incomplete <- function(
+  data,
+  group,
+  time = NULL,
+  detailed = FALSE
+) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])

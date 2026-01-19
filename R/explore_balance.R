@@ -80,7 +80,12 @@
 #' [explore_participation()] for participation pattern analysis
 #'
 #' @export
-explore_balance <- function(data, group, time, print_result = TRUE) {
+explore_balance <- function(
+  data,
+  group,
+  time,
+  print_result = TRUE
+) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
