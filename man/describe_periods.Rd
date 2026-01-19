@@ -23,14 +23,12 @@ Provides detailed coverage statistics for each time period in panel data.
 The data.frame contains the following columns:
 \describe{
 \item{\code{[time]}}{Time period identifier (name matches the input \code{time} argument)}
-\item{\code{Count}}{Number of entities observed in each period}
-\item{\code{Share (obs.)}}{Share of total observations in each period (0 to 1)}
-\item{\code{Share (entities)}}{Share of entities observed in each period (0 to 1)}
+\item{\code{Total}}{Total number of observations in each period (all rows)}
+\item{\code{Balanced}}{Number of observations with at least one non-NA value in substantive variables}
+\item{\code{Complete}}{Number of observations without any NA values in substantive variables}
 }
 
 Time periods are sorted naturally (numeric values as numbers, others alphabetically).
-Statistics are calculated using only rows with substantive data (at least one
-non-NA value in substantive variables).
 }
 \examples{
 data(production)

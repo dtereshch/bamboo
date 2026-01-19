@@ -12,14 +12,12 @@
 #' The data.frame contains the following columns:
 #' \describe{
 #'   \item{\code{[time]}}{Time period identifier (name matches the input `time` argument)}
-#'   \item{\code{Count}}{Number of entities observed in each period}
-#'   \item{\code{Share (obs.)}}{Share of total observations in each period (0 to 1)}
-#'   \item{\code{Share (entities)}}{Share of entities observed in each period (0 to 1)}
+#'   \item{\code{Total}}{Total number of observations in each period (all rows)}
+#'   \item{\code{Balanced}}{Number of observations with at least one non-NA value in substantive variables}
+#'   \item{\code{Complete}}{Number of observations without any NA values in substantive variables}
 #' }
 #'
 #' Time periods are sorted naturally (numeric values as numbers, others alphabetically).
-#' Statistics are calculated using only rows with substantive data (at least one
-#' non-NA value in substantive variables).
 #'
 #' @seealso
 #' [describe_balance()], [explore_balance()], [describe_participation()]
@@ -51,22 +49,11 @@ describe_periods <- function(data, group, time) {
     stop('variable "', time, '" not found in data')
   }
 
-  # Filter data for analysis
-  substantive_vars <- setdiff(names(data), c(group, time))
-
-  if (length(substantive_vars) == 0) {
-    stop("no substantive variables found (besides group and time variables)")
-  }
-
-  has_data <- apply(data[substantive_vars], 1, function(x) any(!is.na(x)))
-  filtered_data <- data[has_data, ]
-
   # Extract variables
-  group_var <- as.character(filtered_data[[group]])
-  time_var <- as.character(filtered_data[[time]])
+  group_var <- as.character(data[[group]])
+  time_var <- as.character(data[[time]])
 
   # Get unique values
-  unique_groups <- unique(group_var)
   unique_times <- unique(time_var)
 
   # Order time periods
@@ -77,48 +64,60 @@ describe_periods <- function(data, group, time) {
   }
   ordered_times <- unique_times[time_order]
 
-  # Create presence matrix
-  presence_matrix <- matrix(
-    0,
-    nrow = length(unique_groups),
-    ncol = length(ordered_times),
-    dimnames = list(unique_groups, ordered_times)
-  )
+  # Identify substantive variables (excluding group and time)
+  substantive_vars <- setdiff(names(data), c(group, time))
 
-  for (i in seq_along(group_var)) {
-    row_idx <- which(unique_groups == group_var[i])
-    col_idx <- which(ordered_times == time_var[i])
-    if (length(col_idx) > 0) {
-      presence_matrix[row_idx, col_idx] <- 1
+  if (length(substantive_vars) == 0) {
+    stop("no substantive variables found (besides group and time variables)")
+  }
+
+  # Initialize result vectors
+  total_counts <- integer(length(ordered_times))
+  balanced_counts <- integer(length(ordered_times))
+  complete_counts <- integer(length(ordered_times))
+
+  # Calculate statistics for each time period
+  for (i in seq_along(ordered_times)) {
+    current_time <- ordered_times[i]
+
+    # Get indices for current time period
+    time_indices <- which(time_var == current_time)
+
+    # Total count (all rows in this period)
+    total_counts[i] <- length(time_indices)
+
+    if (length(time_indices) > 0) {
+      # Extract data for current time period
+      period_data <- data[time_indices, substantive_vars, drop = FALSE]
+
+      # Balanced: at least one non-NA value in substantive variables
+      has_some_data <- apply(period_data, 1, function(x) any(!is.na(x)))
+      balanced_counts[i] <- sum(has_some_data)
+
+      # Complete: no NA values in substantive variables
+      has_all_data <- apply(period_data, 1, function(x) all(!is.na(x)))
+      complete_counts[i] <- sum(has_all_data)
+    } else {
+      balanced_counts[i] <- 0
+      complete_counts[i] <- 0
     }
   }
 
-  # Calculate coverage statistics
-  total_entities <- length(unique_groups)
-  total_obs <- sum(presence_matrix)
-
-  period_coverage <- colSums(presence_matrix)
-  period_obs <- colSums(presence_matrix) # Same as coverage for binary presence
-
-  # Calculate shares as proportions (0 to 1)
-  share_entities <- period_coverage / total_entities
-  share_obs <- period_obs / total_obs
-
-  # Create result data.frame with new column names and order
+  # Create result data.frame
   result_df <- data.frame(
     time_period = ordered_times,
-    entities_count = period_coverage,
-    obs_share = share_obs,
-    entities_share = share_entities,
+    total = total_counts,
+    balanced = balanced_counts,
+    complete = complete_counts,
     stringsAsFactors = FALSE
   )
 
-  # Rename columns according to new specification
+  # Rename columns according to specification
   names(result_df) <- c(
     time,
-    "Count",
-    "Share (obs.)",
-    "Share (entities)"
+    "Total",
+    "Balanced",
+    "Complete"
   )
 
   return(result_df)
