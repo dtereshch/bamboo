@@ -28,7 +28,8 @@ Default = TRUE.}
 A list with detailed participation pattern analysis.
 }
 \description{
-Provides detailed analysis of participation patterns in panel data.
+Provides detailed analysis of participation patterns in panel data, including
+time coverage statistics and pattern distributions.
 }
 \details{
 The returned list contains the following components:
@@ -41,6 +42,7 @@ The returned list contains the following components:
 \item \code{pattern_string}: Binary string representation
 \item \code{n_entities}: Number of entities with this pattern
 \item \code{percent_entities}: Percentage of entities with this pattern
+\item \code{time_coverage}: Number of time periods covered by this pattern
 \item \code{entities}: List of entity identifiers with this pattern
 }
 }
@@ -49,6 +51,8 @@ The returned list contains the following components:
 \item{\code{group_var}}{The group variable name}
 \item{\code{time_var}}{The time variable name}
 \item{\code{filtered_data}}{The filtered data used for analysis (excluding rows with all NAs)}
+\item{\code{time_coverage_stats}}{Named vector with quantiles (min, 5\%, 25\%, 50\%, 75\%, 95\%, max) of time periods covered across all entities}
+\item{\code{time_coverage_by_entity}}{Named vector with number of time periods covered for each entity}
 }
 
 Patterns are sorted by frequency (most common first).
@@ -66,9 +70,17 @@ explore_participation(production, group = "firm", time = "year", max_patterns = 
 participation_result <- explore_participation(production, group = "firm", time = "year",
 print_result = FALSE)
 
-# Access the number of entities per pattern#'
+# Access the number of entities per pattern
 entities_per_pattern <- participation_result$entities_by_pattern
 print(entities_per_pattern)
+
+# Access time coverage statistics
+coverage_stats <- participation_result$time_coverage_stats
+print(coverage_stats)
+
+# Access individual entity coverage
+entity_coverage <- participation_result$time_coverage_by_entity
+print(entity_coverage[1:5])  # First 5 entities
 
 }
 \seealso{

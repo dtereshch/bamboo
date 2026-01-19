@@ -1,6 +1,7 @@
 #' Detailed Panel Data Participation Patterns
 #'
-#' Provides detailed analysis of participation patterns in panel data.
+#' Provides detailed analysis of participation patterns in panel data, including
+#' time coverage statistics and pattern distributions.
 #'
 #' @param data A data.frame containing panel data.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
@@ -22,6 +23,7 @@
 #'       \item \code{pattern_string}: Binary string representation
 #'       \item \code{n_entities}: Number of entities with this pattern
 #'       \item \code{percent_entities}: Percentage of entities with this pattern
+#'       \item \code{time_coverage}: Number of time periods covered by this pattern
 #'       \item \code{entities}: List of entity identifiers with this pattern
 #'     }
 #'   }
@@ -30,6 +32,8 @@
 #'   \item{\code{group_var}}{The group variable name}
 #'   \item{\code{time_var}}{The time variable name}
 #'   \item{\code{filtered_data}}{The filtered data used for analysis (excluding rows with all NAs)}
+#'   \item{\code{time_coverage_stats}}{Named vector with quantiles (min, 5%, 25%, 50%, 75%, 95%, max) of time periods covered across all entities}
+#'   \item{\code{time_coverage_by_entity}}{Named vector with number of time periods covered for each entity}
 #' }
 #'
 #' Patterns are sorted by frequency (most common first).
@@ -50,9 +54,17 @@
 #' participation_result <- explore_participation(production, group = "firm", time = "year",
 #' print_result = FALSE)
 #'
-#' # Access the number of entities per pattern#'
+#' # Access the number of entities per pattern
 #' entities_per_pattern <- participation_result$entities_by_pattern
 #' print(entities_per_pattern)
+#'
+#' # Access time coverage statistics
+#' coverage_stats <- participation_result$time_coverage_stats
+#' print(coverage_stats)
+#'
+#' # Access individual entity coverage
+#' entity_coverage <- participation_result$time_coverage_by_entity
+#' print(entity_coverage[1:5])  # First 5 entities
 #'
 #' @export
 explore_participation <- function(
@@ -141,6 +153,21 @@ explore_participation <- function(
     }
   }
 
+  # Calculate time coverage for each entity
+  time_coverage_by_entity <- rowSums(presence_matrix)
+  names(time_coverage_by_entity) <- rownames(presence_matrix)
+
+  # Calculate time coverage statistics (quantiles)
+  time_coverage_stats <- c(
+    min = min(time_coverage_by_entity),
+    `5%` = as.numeric(quantile(time_coverage_by_entity, 0.05)),
+    `25%` = as.numeric(quantile(time_coverage_by_entity, 0.25)),
+    `50%` = as.numeric(quantile(time_coverage_by_entity, 0.50)),
+    `75%` = as.numeric(quantile(time_coverage_by_entity, 0.75)),
+    `95%` = as.numeric(quantile(time_coverage_by_entity, 0.95)),
+    max = max(time_coverage_by_entity)
+  )
+
   # Group entities by missing value patterns
   pattern_strings <- apply(presence_matrix, 1, function(x) {
     paste(x, collapse = "")
@@ -190,12 +217,19 @@ explore_participation <- function(
   entities_by_pattern <- pattern_counts
   names(entities_by_pattern) <- rownames(pattern_matrix)
 
+  # Calculate time coverage for each pattern
+  pattern_time_coverage <- numeric(nrow(pattern_matrix))
+  for (i in seq_len(nrow(pattern_matrix))) {
+    pattern_time_coverage[i] <- sum(pattern_matrix[i, ])
+  }
+
   # Create pattern stats data.frame
   pattern_stats <- data.frame(
     pattern_id = seq_len(length(pattern_counts)),
     pattern_string = names(pattern_groups),
     n_entities = pattern_counts,
     percent_entities = pattern_pcts,
+    time_coverage = pattern_time_coverage,
     entities = I(pattern_groups),
     stringsAsFactors = FALSE
   )
@@ -209,20 +243,41 @@ explore_participation <- function(
     presence_matrix = presence_matrix,
     group_var = group,
     time_var = time,
-    filtered_data = filtered_data
+    filtered_data = filtered_data,
+    time_coverage_stats = time_coverage_stats,
+    time_coverage_by_entity = time_coverage_by_entity
   )
 
   # Print if requested
   if (print_result) {
     cat("Panel Data Participation Analysis\n")
-    cat("==============================================================\n\n")
+    cat(
+      "===================================================================\n\n"
+    )
+
+    # Print time coverage statistics
+    cat("Distribution of Entities by Time Periods Coverage\n")
+    cat("-------------------------------------------------------------------\n")
+    cat("min 5% 25% 50% 75% 95% max\n")
+    cat(sprintf(
+      "%d %d %d %d %d %d %d\n",
+      time_coverage_stats["min"],
+      time_coverage_stats["5%"],
+      time_coverage_stats["25%"],
+      time_coverage_stats["50%"],
+      time_coverage_stats["75%"],
+      time_coverage_stats["95%"],
+      time_coverage_stats["max"]
+    ))
+    cat("\n")
+
     # Print formatted output
     n_to_display <- min(length(pattern_groups), max_patterns)
     cat(sprintf(
       "Information on Top %d Participation Patterns\n",
       n_to_display
     ))
-    cat("--------------------------------------------------------------\n")
+    cat("-------------------------------------------------------------------\n")
 
     # Calculate maximum widths for alignment
     max_pattern_width <- nchar(as.character(n_to_display))
@@ -252,13 +307,12 @@ explore_participation <- function(
       }
 
       cat(sprintf(
-        "%s (%s, %s): [%s], entities: %s%s\n",
+        "%s (%s, %s): [%s], entities: %s\n",
         pattern_label,
         count_label,
         pct_label,
         paste(pattern_visual, collapse = ""),
-        entities_label,
-        ifelse(i == 1, " (Most Common)", "")
+        entities_label
       ))
     }
 
