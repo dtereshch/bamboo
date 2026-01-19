@@ -13,7 +13,7 @@
 #' @return Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
 #'
 #' @seealso
-#' [decompose_variation()], [plot_participation()]
+#' [summarize_panel()], [plot_participation()]
 #'
 #' @examples
 #' data(production)

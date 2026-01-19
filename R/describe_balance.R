@@ -43,7 +43,7 @@
 #' }
 #'
 #' @seealso
-#' [explore_balance()], [describe_periods()], [describe_participation()], [explore_participation], [plot_participation()]
+#' [explore_balance()], [describe_periods()], [describe_participation()]
 #'
 #' @examples
 #' data(production)

@@ -1,25 +1,25 @@
-#' Panel Data Structure Validation
+#' Panel Data Structure Exploration
 #'
-#' This function performs comprehensive validation of panel data structure,
+#' This function performs exploration of panel data structure,
 #' checking for common issues that could affect panel data analysis.
 #'
 #' @param data A data.frame containing panel data.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param time A character string specifying the name of the time variable in panel data.
-#' @param detailed A logical flag indicating whether to return detailed validation results.
+#' @param detailed A logical flag indicating whether to return detailed exploration results.
 #' Default = FALSE.
-#' @param print_result A logical flag indicating whether to print the validation results.
+#' @param print_result A logical flag indicating whether to print the exploration results.
 #' Default = TRUE.
 #'
-#' @return A list containing panel validation results.
+#' @return A list containing panel exploration results.
 #'
 #' @details
 #' The returned list contains the following components:
 #' \describe{
 #'   \item{\code{panel_summary}}{Character string summarizing panel structure}
-#'   \item{\code{validation_status}}{Overall validation status ("PASS", "WARNING", or "FAIL")}
-#'   \item{\code{validation_message}}{Descriptive message about validation status}
-#'   \item{\code{validation_results}}{Data frame with detailed validation results}
+#'   \item{\code{exploration_status}}{Overall exploration status ("PASS", "WARNING", or "FAIL")}
+#'   \item{\code{exploration_message}}{Descriptive message about exploration status}
+#'   \item{\code{exploration_results}}{Data frame with detailed exploration results}
 #'   \item{\code{detailed}}{Logical indicating whether detailed results were requested}
 #'   \item{\code{panel_info}}{List with panel structure information including:
 #'     \itemize{
@@ -45,32 +45,32 @@
 #' data(production)
 #'
 #' # Basic usage (prints by default)
-#' check_panel(production, group = "firm", time = "year")
+#' explore_panel(production, group = "firm", time = "year")
 #'
-#' # Detailed validation results
-#' check_panel(production, group = "firm", time = "year", detailed = TRUE)
+#' # Detailed exploration results
+#' explore_panel(production, group = "firm", time = "year", detailed = TRUE)
 #'
 #' # Assign the results without printing
-#' check_result <- check_panel(production, group = "firm", time = "year", print_result = FALSE)
+#' panel_result <- explore_panel(production, group = "firm", time = "year", print_result = FALSE)
 #'
 #' # Access useful vectors for further analysis
-#' duplicate_rows <- check_result$vectors$duplicate_rows
-#' unbalanced_firms <- check_result$vectors$unbalanced_groups
-#' irregular_firms <- check_result$vectors$irregular_groups
-#' obs_per_firm <- check_result$vectors$observations_per_group
+#' duplicate_rows <- panel_result$vectors$duplicate_rows
+#' unbalanced_firms <- panel_result$vectors$unbalanced_groups
+#' irregular_firms <- panel_result$vectors$irregular_groups
+#' obs_per_firm <- panel_result$vectors$observations_per_group
 #'
 #' # Identify problematic observations
 #' problematic_indices <- unique(c(
-#' check_result$vectors$duplicate_indices,
-#' check_result$vectors$missing_groups,
-#' check_result$vectors$missing_times
+#' panel_result$vectors$duplicate_indices,
+#' panel_result$vectors$missing_groups,
+#' panel_result$vectors$missing_times
 #' ))
 #'
 #' @seealso
 #' [explore_balance()], [explore_participation()]
 #'
 #' @export
-check_panel <- function(
+explore_panel <- function(
   data,
   group,
   time,
@@ -122,8 +122,8 @@ check_panel <- function(
     warning("time variable '", time, "' contains missing values")
   }
 
-  # Initialize validation results
-  validation_results <- data.frame(
+  # Initialize exploration results
+  exploration_results <- data.frame(
     variable = character(),
     status = character(),
     message = character(),
@@ -246,9 +246,9 @@ check_panel <- function(
   groups_with_min_obs <- names(group_table)[group_table == min_obs]
   groups_with_max_obs <- names(group_table)[group_table == max_obs]
 
-  # Build validation results
-  validation_results <- rbind(
-    validation_results,
+  # Build exploration results
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "data",
       status = "PASS",
@@ -257,8 +257,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "group",
       status = "PASS",
@@ -267,8 +267,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "group_completeness",
       status = ifelse(any(is.na(data[[group]])), "WARNING", "PASS"),
@@ -281,8 +281,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "time",
       status = "PASS",
@@ -291,8 +291,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "time_completeness",
       status = ifelse(any(is.na(data[[time]])), "WARNING", "PASS"),
@@ -305,8 +305,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "group_time_distinct",
       status = "PASS",
@@ -315,8 +315,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "duplicates",
       status = ifelse(has_duplicates, "FAIL", "PASS"),
@@ -329,8 +329,8 @@ check_panel <- function(
     )
   )
 
-  validation_results <- rbind(
-    validation_results,
+  exploration_results <- rbind(
+    exploration_results,
     data.frame(
       variable = "balance",
       status = ifelse(is_balanced, "PASS", "FAIL"),
@@ -344,8 +344,8 @@ check_panel <- function(
       inherits(time_vector, "Date") ||
       inherits(time_vector, "POSIXt")
   ) {
-    validation_results <- rbind(
-      validation_results,
+    exploration_results <- rbind(
+      exploration_results,
       data.frame(
         variable = "intervals",
         status = ifelse(has_irregular_intervals, "FAIL", "PASS"),
@@ -358,8 +358,8 @@ check_panel <- function(
       )
     )
   } else {
-    validation_results <- rbind(
-      validation_results,
+    exploration_results <- rbind(
+      exploration_results,
       data.frame(
         variable = "intervals",
         status = "INFO",
@@ -371,8 +371,8 @@ check_panel <- function(
 
   # Determine overall status
   overall_status <- ifelse(
-    any(validation_results$status %in% c("FAIL", "WARNING")),
-    ifelse(any(validation_results$status == "FAIL"), "FAIL", "WARNING"),
+    any(exploration_results$status %in% c("FAIL", "WARNING")),
+    ifelse(any(exploration_results$status == "FAIL"), "FAIL", "WARNING"),
     "PASS"
   )
 
@@ -404,13 +404,13 @@ check_panel <- function(
   # Create result object with useful vectors for further analysis
   result <- list(
     panel_summary = panel_summary,
-    validation_status = overall_status,
-    validation_message = ifelse(
+    exploration_status = overall_status,
+    exploration_message = ifelse(
       overall_status == "PASS",
       "Panel structure is valid",
       "Panel structure has issues"
     ),
-    validation_results = validation_results,
+    exploration_results = exploration_results,
     detailed = detailed,
 
     # Panel structure information
@@ -468,24 +468,24 @@ check_panel <- function(
     )
   )
 
-  class(result) <- "panel_check"
+  class(result) <- "panel_exploration"
 
   # Print if requested
   if (print_result) {
     if (result$detailed) {
-      cat("Panel Data Structure Check\n")
+      cat("Panel Data Structure Exploration\n")
       cat("==============================================================\n\n")
 
       cat("Summary\n")
       cat("--------------------------------------------------------------\n")
       cat(result$panel_summary, "\n")
-      cat("Validation Status:", result$validation_message, "\n\n")
+      cat("Exploration Status:", result$exploration_message, "\n\n")
 
-      cat("Validation Results\n")
+      cat("Exploration Results\n")
       cat("--------------------------------------------------------------\n")
 
-      for (i in 1:nrow(result$validation_results)) {
-        row <- result$validation_results[i, ]
+      for (i in 1:nrow(result$exploration_results)) {
+        row <- result$exploration_results[i, ]
 
         # Color coding for status
         status_str <- switch(
@@ -501,10 +501,10 @@ check_panel <- function(
       }
       cat("\n")
     } else {
-      # For non-detailed output, just show the panel summary and validation status
+      # For non-detailed output, just show the panel summary and exploration status
       # without any titles
       cat(result$panel_summary, "\n")
-      cat("Validation Status:", result$validation_message, "\n")
+      cat("Exploration Status:", result$exploration_message, "\n")
     }
   }
 

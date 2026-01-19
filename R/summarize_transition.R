@@ -1,6 +1,6 @@
-#' Transition Probability Analysis
+#' Transition Probabilities Summary
 #'
-#' This function calculates transition probabilities between states of a categorical
+#' This function calculates and summarizes transition probabilities between states of a categorical
 #' variable across time periods for panel data.
 #'
 #' @param data A data.frame containing panel data.
@@ -10,7 +10,7 @@
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round probabilities. Default = 3.
 #'
-#' @return A data.frame containing transition probabilities.
+#' @return A data.frame containing transition probability summary.
 #'
 #' @details
 #' The output format depends on the `format` parameter:
@@ -40,22 +40,22 @@
 #' For Stata users: This corresponds to the `xttrans` command.
 #'
 #' @seealso
-#' [describe()], [decompose_variation()], [describe_participation()]
+#' [summarize_data()], [summarize_panel()], [describe_participation()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Analyze transitions in wide format (default)
-#' describe_transition(production, selection = "industry", group = "firm", time = "year")
+#' summarize_transition(production, selection = "industry", group = "firm", time = "year")
 #'
 #' # Analyze transitions in long format
-#' describe_transition(production, selection = "industry", group = "firm", time = "year", format = "long")
+#' summarize_transition(production, selection = "industry", group = "firm", time = "year", format = "long")
 #'
 #' # Customize rounding
-#' describe_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
+#' summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
 #'
 #' @export
-describe_transition <- function(
+summarize_transition <- function(
   data,
   selection,
   group,

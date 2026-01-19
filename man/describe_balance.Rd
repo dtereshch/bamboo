@@ -14,8 +14,16 @@ describe_balance(data, group, time)
 \item{time}{A character string specifying the name of the time variable.}
 }
 \value{
-A data.frame with 6 columns and 3 rows containing panel data summary statistics.
-The data.frame has the following columns:
+A data.frame with panel data balance statistics.
+}
+\description{
+Provides comprehensive summary statistics for panel data structure with focus on balance
+and data completeness.
+}
+\details{
+The data.frame has 6 columns and 3 rows containing panel data summary statistics:
+
+\strong{Columns:}
 \describe{
 \item{\code{Panel Info}}{Character vector describing the type of panel element.
 Contains three values: "Observations", "Entities", and "Periods".}
@@ -37,16 +45,13 @@ For "Periods": number of time periods with no NAs in any observation.}
 \item{\code{Share (without NA)}}{Numeric vector with proportions of cases without missing values
 (ranging from 0 to 1). Calculated as \code{Count (without NA)} / \code{Count (total)} for each row.}
 }
-The data.frame has three rows corresponding to:
-\enumerate{
-\item{\strong{Observations}: Row-level information}
-\item{\strong{Entities}: Group-level balance and data completeness}
-\item{\strong{Periods}: Time-level balance and data completeness}
+
+\strong{Rows:}
+\describe{
+\item{\strong{Observations}}{Row-level information about data completeness}
+\item{\strong{Entities}}{Group-level balance and data completeness}
+\item{\strong{Periods}}{Time-level balance and data completeness}
 }
-}
-\description{
-Provides comprehensive summary statistics for panel data structure with focus on balance
-and data completeness.
 }
 \examples{
 data(production)
@@ -54,5 +59,5 @@ describe_balance(production, group = "firm", time = "year")
 
 }
 \seealso{
-\code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_participation]{describe_participation()}}, \link{explore_participation}, \code{\link[=plot_participation]{plot_participation()}}
+\code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_participation]{describe_participation()}}
 }

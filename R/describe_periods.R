@@ -22,7 +22,7 @@
 #' non-NA value in substantive variables).
 #'
 #' @seealso
-#' [describe_balance()], [explore_balance()], [describe_participation()], [explore_participation()], [plot_participation()]
+#' [describe_balance()], [explore_balance()], [describe_participation()]
 #'
 #' @examples
 #' data(production)

@@ -25,15 +25,33 @@ explore_participation(
 Default = TRUE.}
 }
 \value{
-A list containing detailed participation pattern statistics.
-The list includes:
-\item{pattern_matrix}{Matrix showing presence patterns}
-\item{pattern_groups}{List of entities belonging to each pattern}
-\item{pattern_stats}{Data.frame with pattern statistics}
-\item{entities_by_pattern}{Vector with the number of entities in each pattern}
+A list with detailed participation pattern analysis.
 }
 \description{
 Provides detailed analysis of participation patterns in panel data.
+}
+\details{
+The returned list contains the following components:
+\describe{
+\item{\code{pattern_matrix}}{Matrix showing presence patterns (rows = patterns, columns = time periods)}
+\item{\code{pattern_groups}}{List of entities belonging to each pattern}
+\item{\code{pattern_stats}}{Data.frame with pattern statistics including:
+\itemize{
+\item \code{pattern_id}: Pattern identifier
+\item \code{pattern_string}: Binary string representation
+\item \code{n_entities}: Number of entities with this pattern
+\item \code{percent_entities}: Percentage of entities with this pattern
+\item \code{entities}: List of entity identifiers with this pattern
+}
+}
+\item{\code{entities_by_pattern}}{Named vector with number of entities in each pattern}
+\item{\code{presence_matrix}}{Original presence matrix used for analysis}
+\item{\code{group_var}}{The group variable name}
+\item{\code{time_var}}{The time variable name}
+\item{\code{filtered_data}}{The filtered data used for analysis (excluding rows with all NAs)}
+}
+
+Patterns are sorted by frequency (most common first).
 }
 \examples{
 data(production)
@@ -54,5 +72,5 @@ print(entities_per_pattern)
 
 }
 \seealso{
-\code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=explore_incomplete]{explore_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}
+\code{\link[=describe_participation]{describe_participation()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=explore_panel]{explore_panel()}}
 }

@@ -14,17 +14,23 @@ describe_periods(data, group, time)
 \item{time}{A character string specifying the name of the time variable.}
 }
 \value{
-A data.frame with coverage statistics for each time period.
-The data.frame has the following columns:
-\itemize{
-\item Time period identifier (name matches the input \code{time} argument)
-\item \code{Count}: Number of entities observed in each period
-\item \code{Share (obs.)}: Share of total observations in each period (0 to 1)
-\item \code{Share (entities)}: Share of entities observed in each period (0 to 1)
-}
+A data.frame with time period coverage statistics.
 }
 \description{
 Provides detailed coverage statistics for each time period in panel data.
+}
+\details{
+The data.frame contains the following columns:
+\describe{
+\item{\code{[time]}}{Time period identifier (name matches the input \code{time} argument)}
+\item{\code{Count}}{Number of entities observed in each period}
+\item{\code{Share (obs.)}}{Share of total observations in each period (0 to 1)}
+\item{\code{Share (entities)}}{Share of entities observed in each period (0 to 1)}
+}
+
+Time periods are sorted naturally (numeric values as numbers, others alphabetically).
+Statistics are calculated using only rows with substantive data (at least one
+non-NA value in substantive variables).
 }
 \examples{
 data(production)
@@ -32,5 +38,5 @@ describe_periods(production, group = "firm", time = "year")
 
 }
 \seealso{
-\code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=plot_participation]{plot_participation()}}
+\code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_participation]{describe_participation()}}
 }

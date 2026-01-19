@@ -1,6 +1,6 @@
-#' Descriptive Statistics
+#' Data Summary Statistics
 #'
-#' This function calculates comprehensive descriptive statistics for numeric variables,
+#' This function calculates summary statistics for numeric variables,
 #' either overall or grouped by a single grouping variable.
 #'
 #' @param data A data.frame containing the variables for analysis.
@@ -14,7 +14,7 @@
 #' @param digits An integer specifying the number of decimal places for rounding
 #'        statistics. Default = 3.
 #'
-#' @return A data.frame with descriptive statistics.
+#' @return A data.frame with descriptive statistics summary.
 #'
 #' @details
 #' The returned data.frame contains the following columns:
@@ -39,34 +39,34 @@
 #' When a grouping variable is specified, statistics are calculated for each group.
 #'
 #' @seealso
-#' [decompose_variation()], [describe_transition()]
+#' [summarize_panel()], [summarize_transition()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Basic usage with statistics for all numeric variables
-#' describe(production)
+#' summarize_data(production)
 #'
 #' # Detailed output
-#' describe(production, detailed = TRUE)
+#' summarize_data(production, detailed = TRUE)
 #'
 #' # Show statistics for a single variable
-#' describe(production, selection = "sales")
+#' summarize_data(production, selection = "sales")
 #'
 #' # Show statistics for multiple variables
-#' describe(production, selection = c("capital", "labor"))
+#' summarize_data(production, selection = c("capital", "labor"))
 #'
 #' # Show grouped statistics
-#' describe(production, group = "year")
+#' summarize_data(production, group = "year")
 #'
 #' # Show statistics with two digits rounding
-#' describe(production, digits = 2)
+#' summarize_data(production, digits = 2)
 #'
 #' # Show statistics with no rounding
-#' describe(production, digits = 999999)
+#' summarize_data(production, digits = 999999)
 #'
 #' @export
-describe <- function(
+summarize_data <- function(
   data,
   selection = NULL,
   group = NULL,

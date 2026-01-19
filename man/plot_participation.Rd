@@ -52,5 +52,5 @@ plot_participation(production, group = "firm", time = "year", colors = c("black"
 
 }
 \seealso{
-\code{\link[=describe_participation]{describe_participation()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=explore_incomplete]{explore_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}
+\code{\link[=describe_participation]{describe_participation()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}
 }

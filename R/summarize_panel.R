@@ -1,26 +1,26 @@
-#' Panel Data Variation Decomposition
+#' Panel Data Summary Statistics
 #'
-#' This function calculates descriptive statistics for panel data and decomposes
+#' This function calculates summary statistics for panel data and decomposes
 #' variance into between and within components.
 #'
 #' @param data A data.frame containing panel data.
 #' @param selection A character vector specifying which numeric variables to analyze.
 #'   If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
-#'   Required for variance decomposition.
+#'   Required for variance summary.
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
 #'   Default = TRUE.
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'   Default = 3.
 #'
-#' @return A data.frame with variance decomposition statistics.
+#' @return A data.frame with variance summary statistics.
 #'
 #' @details
 #' When `detailed = TRUE` (default), returns a data.frame with the following columns:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
-#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
-#'   \item{\code{mean}}{Mean value (only for "overall" decomposition)}
+#'   \item{\code{summary}}{Type of summary: "overall", "between", or "within"}
+#'   \item{\code{mean}}{Mean value (only for "overall" summary)}
 #'   \item{\code{sd}}{Standard deviation}
 #'   \item{\code{min}}{Minimum value}
 #'   \item{\code{max}}{Maximum value}
@@ -48,31 +48,31 @@
 #' For Stata users: This corresponds to the `xtsum` command.
 #'
 #' @seealso
-#' [describe()], [plot_heterogeneity()]
+#' [summarize_data()], [plot_heterogeneity()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Basic usage with statistics for all numeric variables
-#' decompose_variation(production, group = "firm")
+#' summarize_panel(production, group = "firm")
 #'
 #' # Simplified output
-#' decompose_variation(production, group = "firm", detailed = FALSE)
+#' summarize_panel(production, group = "firm", detailed = FALSE)
 #'
 #' # Show statistics for a single variable
-#' decompose_variation(production, selection = "sales", group = "firm")
+#' summarize_panel(production, selection = "sales", group = "firm")
 #'
 #' # Show statistics for multiple variables
-#' decompose_variation(production, selection = c("capital", "labor"), group = "firm")
+#' summarize_panel(production, selection = c("capital", "labor"), group = "firm")
 #'
 #' # Show statistics with two digits rounding
-#' decompose_variation(production, group = "firm", digits = 2)
+#' summarize_panel(production, group = "firm", digits = 2)
 #'
 #' # Show statistics with no rounding
-#' decompose_variation(production, group = "firm", digits = 999999)
+#' summarize_panel(production, group = "firm", digits = 999999)
 #'
 #' @export
-decompose_variation <- function(
+summarize_panel <- function(
   data,
   selection = NULL,
   group,
@@ -188,7 +188,7 @@ decompose_variation <- function(
   }
 
   # Helper function to calculate panel statistics for one variable
-  decompose_variation_1 <- function(
+  summarize_panel_1 <- function(
     data,
     varname,
     group,
@@ -203,7 +203,7 @@ decompose_variation <- function(
       if (detailed_output) {
         return(data.frame(
           variable = character(),
-          decomposition = character(),
+          summary = character(),
           mean = numeric(),
           sd = numeric(),
           min = numeric(),
@@ -275,7 +275,7 @@ decompose_variation <- function(
       # Create Stata-like output with overall, between, and within rows
       result <- data.frame(
         variable = c(varname, varname, varname),
-        decomposition = c("overall", "between", "within"),
+        summary = c("overall", "between", "within"),
         mean = c(overall_mean, NA, NA),
         sd = c(overall_sd, between_sd, within_sd),
         min = c(min_val, between_min, within_min),
@@ -299,7 +299,7 @@ decompose_variation <- function(
 
   # Calculate statistics for each variable
   results <- lapply(selection, function(varname) {
-    decompose_variation_1(data_df, varname, group, detailed, digits)
+    summarize_panel_1(data_df, varname, group, detailed, digits)
   })
 
   # Combine all results

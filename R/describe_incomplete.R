@@ -1,4 +1,4 @@
-#' Incomplete Entities Analysis
+#' Incomplete Entities Description
 #'
 #' This function provides a descriptive table of entities with incomplete observations (missing values).
 #'
@@ -8,7 +8,7 @@
 #' @param detailed A logical flag indicating whether to include detailed missing counts
 #'        for each variable. Default = FALSE.
 #'
-#' @return A data.frame with incomplete entities analysis or a character message.
+#' @return A data.frame with incomplete entities description or a character message.
 #'
 #' @details
 #' When incomplete entities exist, returns a data.frame with:
@@ -33,22 +33,22 @@
 #' "There are no incomplete groups/entities in the data."
 #'
 #' @seealso
-#' [explore_participation()], [describe_participation()], [plot_participation()], [explore_balance()], [describe_balance()], [describe_periods()]
+#' [explore_participation()], [describe_participation()], [explore_balance()], [describe_balance()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Basic usage
-#' explore_incomplete(production, group = "firm")
+#' describe_incomplete(production, group = "firm")
 #'
 #' # More careful usage with panel balance check
-#' explore_incomplete(production, group = "firm", time = "year")
+#' describe_incomplete(production, group = "firm", time = "year")
 #'
 #' # Detailed view with variable-level NA counts
-#' explore_incomplete(production, group = "firm", detailed = TRUE)
+#' describe_incomplete(production, group = "firm", detailed = TRUE)
 #'
 #' @export
-explore_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
+describe_incomplete <- function(data, group, time = NULL, detailed = FALSE) {
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])

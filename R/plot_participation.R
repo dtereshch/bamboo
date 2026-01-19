@@ -15,7 +15,7 @@
 #' @return Invisibly returns a list with summary statistics. Creates a plot showing participation patterns.
 #'
 #' @seealso
-#' [describe_participation()], [explore_participation()], [describe_periods()], [explore_incomplete()], [describe_balance()], [explore_balance()]
+#' [describe_participation()], [explore_participation()], [plot_heterogeneity()]
 #'
 #' @examples
 #' data(production)

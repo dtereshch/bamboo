@@ -39,7 +39,7 @@
 #' Patterns are sorted by frequency (most common first).
 #'
 #' @seealso
-#' [plot_participation()], [explore_participation()], [describe_periods()], [explore_incomplete()], [describe_balance()], [explore_balance()]
+#' [plot_participation()], [explore_participation()], [describe_periods()], [describe_incomplete()], [describe_balance()]
 #'
 #' @examples
 #' data(production)
