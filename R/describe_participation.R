@@ -7,6 +7,8 @@
 #' @param time A character string specifying the name of the time variable.
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param format A character string specifying the output format: "wide" (default) or "long".
+#' @param digits An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
+#' Default = 3.
 #'
 #' @return A data.frame with participation patterns.
 #'
@@ -53,13 +55,17 @@
 #' # Simplified version in long format
 #' describe_participation(production, group = "firm", time = "year", detailed = FALSE, format = "long")
 #'
+#' # With custom rounding
+#' describe_participation(production, group = "firm", time = "year", digits = 4)
+#'
 #' @export
 describe_participation <- function(
   data,
   group,
   time,
   detailed = TRUE,
-  format = "wide"
+  format = "wide",
+  digits = 3
 ) {
   # Input validation
   if (!is.data.frame(data)) {
@@ -93,6 +99,15 @@ describe_participation <- function(
   if (!format %in% c("wide", "long")) {
     stop('format must be either "wide" or "long", not "', format, '"')
   }
+
+  if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
+    stop(
+      "'digits' must be a single non-negative integer, not ",
+      class(digits)[1]
+    )
+  }
+
+  digits <- as.integer(digits)
 
   data <- .check_and_convert_data_robust(data, arg_name = "data")
 
@@ -166,13 +181,13 @@ describe_participation <- function(
 
   # Add count and share columns
   result$count <- as.numeric(pattern_counts)
-  result$share <- round(result$count / sum(result$count), 4)
+  result$share <- round(result$count / sum(result$count), digits)
 
   # Sort by count (descending) FIRST, then calculate cumulative sum
   result <- result[order(-result$count), ]
 
   # Now calculate cumulative sum on the sorted data
-  result$cumulative <- round(cumsum(result$share), 4)
+  result$cumulative <- round(cumsum(result$share), digits)
 
   # Reset pattern numbers to follow the new sorted order
   result$pattern <- seq_len(nrow(result))

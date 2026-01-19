@@ -4,7 +4,14 @@
 \alias{describe_participation}
 \title{Panel Data Participation Patterns}
 \usage{
-describe_participation(data, group, time, detailed = TRUE, format = "wide")
+describe_participation(
+  data,
+  group,
+  time,
+  detailed = TRUE,
+  format = "wide",
+  digits = 3
+)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}
@@ -16,6 +23,9 @@ describe_participation(data, group, time, detailed = TRUE, format = "wide")
 \item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
 
 \item{format}{A character string specifying the output format: "wide" (default) or "long".}
+
+\item{digits}{An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
+Default = 3.}
 }
 \value{
 A data.frame with participation patterns.
@@ -62,6 +72,9 @@ describe_participation(production, group = "firm", time = "year", detailed = FAL
 
 # Simplified version in long format
 describe_participation(production, group = "firm", time = "year", detailed = FALSE, format = "long")
+
+# With custom rounding
+describe_participation(production, group = "firm", time = "year", digits = 4)
 
 }
 \seealso{
