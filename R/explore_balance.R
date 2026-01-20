@@ -76,11 +76,6 @@
 #'   production$year %in% complete_periods,
 #' ]
 #'
-#' @seealso
-#' [check_panel()] for basic panel structure validation,
-#' [describe_balance()] for summary statistics,
-#' [explore_participation()] for participation pattern analysis
-#'
 #' @export
 explore_balance <- function(
   data,
