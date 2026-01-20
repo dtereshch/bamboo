@@ -336,12 +336,12 @@ explore_balance <- function(
     cat(sprintf("%6d  Maximum observations per period\n", max_obs_per_period))
     cat(sprintf("%6.1f  Average observations per period\n", avg_obs_per_period))
     cat(sprintf(
-      "%6d  Balanced entities (%5.1f%%)\n",
+      "%6d  Entities where all periods have ≥1 non-NA (%5.1f%%)\n",
       n_balanced_entities,
       pct_balanced_entities
     ))
     cat(sprintf(
-      "%6d  Complete entities (%5.1f%%)\n",
+      "%6d  Entities with no missing values (%5.1f%%)\n",
       n_entities_complete,
       pct_entities_complete
     ))
