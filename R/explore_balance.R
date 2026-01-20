@@ -299,62 +299,58 @@ explore_balance <- function(
   # Print if requested
   if (print_result) {
     cat("Panel Data Balance Exploration\n")
-    cat(
-      "====================================================================\n\n"
-    )
+    cat("====================================================\n\n")
 
-    cat("Basic Information\n")
-    cat(
-      "--------------------------------------------------------------------\n"
-    )
-    cat(sprintf("  Total observations: %d \n", total_obs))
+    cat("Basic Information:\n")
+    cat("----------------------------------------------------\n")
+    cat(sprintf("%-30s %14d\n", "Total observations:", total_obs))
     cat(sprintf(
-      "  Balanced observations (≥1 non-NA): %d (%.1f%%) \n",
+      "%-30s %14d (%.1f%%)\n",
+      "With ≥1 non-NA:",
       obs_balanced,
       ifelse(total_obs > 0, obs_balanced / total_obs * 100, 0)
     ))
     cat(sprintf(
-      "  Complete observations (no NAs): %d (%.1f%%) \n\n",
+      "%-30s %14d (%.1f%%)\n",
+      "With no NAs:",
       obs_complete,
       ifelse(total_obs > 0, obs_complete / total_obs * 100, 0)
     ))
+    cat("\n")
 
-    cat("Time Periods\n")
-    cat(
-      "--------------------------------------------------------------------\n"
-    )
-    cat(sprintf("  Number of time periods: %d \n", n_periods))
+    cat("Time Periods:\n")
+    cat("----------------------------------------------------\n")
+    cat(sprintf("%-30s %14d\n", "Number of periods:", n_periods))
     cat(sprintf(
-      "  Observations per entity: %d - %d (avg: %.1f )\n",
+      "%-30s %14d - %d (avg: %.1f)\n",
+      "Observations per entity:",
       min_obs_per_entity,
       max_obs_per_entity,
       avg_obs_per_entity
     ))
-    cat(sprintf(
-      "  Balanced time periods (all entities have ≥1 non-NA): %d\n",
-      n_balanced_periods
-    ))
-    cat(sprintf(
-      "  Complete time periods (no NAs): %d\n\n",
-      n_periods_complete
-    ))
+    cat(sprintf("%-30s %14d\n", "Balanced periods:", n_balanced_periods))
+    cat(sprintf("%-30s %14d\n", "Complete periods:", n_periods_complete))
+    cat("\n")
 
-    cat("Entities\n")
-    cat("-------------------------------------------------------------------\n")
-    cat(sprintf("  Number of entities: %d \n", n_entities))
+    cat("Entities:\n")
+    cat("----------------------------------------------------\n")
+    cat(sprintf("%-30s %14d\n", "Number of entities:", n_entities))
     cat(sprintf(
-      "  Observations per time period: %d - %d (avg: %.1f )\n",
+      "%-30s %14d - %d (avg: %.1f)\n",
+      "Observations per period:",
       min_obs_per_period,
       max_obs_per_period,
       avg_obs_per_period
     ))
     cat(sprintf(
-      "  Balanced entities (all periods have ≥1 non-NA): %d (%.1f%%)\n",
+      "%-30s %14d (%.1f%%)\n",
+      "Balanced entities:",
       n_balanced_entities,
       pct_balanced_entities
     ))
     cat(sprintf(
-      "  Complete entities (no NAs): %d (%.1f%%)\n",
+      "%-30s %14d (%.1f%%)\n",
+      "Complete entities:",
       n_entities_complete,
       pct_entities_complete
     ))
