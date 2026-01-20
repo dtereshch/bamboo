@@ -194,6 +194,7 @@ explore_participation <- function(
     }
   }
 
+  # Initial rownames before sorting
   rownames(pattern_matrix) <- paste0("Pattern ", seq_len(nrow(pattern_matrix)))
   colnames(pattern_matrix) <- ordered_times
 
@@ -209,6 +210,10 @@ explore_participation <- function(
   pattern_counts <- pattern_counts[pattern_order]
   pattern_groups <- pattern_groups[pattern_order]
 
+  # FIX: Reassign pattern IDs after sorting
+  rownames(pattern_matrix) <- paste0("Pattern ", seq_len(nrow(pattern_matrix)))
+  names(pattern_groups) <- rownames(pattern_matrix)
+
   # Calculate percentages
   total_entities <- length(unique_groups)
   pattern_pcts <- pattern_counts / total_entities * 100
@@ -223,10 +228,15 @@ explore_participation <- function(
     pattern_time_coverage[i] <- sum(pattern_matrix[i, ])
   }
 
+  # FIX: Update pattern strings for pattern_stats
+  pattern_strings_sorted <- apply(pattern_matrix, 1, function(x) {
+    paste(x, collapse = "")
+  })
+
   # Create pattern stats data.frame
   pattern_stats <- data.frame(
     pattern_id = seq_len(length(pattern_counts)),
-    pattern_string = names(pattern_groups),
+    pattern_string = pattern_strings_sorted,
     n_entities = pattern_counts,
     percent_entities = pattern_pcts,
     time_coverage = pattern_time_coverage,
