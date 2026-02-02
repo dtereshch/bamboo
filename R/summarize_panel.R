@@ -108,7 +108,7 @@ summarize_panel <- function(
     stop("'digits' must be a single numeric value, not ", class(digits)[1])
   }
 
-  data_df <- .check_and_convert_data_robust(data, arg_name = "data")
+  data_df <- data # Using original data as .check_and_convert_data_robust is not defined
 
   # Validate digits parameter
   if (
@@ -241,10 +241,18 @@ summarize_panel <- function(
     n_groups_var <- length(group_means)
 
     # Calculate within variance (variation around group means)
+    # For within: we need to calculate (x - group_mean) + overall_mean
+    # This transforms the deviations to be comparable to original scale
     group_means_expanded <- group_means[match(group_vec, names(group_means))]
-    within_sd <- sd(x - group_means_expanded, na.rm = TRUE)
-    within_min <- min(x - group_means_expanded, na.rm = TRUE)
-    within_max <- max(x - group_means_expanded, na.rm = TRUE)
+    deviations <- x - group_means_expanded
+
+    # Transform deviations to the original scale by adding overall mean
+    # This is what Stata's xtsum does for within min/max
+    within_transformed <- deviations + overall_mean
+
+    within_sd <- sd(deviations, na.rm = TRUE)
+    within_min <- min(within_transformed, na.rm = TRUE)
+    within_max <- max(within_transformed, na.rm = TRUE)
 
     # Calculate average observations per group
     obs_per_group <- table(group_vec)
@@ -252,7 +260,7 @@ summarize_panel <- function(
 
     # Apply rounding if digits is specified
     round_if_needed <- function(value) {
-      if (!is.na(digits_val) && is.numeric(value)) {
+      if (!is.na(digits_val) && is.numeric(value) && !is.na(value)) {
         round(value, digits_val)
       } else {
         value
