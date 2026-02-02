@@ -4,7 +4,14 @@
 \alias{summarize_missing}
 \title{Missing Values Summary for Panel Data}
 \usage{
-summarize_missing(data, selection = NULL, group, time, detailed = FALSE)
+summarize_missing(
+  data,
+  selection = NULL,
+  group,
+  time,
+  detailed = FALSE,
+  digits = 3
+)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}
@@ -18,6 +25,9 @@ If not specified, all variables in the data.frame will be used.}
 
 \item{detailed}{A logical flag indicating whether to return detailed period-specific NA counts.
 Default = FALSE.}
+
+\item{digits}{An integer indicating the number of decimal places to round the na_share column.
+Default = 3.}
 }
 \value{
 A data.frame with missing value summary statistics.
@@ -31,7 +41,7 @@ When \code{detailed = FALSE} (default), returns a data.frame with the following 
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{na_count}}{Total number of missing values (NAs) for the variable}
-\item{\code{na_share}}{Proportion of observations that are missing (0 to 1)}
+\item{\code{na_share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
 \item{\code{entities_with_na}}{Number of entities/groups with at least one missing value for this variable}
 \item{\code{periods_with_na}}{Number of time periods with at least one missing value for this variable}
 }
@@ -48,6 +58,7 @@ The data.frame has additional attributes:
 \item{\code{group_var}}{The grouping variable name}
 \item{\code{time_var}}{The time variable name}
 \item{\code{detailed}}{Logical indicating detailed output}
+\item{\code{digits}}{Number of decimal places used for rounding na_share}
 \item{\code{total_observations}}{Total number of observations in the data}
 \item{\code{total_entities}}{Total number of unique entities/groups}
 \item{\code{total_periods}}{Total number of unique time periods}
@@ -67,6 +78,9 @@ summarize_missing(production, selection = "sales", group = "firm", time = "year"
 
 # Show missing values for multiple variables
 summarize_missing(production, selection = c("capital", "labor"), group = "firm", time = "year")
+
+# Customize rounding
+summarize_missing(production, group = "firm", time = "year", digits = 4)
 
 }
 \seealso{

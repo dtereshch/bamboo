@@ -10,6 +10,8 @@
 #' @param time A character string specifying the name of the time variable.
 #' @param detailed A logical flag indicating whether to return detailed period-specific NA counts.
 #'        Default = FALSE.
+#' @param digits An integer indicating the number of decimal places to round the na_share column.
+#'        Default = 3.
 #'
 #' @return A data.frame with missing value summary statistics.
 #'
@@ -18,7 +20,7 @@
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{na_count}}{Total number of missing values (NAs) for the variable}
-#'   \item{\code{na_share}}{Proportion of observations that are missing (0 to 1)}
+#'   \item{\code{na_share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
 #'   \item{\code{entities_with_na}}{Number of entities/groups with at least one missing value for this variable}
 #'   \item{\code{periods_with_na}}{Number of time periods with at least one missing value for this variable}
 #' }
@@ -35,6 +37,7 @@
 #'   \item{\code{group_var}}{The grouping variable name}
 #'   \item{\code{time_var}}{The time variable name}
 #'   \item{\code{detailed}}{Logical indicating detailed output}
+#'   \item{\code{digits}}{Number of decimal places used for rounding na_share}
 #'   \item{\code{total_observations}}{Total number of observations in the data}
 #'   \item{\code{total_entities}}{Total number of unique entities/groups}
 #'   \item{\code{total_periods}}{Total number of unique time periods}
@@ -58,13 +61,17 @@
 #' # Show missing values for multiple variables
 #' summarize_missing(production, selection = c("capital", "labor"), group = "firm", time = "year")
 #'
+#' # Customize rounding
+#' summarize_missing(production, group = "firm", time = "year", digits = 4)
+#'
 #' @export
 summarize_missing <- function(
   data,
   selection = NULL,
   group,
   time,
-  detailed = FALSE
+  detailed = FALSE,
+  digits = 3
 ) {
   # Input validation
   if (!is.data.frame(data)) {
@@ -97,6 +104,15 @@ summarize_missing <- function(
   if (!is.logical(detailed) || length(detailed) != 1) {
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
+
+  if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
+    stop(
+      "'digits' must be a single non-negative integer, not ",
+      class(digits)[1]
+    )
+  }
+
+  digits <- as.integer(digits)
 
   # Get data for analysis (similar to other functions)
   data_df <- .check_and_convert_data_robust(data, arg_name = "data")
@@ -157,8 +173,9 @@ summarize_missing <- function(
     # Total NA count
     na_count <- sum(is.na(data_df[[var]]))
 
-    # NA share (proportion)
+    # NA share (proportion) - rounded to specified digits
     na_share <- ifelse(total_obs > 0, na_count / total_obs, 0)
+    na_share <- round(na_share, digits)
 
     # Entities with at least one NA
     if (na_count > 0) {
@@ -213,6 +230,7 @@ summarize_missing <- function(
   attr(result_df, "group_var") <- group
   attr(result_df, "time_var") <- time
   attr(result_df, "detailed") <- detailed
+  attr(result_df, "digits") <- digits
   attr(result_df, "total_observations") <- total_obs
   attr(result_df, "total_entities") <- total_entities
   attr(result_df, "total_periods") <- total_periods
