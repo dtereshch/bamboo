@@ -214,12 +214,31 @@ plot_participation <- function(
   # Set up plot margins to accommodate legend at top and y-labels on right
   par(mar = c(5, 1, 4, 8) + 0.1) # Top margin for legend, right margin for y-labels
 
-  # Create heatmap using image function with reversed colors
+  # FIX: Don't reverse colors - use them in the correct order
+  # The image() function expects values 0 and 1, where:
+  # - 0 maps to colors[1]
+  # - 1 maps to colors[2]
+  # Since our matrix has 1=present, 0=missing, we need to map:
+  # - 1 (present) should use colors[1]
+  # - 0 (missing) should use colors[2]
+
+  # But actually, looking at the documentation, image() maps:
+  # - minimum value to colors[1]
+  # - maximum value to colors[2]
+  # So with values 0 and 1:
+  # - 0 (minimum) maps to colors[1]
+  # - 1 (maximum) maps to colors[2]
+
+  # This is correct! We want:
+  # - present (1) to show as colors[1] (blue by default)
+  # - missing (0) to show as colors[2] (orange by default)
+
+  # Create heatmap using image function
   image(
     x = seq_len(ncol(pattern_matrix)),
     y = seq_len(nrow(pattern_matrix)),
     z = t(pattern_matrix),
-    col = rev(colors), # Reverse colors to match the data correctly
+    col = colors, # DON'T reverse - use colors in correct order
     xlab = xlab,
     ylab = "",
     axes = FALSE,
@@ -241,11 +260,11 @@ plot_participation <- function(
   abline(h = seq(0.5, nrow(pattern_matrix) + 0.5, 1), col = "gray", lty = 3)
   abline(v = seq(0.5, ncol(pattern_matrix) + 0.5, 1), col = "gray", lty = 3)
 
-  # Add legend at the top
+  # Add legend at the top - FIX: Update legend order to match actual mapping
   legend(
     "top",
     legend = c("Present", "Missing"),
-    fill = colors,
+    fill = colors, # Same order as in image()
     bg = "white",
     horiz = TRUE,
     xpd = TRUE,
