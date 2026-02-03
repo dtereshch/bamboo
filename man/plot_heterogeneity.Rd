@@ -8,9 +8,7 @@ plot_heterogeneity(
   data,
   selection = NULL,
   group,
-  colors = c("#D55E00", "#0072B2"),
-  xlab = NULL,
-  ylab = NULL
+  colors = c("#D55E00", "#0072B2")
 )
 }
 \arguments{
@@ -23,12 +21,6 @@ If NULL (default), all numeric variables in the dataset will be used.}
 
 \item{colors}{A character vector of two colors: first for individual points,
 second for mean line and points. Default = c("#D55E00", "#0072B2").}
-
-\item{xlab}{A character string specifying the X-axis label (default: based on
-grouping variable). Only used for single plots.}
-
-\item{ylab}{A character string specifying the Y-axis label (default: based on
-variable name). Only used for single plots.}
 }
 \value{
 Invisibly returns a list with summary statistics. Creates plot(s) showing
@@ -38,7 +30,8 @@ group heterogeneity.
 Creates visualizations of heterogeneity among groups. Handles multiple numeric
 variables and multiple grouping variables, arranging them in a grid where
 selection variables form rows and group variables form columns. For multi-plot
-grids, axis labels are omitted as variable names are displayed in the grid headers.
+grids, variable names are displayed as row and column headers instead of
+individual plot axis labels for cleaner presentation.
 }
 \details{
 When both \code{selection} and \code{group} contain multiple variables, plots are arranged
@@ -48,11 +41,16 @@ in a grid:
 \item Columns correspond to variables in \code{group} (X-axis grouping variables)
 }
 
-In multi-plot grids:
+Plot labeling strategy:
+\itemize{
+\item \strong{Single plot}: Variable names are used as axis labels, with a legend in the plot
+\item \strong{Multi-plot grid}:
 \itemize{
 \item Row variable names are displayed as y-axis labels on the left side
 \item Column variable names are displayed as x-axis labels on the top
-\item Individual plot axes labels are omitted for cleaner presentation
+\item Individual plot axes show only tick marks and values, not labels
+\item A single common horizontal legend is placed below the grid
+}
 }
 
 When only one variable is specified for either parameter, a single plot or
@@ -62,20 +60,22 @@ single row/column is created with appropriate axis labels.
 \dontrun{
 data(production)
 
-# Plot labor by year (single plot with axis labels)
+# Plot labor by year (single plot with axis labels and legend)
 plot_heterogeneity(production, selection = "labor", group = "year")
 
-# Plot capital by firm (single plot with axis labels)
+# Plot capital by firm (single plot with axis labels and legend)
 plot_heterogeneity(production, selection = "capital", group = "firm")
 
 # Plot multiple variables with single grouping variable
 # Y-axis labels show variable names, x-axis shows group variable
+# Single common legend below the plots
 plot_heterogeneity(production,
                    selection = c("sales", "labor", "capital"),
                    group = "year")
 
 # Plot single variable with multiple grouping variables
 # Single y-axis label, x-axis labels show different grouping approaches
+# Single common legend below the plots
 plot_heterogeneity(production,
                    selection = "sales",
                    group = c("firm", "year", "industry"))
@@ -83,6 +83,7 @@ plot_heterogeneity(production,
 # Plot multiple variables with multiple grouping variables (grid)
 # Row labels = selection variables, column labels = group variables
 # No individual plot axis labels for cleaner grid
+# Single common legend below the grid
 plot_heterogeneity(production,
                    selection = c("sales", "labor"),
                    group = c("year", "industry"))
