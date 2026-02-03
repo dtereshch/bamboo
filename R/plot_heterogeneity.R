@@ -6,14 +6,10 @@
 #'
 #' @param data A data.frame containing the variables for analysis.
 #' @param selection A character vector specifying the numeric variable(s) of interest.
-#'        If not specified, all numeric variables in the dataset will be used.
+#'        If NULL (default), all numeric variables in the dataset will be used.
 #' @param group A character vector specifying the grouping variable(s).
 #' @param colors A character vector of two colors: first for individual points, second for mean line and points.
 #'        Default = c("#D55E00", "#0072B2").
-#' @param xlab A character string specifying the X-axis label (default: based on grouping variable).
-#'        If multiple plots are created, this is ignored and variable names are used.
-#' @param ylab A character string specifying the Y-axis label (default: based on variable name).
-#'        If multiple plots are created, this is ignored and variable names are used.
 #'
 #' @return Invisibly returns a list with summary statistics. Creates plot(s) showing group heterogeneity.
 #'
@@ -23,6 +19,7 @@
 #' - Columns correspond to variables in `group`
 #'
 #' When only one variable is specified for either parameter, a single plot or single row/column is created.
+#' The legend is placed above all plots and is horizontal and centered.
 #'
 #' @seealso
 #' [summarize_panel()], [plot_participation()]
@@ -56,9 +53,7 @@ plot_heterogeneity <- function(
   data,
   selection = NULL,
   group,
-  colors = c("#D55E00", "#0072B2"),
-  xlab = NULL,
-  ylab = NULL
+  colors = c("#D55E00", "#0072B2")
 ) {
   # Input validation
   if (!is.data.frame(data)) {
@@ -150,8 +145,8 @@ plot_heterogeneity <- function(
     data_sub,
     y_var_name,
     group_var_name,
-    xlab_single = NULL,
-    ylab_single = NULL
+    show_xlab = TRUE,
+    show_ylab = TRUE
   ) {
     y_var <- data_sub[[y_var_name]]
     x_var <- data_sub[[group_var_name]]
@@ -171,14 +166,6 @@ plot_heterogeneity <- function(
       x_var <- as.factor(x_var)
     }
 
-    # Set default labels if not provided
-    if (is.null(xlab_single)) {
-      xlab_single <- group_var_name
-    }
-    if (is.null(ylab_single)) {
-      ylab_single <- y_var_name
-    }
-
     # Create color with alpha
     point_col_rgb <- col2rgb(point_col) / 255
     point_col_alpha <- rgb(
@@ -196,8 +183,8 @@ plot_heterogeneity <- function(
       NA,
       xlim = c(0.5, length(levels(x_var)) + 0.5),
       ylim = range(y_var, na.rm = TRUE),
-      xlab = xlab_single,
-      ylab = ylab_single,
+      xlab = if (show_xlab) group_var_name else "",
+      ylab = if (show_ylab) y_var_name else "",
       main = "",
       xaxt = "n",
       frame.plot = FALSE
@@ -229,18 +216,6 @@ plot_heterogeneity <- function(
 
     # Add grid
     grid()
-
-    # Add legend to every plot
-    legend(
-      "topright",
-      legend = c("Individual observations", "Group means"),
-      col = c(point_col, mean_col),
-      pch = c(16, 18),
-      lty = c(NA, 1),
-      pt.cex = c(0.8, 1.5),
-      bty = "n",
-      cex = 0.8 * cex
-    )
 
     # Return summary statistics for this combination
     list(
@@ -275,14 +250,54 @@ plot_heterogeneity <- function(
     old_par <- par(no.readonly = TRUE)
     on.exit(par(old_par))
 
-    # Set up multi-panel plot
+    # Create layout with space for legend at the top
+    layout_matrix <- matrix(
+      seq_len(n_rows * n_cols) + 1, # +1 to account for legend in position 1
+      nrow = n_rows,
+      ncol = n_cols,
+      byrow = TRUE
+    )
+
+    # Add legend row at the top
+    layout_matrix <- rbind(
+      rep(1, n_cols), # Legend occupies the entire first row
+      layout_matrix
+    )
+
+    # Set layout with different heights for legend and plots
+    layout(
+      layout_matrix,
+      heights = c(0.1, rep(0.9 / n_rows, n_rows)) # Legend gets 10% of height
+    )
+
+    # Set plot parameters
     par(
-      mfrow = c(n_rows, n_cols),
-      mar = c(4, 4, 2, 1) + 0.1,
-      oma = c(3, 3, 3, 2), # Outer margins for overall labels
+      mar = c(4, 4, 1, 1) + 0.1,
+      oma = c(0, 0, 0, 0),
       las = las
     )
 
+    # --- Create Legend ---
+    # Create empty plot for legend
+    plot.new()
+    plot.window(xlim = c(0, 1), ylim = c(0, 1))
+
+    # Add horizontal, centered legend
+    legend(
+      "center",
+      legend = c("Individual observations", "Group means"),
+      col = c(point_col, mean_col),
+      pch = c(16, 18),
+      lty = c(NA, 1),
+      pt.cex = c(1.2, 1.8),
+      lwd = c(NA, mean_lwd),
+      bty = "n",
+      cex = 1.2,
+      horiz = TRUE,
+      xpd = NA
+    )
+
+    # --- Create Plots ---
     # Create plots in grid: rows = selection variables, columns = group variables
     for (i in seq_along(selection)) {
       y_var_name <- selection[i]
@@ -290,22 +305,18 @@ plot_heterogeneity <- function(
       for (j in seq_along(group)) {
         group_var_name <- group[j]
 
-        # Only use custom labels for single plot
-        if (n_rows == 1 && n_cols == 1) {
-          xlab_single <- xlab
-          ylab_single <- ylab
-        } else {
-          xlab_single <- NULL
-          ylab_single <- NULL
-        }
+        # Determine whether to show axis labels
+        # Show labels only for single plot
+        show_xlab <- (n_rows == 1 && n_cols == 1) || (n_rows > 1 && i == n_rows)
+        show_ylab <- (n_rows == 1 && n_cols == 1) || (n_cols > 1 && j == 1)
 
         # Create plot for this combination
         group_stats <- create_single_plot(
           data,
           y_var_name,
           group_var_name,
-          xlab_single,
-          ylab_single
+          show_xlab,
+          show_ylab
         )
 
         # Store statistics
@@ -314,29 +325,16 @@ plot_heterogeneity <- function(
         }
         summary_stats$group_stats[[y_var_name]][[group_var_name]] <- group_stats
 
-        # Add variable labels for multi-plot grids
-        if (n_rows > 1 && j == 1) {
-          # Add y-axis label on the left side of each row
-          mtext(y_var_name, side = 2, line = 3, outer = FALSE, cex = 0.9)
+        # Add row labels (y-axis variable names) on the left for multi-plot grids
+        if (n_cols > 1 && j == 1 && n_rows > 1) {
+          mtext(y_var_name, side = 2, line = 3, cex = 0.9)
         }
 
-        if (n_cols > 1 && i == 1) {
-          # Add x-axis label on the top of each column
-          mtext(group_var_name, side = 3, line = 1, outer = FALSE, cex = 0.9)
+        # Add column labels (group variable names) on the top for multi-plot grids
+        if (n_rows > 1 && i == 1 && n_cols > 1) {
+          mtext(group_var_name, side = 3, line = 1, cex = 0.9)
         }
       }
-    }
-
-    # Add overall title if multiple plots
-    if (n_rows > 1 || n_cols > 1) {
-      mtext(
-        "Heterogeneity Analysis",
-        side = 3,
-        line = 1,
-        outer = TRUE,
-        font = 2,
-        cex = 1.2
-      )
     }
   } else {
     # Calculate statistics without plotting
