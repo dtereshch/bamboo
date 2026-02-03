@@ -295,27 +295,26 @@ plot_heterogeneity <- function(
 
     if (is_multiplot) {
       # Calculate dynamic left margin based on the longest selection variable name
-      # Get the maximum string width in inches for the selection variable names
-      max_name_width <- 0
+      # Get maximum character count among selection variable names
+      max_char_count <- max(nchar(selection))
 
-      # Open a temporary plot to measure text width
-      plot.new()
-
-      # Set the same font characteristics we'll use for the labels
-      par(cex = 0.9, font = 2)
-
-      # Calculate the width of each selection variable name
-      for (var_name in selection) {
-        name_width <- strwidth(var_name, units = "inches")
-        max_name_width <- max(max_name_width, name_width)
+      # Calculate required margin:
+      # - Base margin of 4 lines
+      # - Add 0.3 lines per character beyond 8 characters
+      # - Minimum of 4 lines, but scales with long variable names
+      base_margin <- 4
+      if (max_char_count > 8) {
+        extra_chars <- max_char_count - 8
+        required_left_margin_lines <- base_margin + (extra_chars * 0.3)
+      } else {
+        required_left_margin_lines <- base_margin
       }
 
-      # Convert inches to lines (approximately 1 inch = 5 lines in default settings)
-      # Add extra padding for safety
-      required_left_margin_lines <- max(4, ceiling(max_name_width * 5.5) + 1)
-
-      # Reset plot
-      plot.window(c(0, 1), c(0, 1))
+      # Round up and ensure reasonable bounds
+      required_left_margin_lines <- min(
+        max(ceiling(required_left_margin_lines), 4),
+        10
+      )
 
       # Create layout with space for common legend
       layout_matrix <- matrix(
@@ -335,11 +334,11 @@ plot_heterogeneity <- function(
         widths = rep(1, n_cols)
       )
 
-      # Adjust margins for grid plots - dynamic left margin based on text width
-      # Use at least 4 lines, but more if needed for long variable names
+      # Adjust margins for grid plots - use outer margins for the variable names
+      # This is the key fix: Use outer margins for labels and keep inner margins small
       par(
-        mar = c(2, required_left_margin_lines, 3, 1) + 0.1,
-        oma = c(0, 0, 0, 0),
+        mar = c(2, 1, 3, 1) + 0.1, # Small inner margins
+        oma = c(0, required_left_margin_lines, 0, 0), # Outer left margin for labels
         las = las
       )
     } else {
@@ -381,29 +380,32 @@ plot_heterogeneity <- function(
 
         # Add variable labels for multi-plot grids
         if (is_multiplot) {
-          # Add row labels (selection variables) on the left side
-          # Position depends on the calculated margin
+          # Add row labels (selection variables) on the left side in outer margin area
           if (j == 1) {
-            # Calculate optimal line position based on margin size
-            line_position <- max(2.5, required_left_margin_lines - 2)
+            # Calculate the exact position in the outer margin
+            # Each plot gets 1/n_rows of the total height in the layout
+            # We want to center the label in the middle of each row
+            plot_position <- (n_rows - i + 0.5) / n_rows
 
+            # Use outer=TRUE to place in outer margin area
             mtext(
               y_var_name,
               side = 2,
-              line = line_position, # Dynamic positioning
-              outer = FALSE,
+              line = required_left_margin_lines - 2, # Position within outer margin
+              outer = TRUE, # Critical: place in outer margin, not inner
               cex = 0.9,
-              font = 2
-            )
+              font = 2,
+              at = plot_position
+            ) # Position vertically within the outer margin
           }
 
-          # Add column labels (group variables) on the top
+          # Add column labels (group variables) on the top in inner margin
           if (i == 1) {
             mtext(
               group_var_name,
               side = 3,
               line = 1,
-              outer = FALSE,
+              outer = FALSE, # Keep in inner margin for top labels
               cex = 0.9,
               font = 2
             )
