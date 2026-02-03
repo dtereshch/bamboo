@@ -129,6 +129,17 @@ plot_heterogeneity <- function(
     }
   }
 
+  # Check for too many plots
+  n_plots <- length(selection) * length(group)
+  if (n_plots > 12) {
+    warning(
+      "Creating ",
+      n_plots,
+      " plots. This may be difficult to view. ",
+      "Consider reducing the number of variables in 'selection' or 'group'."
+    )
+  }
+
   # Extract colors
   point_col <- colors[1]
   mean_col <- colors[2]
@@ -146,7 +157,8 @@ plot_heterogeneity <- function(
     y_var_name,
     group_var_name,
     show_xlab = TRUE,
-    show_ylab = TRUE
+    show_ylab = TRUE,
+    current_mar
   ) {
     y_var <- data_sub[[y_var_name]]
     x_var <- data_sub[[group_var_name]]
@@ -177,6 +189,19 @@ plot_heterogeneity <- function(
 
     # Calculate group means
     group_means <- tapply(y_var, x_var, mean, na.rm = TRUE)
+
+    # Set margins for this plot
+    current_mar_copy <- current_mar
+
+    # Adjust margins for axis labels
+    if (!show_xlab) {
+      current_mar_copy[1] <- current_mar_copy[1] - 1.5 # Reduce bottom margin
+    }
+    if (!show_ylab) {
+      current_mar_copy[2] <- current_mar_copy[2] - 1.5 # Reduce left margin
+    }
+
+    par(mar = current_mar_copy)
 
     # Create the plot
     plot(
@@ -250,34 +275,43 @@ plot_heterogeneity <- function(
     old_par <- par(no.readonly = TRUE)
     on.exit(par(old_par))
 
-    # Create layout with space for legend at the top
-    layout_matrix <- matrix(
-      seq_len(n_rows * n_cols) + 1, # +1 to account for legend in position 1
-      nrow = n_rows,
-      ncol = n_cols,
-      byrow = TRUE
-    )
+    # Create separate layout for legend and plots
+    if (n_rows == 1 && n_cols == 1) {
+      # Single plot - simple setup
+      layout_matrix <- matrix(1:2, nrow = 2, ncol = 1)
+      layout_heights <- c(0.15, 0.85)
+    } else {
+      # Multiple plots - create grid
+      layout_matrix <- matrix(
+        2:(n_rows * n_cols + 1), # Plots start at position 2
+        nrow = n_rows,
+        ncol = n_cols,
+        byrow = TRUE
+      )
 
-    # Add legend row at the top
-    layout_matrix <- rbind(
-      rep(1, n_cols), # Legend occupies the entire first row
-      layout_matrix
-    )
+      # Add legend row at the top
+      layout_matrix <- rbind(
+        rep(1, n_cols), # Legend occupies the entire first row
+        layout_matrix
+      )
 
-    # Set layout with different heights for legend and plots
+      # Calculate heights - legend gets fixed proportion, plots share remaining space
+      layout_heights <- c(0.1, rep(0.9 / n_rows, n_rows))
+    }
+
+    # Set layout
     layout(
       layout_matrix,
-      heights = c(0.1, rep(0.9 / n_rows, n_rows)) # Legend gets 10% of height
+      heights = layout_heights
     )
 
-    # Set plot parameters
-    par(
-      mar = c(4, 4, 1, 1) + 0.1,
-      oma = c(0, 0, 0, 0),
-      las = las
-    )
+    # Set base margins (will be adjusted per plot)
+    base_mar <- c(3, 3, 1, 1) + 0.1
 
     # --- Create Legend ---
+    # Set margins for legend
+    par(mar = c(0, 0, 0, 0))
+
     # Create empty plot for legend
     plot.new()
     plot.window(xlim = c(0, 1), ylim = c(0, 1))
@@ -289,10 +323,10 @@ plot_heterogeneity <- function(
       col = c(point_col, mean_col),
       pch = c(16, 18),
       lty = c(NA, 1),
-      pt.cex = c(1.2, 1.8),
+      pt.cex = c(1.0, 1.3),
       lwd = c(NA, mean_lwd),
       bty = "n",
-      cex = 1.2,
+      cex = 0.9,
       horiz = TRUE,
       xpd = NA
     )
@@ -306,9 +340,10 @@ plot_heterogeneity <- function(
         group_var_name <- group[j]
 
         # Determine whether to show axis labels
-        # Show labels only for single plot
-        show_xlab <- (n_rows == 1 && n_cols == 1) || (n_rows > 1 && i == n_rows)
-        show_ylab <- (n_rows == 1 && n_cols == 1) || (n_cols > 1 && j == 1)
+        # Show x-axis label only for bottom row
+        show_xlab <- (n_rows == 1 && n_cols == 1) || (i == n_rows)
+        # Show y-axis label only for first column
+        show_ylab <- (n_rows == 1 && n_cols == 1) || (j == 1)
 
         # Create plot for this combination
         group_stats <- create_single_plot(
@@ -316,7 +351,8 @@ plot_heterogeneity <- function(
           y_var_name,
           group_var_name,
           show_xlab,
-          show_ylab
+          show_ylab,
+          base_mar
         )
 
         # Store statistics
@@ -325,15 +361,8 @@ plot_heterogeneity <- function(
         }
         summary_stats$group_stats[[y_var_name]][[group_var_name]] <- group_stats
 
-        # Add row labels (y-axis variable names) on the left for multi-plot grids
-        if (n_cols > 1 && j == 1 && n_rows > 1) {
-          mtext(y_var_name, side = 2, line = 3, cex = 0.9)
-        }
-
-        # Add column labels (group variable names) on the top for multi-plot grids
-        if (n_rows > 1 && i == 1 && n_cols > 1) {
-          mtext(group_var_name, side = 3, line = 1, cex = 0.9)
-        }
+        # Reset to base margins after each plot
+        par(mar = base_mar)
       }
     }
   } else {
