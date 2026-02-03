@@ -4,7 +4,7 @@
 \alias{summarize_categorical}
 \title{Categorical Variable Summary for Panel Data}
 \usage{
-summarize_categorical(data, selection = NULL, group, time, digits = 3)
+summarize_categorical(data, selection = NULL, group, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data.}
@@ -15,10 +15,7 @@ If not specified, all factor variables in the data.frame will be used.}
 \item{group}{A character string specifying the name of the entity/group variable.
 Required for decomposition.}
 
-\item{time}{A character string specifying the name of the time variable.
-Required for correct ordering within groups.}
-
-\item{digits}{An integer indicating the number of decimal places to round percentages.
+\item{digits}{An integer indicating the number of decimal places to round shares.
 Default = 3.}
 }
 \value{
@@ -34,16 +31,16 @@ Returns a data.frame with the following columns:
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{category}}{The category level of the variable}
 \item{\code{n_overall}}{Overall frequency (person-time observations)}
-\item{\code{share_overall}}{Overall percentage (n_overall / total_obs * 100)}
+\item{\code{share_overall}}{Overall share (n_overall / total_obs)}
 \item{\code{n_between}}{Between-group frequency (number of groups ever having this category)}
-\item{\code{share_between}}{Between-group percentage (n_between / total_groups * 100)}
-\item{\code{share_within}}{Within-group percentage (average percent of time groups have this category)}
+\item{\code{share_between}}{Between-group share (n_between / total_groups)}
+\item{\code{share_within}}{Within-group share (average share of time groups have this category)}
 }
+All shares are proportions ranging from 0 to 1.
 
 The data.frame has additional attributes:
 \describe{
 \item{\code{group_var}}{The grouping variable name}
-\item{\code{time_var}}{The time variable name}
 \item{\code{n_groups}}{Number of unique groups}
 \item{\code{digits}}{Number of decimal places used for rounding}
 }
@@ -53,22 +50,20 @@ The data.frame has additional attributes:
 data(production)
 
 # Basic usage with statistics for all factor variables
-summarize_categorical(production, group = "firm", time = "year")
+summarize_categorical(production, group = "firm")
 
 # Show statistics for a single categorical variable
-summarize_categorical(production, selection = "industry",
-                      group = "firm", time = "year")
+summarize_categorical(production, selection = "industry", group = "firm")
 
 # Show statistics for multiple categorical variables
-summarize_categorical(production, selection = c("industry", "status"),
-                      group = "firm", time = "year")
+summarize_categorical(production, selection = c("industry", "status"), group = "firm")
 
 # Show statistics with two digits rounding
-summarize_categorical(production, group = "firm", time = "year", digits = 2)
+summarize_categorical(production, group = "firm", digits = 2)
 
 }
 \references{
-For Stata users: This corresponds to the \code{xttab} command.
+For Stata users: This corresponds to the \code{xttab} command, but returns shares (proportions) instead of percentages.
 }
 \seealso{
 \code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=summarize_transition]{summarize_transition()}}, \code{\link[=summarize_data]{summarize_data()}}

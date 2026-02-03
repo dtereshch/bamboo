@@ -8,9 +8,7 @@
 #'   If not specified, all factor variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable.
 #'   Required for decomposition.
-#' @param time A character string specifying the name of the time variable.
-#'   Required for correct ordering within groups.
-#' @param digits An integer indicating the number of decimal places to round percentages.
+#' @param digits An integer indicating the number of decimal places to round shares.
 #'   Default = 3.
 #'
 #' @return A data.frame with categorical panel data summary statistics.
@@ -21,22 +19,22 @@
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{category}}{The category level of the variable}
 #'   \item{\code{n_overall}}{Overall frequency (person-time observations)}
-#'   \item{\code{share_overall}}{Overall percentage (n_overall / total_obs * 100)}
+#'   \item{\code{share_overall}}{Overall share (n_overall / total_obs)}
 #'   \item{\code{n_between}}{Between-group frequency (number of groups ever having this category)}
-#'   \item{\code{share_between}}{Between-group percentage (n_between / total_groups * 100)}
-#'   \item{\code{share_within}}{Within-group percentage (average percent of time groups have this category)}
+#'   \item{\code{share_between}}{Between-group share (n_between / total_groups)}
+#'   \item{\code{share_within}}{Within-group share (average share of time groups have this category)}
 #' }
+#' All shares are proportions ranging from 0 to 1.
 #'
 #' The data.frame has additional attributes:
 #' \describe{
 #'   \item{\code{group_var}}{The grouping variable name}
-#'   \item{\code{time_var}}{The time variable name}
 #'   \item{\code{n_groups}}{Number of unique groups}
 #'   \item{\code{digits}}{Number of decimal places used for rounding}
 #' }
 #'
 #' @references
-#' For Stata users: This corresponds to the `xttab` command.
+#' For Stata users: This corresponds to the `xttab` command, but returns shares (proportions) instead of percentages.
 #'
 #' @seealso
 #' [summarize_panel()], [summarize_transition()], [summarize_data()]
@@ -46,25 +44,22 @@
 #' data(production)
 #'
 #' # Basic usage with statistics for all factor variables
-#' summarize_categorical(production, group = "firm", time = "year")
+#' summarize_categorical(production, group = "firm")
 #'
 #' # Show statistics for a single categorical variable
-#' summarize_categorical(production, selection = "industry",
-#'                       group = "firm", time = "year")
+#' summarize_categorical(production, selection = "industry", group = "firm")
 #'
 #' # Show statistics for multiple categorical variables
-#' summarize_categorical(production, selection = c("industry", "status"),
-#'                       group = "firm", time = "year")
+#' summarize_categorical(production, selection = c("industry", "status"), group = "firm")
 #'
 #' # Show statistics with two digits rounding
-#' summarize_categorical(production, group = "firm", time = "year", digits = 2)
+#' summarize_categorical(production, group = "firm", digits = 2)
 #'
 #' @export
 summarize_categorical <- function(
   data,
   selection = NULL,
   group,
-  time,
   digits = 3
 ) {
   # Input validation
@@ -83,16 +78,8 @@ summarize_categorical <- function(
     stop("'group' must be a single character string")
   }
 
-  if (!is.character(time) || length(time) != 1) {
-    stop("'time' must be a single character string")
-  }
-
   if (!group %in% names(data)) {
     stop('variable "', group, '" not found in data')
-  }
-
-  if (!time %in% names(data)) {
-    stop('variable "', time, '" not found in data')
   }
 
   if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
@@ -116,9 +103,8 @@ summarize_categorical <- function(
       FUN.VALUE = logical(1)
     )
 
-    # Exclude group and time variables from selection
+    # Exclude group variable from selection
     is_factor[group] <- FALSE
-    is_factor[time] <- FALSE
 
     selection <- names(data)[is_factor]
 
@@ -154,20 +140,16 @@ summarize_categorical <- function(
     }
   }
 
-  # Convert group and time to character for consistent handling
+  # Convert group to character for consistent handling
   data[[group]] <- as.character(data[[group]])
-  data[[time]] <- as.character(data[[time]])
-
-  # Order data by group and time
-  data <- data[order(data[[group]], data[[time]]), ]
 
   # Get total number of groups
   n_groups <- length(unique(data[[group]]))
 
   # Helper function to calculate categorical statistics for one variable
-  summarize_categorical_1 <- function(df, varname, grp, tme, digits_val) {
-    # Remove rows with NA in the variable, group, or time
-    complete_cases <- complete.cases(df[[varname]], df[[grp]], df[[tme]])
+  summarize_categorical_1 <- function(df, varname, grp, digits_val) {
+    # Remove rows with NA in the variable or group
+    complete_cases <- complete.cases(df[[varname]], df[[grp]])
     df_clean <- df[complete_cases, , drop = FALSE]
 
     if (nrow(df_clean) == 0) {
@@ -197,64 +179,65 @@ summarize_categorical <- function(
 
     # Calculate between statistics (groups ever having category)
     # For each group, check which categories it ever had
-    group_categories <- tapply(
-      df_clean[[varname]],
-      df_clean[[grp]],
-      function(x) unique(as.character(x))
-    )
+    group_data <- split(df_clean[[varname]], df_clean[[grp]])
 
     # Count groups that ever had each category
     between_counts <- sapply(categories, function(cat) {
-      sum(sapply(group_categories, function(gcats) cat %in% gcats))
+      sum(sapply(group_data, function(gdata) {
+        any(as.character(gdata) == cat)
+      }))
     })
 
-    # Calculate within statistics (average percent of time groups have category)
-    # For each group, calculate the percentage of observations for each category
-    group_percentages <- tapply(
-      df_clean[[varname]],
-      df_clean[[grp]],
-      function(x) {
-        tab <- table(x)
-        tab / sum(tab) * 100
-      }
-    )
-
-    # Average these percentages across groups for each category
-    # Weighted by the number of groups that ever had the category
+    # Calculate within shares (proportions)
+    # For each category, calculate average share across groups that ever had it
     within_shares <- sapply(categories, function(cat) {
-      percents <- sapply(group_percentages, function(gp) {
-        if (cat %in% names(gp)) gp[cat] else 0
-      })
-      # Only average over groups that ever had this category
-      relevant_groups <- which(between_counts[cat] > 0)
-      if (length(relevant_groups) == 0) {
+      # Get groups that ever had this category
+      groups_with_cat <- which(sapply(group_data, function(gdata) {
+        any(as.character(gdata) == cat)
+      }))
+
+      if (length(groups_with_cat) == 0) {
         return(0)
       }
-      mean(percents[relevant_groups])
+
+      # For each group that ever had the category, calculate what share
+      # of its observations have this category
+      group_shares <- sapply(groups_with_cat, function(i) {
+        gdata <- group_data[[i]]
+        sum(as.character(gdata) == cat) / length(gdata)
+      })
+
+      # Average these shares
+      mean(group_shares)
     })
 
-    # Calculate shares (percentages)
-    share_overall <- overall_counts / total_obs * 100
-    share_between <- between_counts / n_groups * 100
+    # Calculate shares (proportions, not percentages)
+    share_overall <- as.numeric(overall_counts / total_obs)
+    share_between <- as.numeric(between_counts / n_groups)
 
     # Apply rounding if digits is specified
     round_if_needed <- function(value) {
-      if (is.numeric(value) && !is.na(value)) {
+      if (is.numeric(value) && !any(is.na(value))) {
         round(value, digits_val)
       } else {
         value
       }
     }
 
+    # Round the share columns
+    share_overall_rounded <- round_if_needed(share_overall)
+    share_between_rounded <- round_if_needed(share_between)
+    within_shares_rounded <- round_if_needed(within_shares)
+
     # Prepare result data frame
     result <- data.frame(
       variable = rep(varname, length(categories)),
       category = categories,
       n_overall = as.integer(overall_counts),
-      share_overall = round_if_needed(as.numeric(share_overall)),
+      share_overall = share_overall_rounded,
       n_between = as.integer(between_counts),
-      share_between = round_if_needed(as.numeric(share_between)),
-      share_within = round_if_needed(as.numeric(within_shares)),
+      share_between = share_between_rounded,
+      share_within = within_shares_rounded,
       stringsAsFactors = FALSE
     )
 
@@ -263,7 +246,7 @@ summarize_categorical <- function(
 
   # Calculate statistics for each variable
   results <- lapply(selection, function(varname) {
-    summarize_categorical_1(data, varname, group, time, digits)
+    summarize_categorical_1(data, varname, group, digits)
   })
 
   # Combine all results
@@ -272,7 +255,6 @@ summarize_categorical <- function(
 
   # Add data source information as attribute
   attr(result_df, "group_var") <- group
-  attr(result_df, "time_var") <- time
   attr(result_df, "n_groups") <- n_groups
   attr(result_df, "digits") <- digits
 
