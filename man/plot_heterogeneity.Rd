@@ -6,7 +6,7 @@
 \usage{
 plot_heterogeneity(
   data,
-  selection,
+  selection = NULL,
   group,
   colors = c("#D55E00", "#0072B2"),
   xlab = NULL,
@@ -16,34 +16,57 @@ plot_heterogeneity(
 \arguments{
 \item{data}{A data.frame containing the variables for analysis.}
 
-\item{selection}{A character string specifying the numeric variable of interest.}
+\item{selection}{A character vector specifying the numeric variable(s) of interest.
+If not specified, all numeric variables in the dataset will be used.}
 
-\item{group}{A character string or vector of character strings specifying the grouping variable(s).}
+\item{group}{A character vector specifying the grouping variable(s).}
 
 \item{colors}{A character vector of two colors: first for individual points, second for mean line and points.
 Default = c("#D55E00", "#0072B2").}
 
-\item{xlab}{A character string specifying the X-axis label (default: based on grouping variable).}
+\item{xlab}{A character string specifying the X-axis label (default: based on grouping variable).
+If multiple plots are created, this is ignored and variable names are used.}
 
-\item{ylab}{A character string specifying the Y-axis label (default: based on variable name).}
+\item{ylab}{A character string specifying the Y-axis label (default: based on variable name).
+If multiple plots are created, this is ignored and variable names are used.}
 }
 \value{
-Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
+Invisibly returns a list with summary statistics. Creates plot(s) showing group heterogeneity.
 }
 \description{
-This function creates visualizations of heterogeneity among groups.
+This function creates visualizations of heterogeneity among groups. It can handle
+multiple numeric variables and multiple grouping variables, arranging them in a
+grid where selection variables form rows and group variables form columns.
+}
+\details{
+When both \code{selection} and \code{group} contain multiple variables, plots are arranged in a grid:
+\itemize{
+\item Rows correspond to variables in \code{selection}
+\item Columns correspond to variables in \code{group}
+}
+
+When only one variable is specified for either parameter, a single plot or single row/column is created.
 }
 \examples{
 data(production)
 
-# Plot labor by year
+# Plot labor by year (single plot)
 plot_heterogeneity(production, selection = "labor", group = "year")
 
-# Plot capital by firm
+# Plot capital by firm (single plot)
 plot_heterogeneity(production, selection = "capital", group = "firm")
 
-# Plot sales with multiple grouping variables
-plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
+# Plot multiple variables with single grouping variable
+plot_heterogeneity(production, selection = c("sales", "labor", "capital"), group = "year")
+
+# Plot single variable with multiple grouping variables
+plot_heterogeneity(production, selection = "sales", group = c("firm", "year", "industry"))
+
+# Plot multiple variables with multiple grouping variables (grid)
+plot_heterogeneity(production, selection = c("sales", "labor"), group = c("year", "industry"))
+
+# Use all numeric variables with default
+plot_heterogeneity(production, group = "year")
 
 # Customize colors
 plot_heterogeneity(production, selection = "sales", group = "year", colors = c("gray", "black"))

@@ -1,16 +1,28 @@
 #' Heterogeneity Visualization
 #'
-#' This function creates visualizations of heterogeneity among groups.
+#' This function creates visualizations of heterogeneity among groups. It can handle
+#' multiple numeric variables and multiple grouping variables, arranging them in a
+#' grid where selection variables form rows and group variables form columns.
 #'
 #' @param data A data.frame containing the variables for analysis.
-#' @param selection A character string specifying the numeric variable of interest.
-#' @param group A character string or vector of character strings specifying the grouping variable(s).
+#' @param selection A character vector specifying the numeric variable(s) of interest.
+#'        If not specified, all numeric variables in the dataset will be used.
+#' @param group A character vector specifying the grouping variable(s).
 #' @param colors A character vector of two colors: first for individual points, second for mean line and points.
 #'        Default = c("#D55E00", "#0072B2").
 #' @param xlab A character string specifying the X-axis label (default: based on grouping variable).
+#'        If multiple plots are created, this is ignored and variable names are used.
 #' @param ylab A character string specifying the Y-axis label (default: based on variable name).
+#'        If multiple plots are created, this is ignored and variable names are used.
 #'
-#' @return Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
+#' @return Invisibly returns a list with summary statistics. Creates plot(s) showing group heterogeneity.
+#'
+#' @details
+#' When both `selection` and `group` contain multiple variables, plots are arranged in a grid:
+#' - Rows correspond to variables in `selection`
+#' - Columns correspond to variables in `group`
+#'
+#' When only one variable is specified for either parameter, a single plot or single row/column is created.
 #'
 #' @seealso
 #' [summarize_panel()], [plot_participation()]
@@ -18,14 +30,23 @@
 #' @examples
 #' data(production)
 #'
-#' # Plot labor by year
+#' # Plot labor by year (single plot)
 #' plot_heterogeneity(production, selection = "labor", group = "year")
 #'
-#' # Plot capital by firm
+#' # Plot capital by firm (single plot)
 #' plot_heterogeneity(production, selection = "capital", group = "firm")
 #'
-#' # Plot sales with multiple grouping variables
-#' plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
+#' # Plot multiple variables with single grouping variable
+#' plot_heterogeneity(production, selection = c("sales", "labor", "capital"), group = "year")
+#'
+#' # Plot single variable with multiple grouping variables
+#' plot_heterogeneity(production, selection = "sales", group = c("firm", "year", "industry"))
+#'
+#' # Plot multiple variables with multiple grouping variables (grid)
+#' plot_heterogeneity(production, selection = c("sales", "labor"), group = c("year", "industry"))
+#'
+#' # Use all numeric variables with default
+#' plot_heterogeneity(production, group = "year")
 #'
 #' # Customize colors
 #' plot_heterogeneity(production, selection = "sales", group = "year", colors = c("gray", "black"))
@@ -33,7 +54,7 @@
 #' @export
 plot_heterogeneity <- function(
   data,
-  selection,
+  selection = NULL,
   group,
   colors = c("#D55E00", "#0072B2"),
   xlab = NULL,
@@ -44,21 +65,10 @@ plot_heterogeneity <- function(
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!is.character(selection) || length(selection) != 1) {
+  if (!is.null(selection) && !is.character(selection)) {
     stop(
-      "'selection' must be a single character string, not ",
+      "'selection' must be a character vector or NULL, not ",
       class(selection)[1]
-    )
-  }
-
-  if (!selection %in% names(data)) {
-    stop('variable "', selection, '" not found in data')
-  }
-
-  if (!is.numeric(data[[selection]])) {
-    stop(
-      "'selection' must be a numeric variable, not ",
-      class(data[[selection]])[1]
     )
   }
 
@@ -69,12 +79,12 @@ plot_heterogeneity <- function(
     )
   }
 
-  missing_groups <- group[!group %in% names(data)]
-  if (length(missing_groups) > 0) {
+  # Check for missing variables in data
+  missing_vars <- setdiff(c(selection, group), names(data))
+  if (length(missing_vars) > 0) {
     stop(
-      'variable(s) "',
-      paste(missing_groups, collapse = '", "'),
-      '" not found in data'
+      "the following variables were not found in data: ",
+      paste(missing_vars, collapse = ", ")
     )
   }
 
@@ -91,60 +101,66 @@ plot_heterogeneity <- function(
     stop("'data' must have at least one row")
   }
 
-  # Check if variables exist in data
-  if (!selection %in% names(data)) {
-    stop("variable '", selection, "' not found in data")
-  }
+  # If selection is NULL, use all numeric variables
+  if (is.null(selection)) {
+    # Identify numeric variables
+    numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
+    selection <- names(data)[numeric_vars]
 
-  missing_groups <- setdiff(group, names(data))
-  if (length(missing_groups) > 0) {
-    stop(
-      "group variable(s) '",
-      paste(missing_groups, collapse = "', '"),
-      "' not found in data"
+    # Remove group variables from selection if they are numeric
+    selection <- setdiff(selection, group)
+
+    if (length(selection) == 0) {
+      stop(
+        "no numeric variables found in the dataset (excluding group variables)"
+      )
+    }
+
+    message(
+      "Analyzing all numeric variable(s): ",
+      paste(selection, collapse = ", ")
     )
   }
 
-  # Validate colors parameter
-  if (!is.character(colors) || length(colors) != 2) {
-    stop("'colors' must be a character vector of length 2")
+  # Validate selection variables are numeric
+  for (var in selection) {
+    if (!is.numeric(data[[var]])) {
+      stop(
+        "variable '",
+        var,
+        "' must be numeric, not ",
+        class(data[[var]])[1]
+      )
+    }
   }
 
   # Extract colors
   point_col <- colors[1]
   mean_col <- colors[2]
 
-  # Set default parameter values that were removed
+  # Set default parameter values
   point_alpha <- 0.6
   mean_lwd <- 2
   cex <- 1
   las <- 1
   plot <- TRUE
-  ncol <- NULL
-  nrow <- NULL
-
-  # Extract the main variable
-  y_var <- data[[selection]]
-
-  # Check variable type
-  if (!is.numeric(y_var)) {
-    stop("'selection' must be a numeric variable")
-  }
 
   # Function to create single plot
   create_single_plot <- function(
     data_sub,
-    group_var,
+    y_var_name,
+    group_var_name,
     xlab_single = NULL,
     ylab_single = NULL
   ) {
-    x_var <- data_sub[[group_var]]
+    y_var <- data_sub[[y_var_name]]
+    x_var <- data_sub[[group_var_name]]
 
     # Check group variable type
     if (!is.factor(x_var) && !is.character(x_var) && !is.numeric(x_var)) {
       stop(
         "group variable '",
-        group_var,
+        group_var_name,
         "' must be a factor, character, or numeric variable, not ",
         class(x_var)[1]
       )
@@ -157,10 +173,10 @@ plot_heterogeneity <- function(
 
     # Set default labels if not provided
     if (is.null(xlab_single)) {
-      xlab_single <- group_var
+      xlab_single <- group_var_name
     }
     if (is.null(ylab_single)) {
-      ylab_single <- selection
+      ylab_single <- y_var_name
     }
 
     # Create color with alpha
@@ -173,16 +189,16 @@ plot_heterogeneity <- function(
     )
 
     # Calculate group means
-    group_means <- tapply(data_sub[[selection]], x_var, mean, na.rm = TRUE)
+    group_means <- tapply(y_var, x_var, mean, na.rm = TRUE)
 
     # Create the plot
     plot(
       NA,
       xlim = c(0.5, length(levels(x_var)) + 0.5),
-      ylim = range(data_sub[[selection]], na.rm = TRUE),
+      ylim = range(y_var, na.rm = TRUE),
       xlab = xlab_single,
       ylab = ylab_single,
-      main = "", # Remove title
+      main = "",
       xaxt = "n",
       frame.plot = FALSE
     )
@@ -194,7 +210,7 @@ plot_heterogeneity <- function(
     x_jitter <- jitter(as.numeric(x_var), amount = 0.2)
     points(
       x_jitter,
-      data_sub[[selection]],
+      y_var,
       col = point_col_alpha,
       pch = 16,
       cex = 0.8 * cex
@@ -223,85 +239,124 @@ plot_heterogeneity <- function(
       lty = c(NA, 1),
       pt.cex = c(0.8, 1.5),
       bty = "n",
-      cex = 0.8 * cex # Slightly smaller legend for multi-panel plots
+      cex = 0.8 * cex
     )
 
-    # Return summary statistics for this group
+    # Return summary statistics for this combination
     list(
       means = group_means,
-      sd = tapply(data_sub[[selection]], x_var, sd, na.rm = TRUE),
-      n = tapply(data_sub[[selection]], x_var, function(x) sum(!is.na(x)))
+      sd = tapply(y_var, x_var, sd, na.rm = TRUE),
+      n = tapply(y_var, x_var, function(x) sum(!is.na(x)))
     )
   }
 
-  # Calculate overall summary statistics
+  # Initialize summary statistics list
   summary_stats <- list(
-    overall_mean = mean(y_var, na.rm = TRUE),
-    overall_sd = sd(y_var, na.rm = TRUE),
+    overall_stats = list(),
     group_stats = list()
   )
 
+  # Calculate overall summary statistics for each selection variable
+  for (y_var_name in selection) {
+    y_var <- data[[y_var_name]]
+    summary_stats$overall_stats[[y_var_name]] <- list(
+      mean = mean(y_var, na.rm = TRUE),
+      sd = sd(y_var, na.rm = TRUE),
+      n = sum(!is.na(y_var))
+    )
+  }
+
   if (plot) {
-    # Set up plotting layout for multiple groups
-    if (length(group) > 1) {
-      # Determine grid dimensions
-      n_plots <- length(group)
-      if (is.null(ncol) && is.null(nrow)) {
-        ncol <- ceiling(sqrt(n_plots))
-        nrow <- ceiling(n_plots / ncol)
-      } else if (is.null(ncol)) {
-        ncol <- ceiling(n_plots / nrow)
-      } else if (is.null(nrow)) {
-        nrow <- ceiling(n_plots / ncol)
+    # Set up plotting layout
+    n_rows <- length(selection)
+    n_cols <- length(group)
+
+    # Save current par settings
+    old_par <- par(no.readonly = TRUE)
+    on.exit(par(old_par))
+
+    # Set up multi-panel plot
+    par(
+      mfrow = c(n_rows, n_cols),
+      mar = c(4, 4, 2, 1) + 0.1,
+      oma = c(3, 3, 3, 2), # Outer margins for overall labels
+      las = las
+    )
+
+    # Create plots in grid: rows = selection variables, columns = group variables
+    for (i in seq_along(selection)) {
+      y_var_name <- selection[i]
+
+      for (j in seq_along(group)) {
+        group_var_name <- group[j]
+
+        # Only use custom labels for single plot
+        if (n_rows == 1 && n_cols == 1) {
+          xlab_single <- xlab
+          ylab_single <- ylab
+        } else {
+          xlab_single <- NULL
+          ylab_single <- NULL
+        }
+
+        # Create plot for this combination
+        group_stats <- create_single_plot(
+          data,
+          y_var_name,
+          group_var_name,
+          xlab_single,
+          ylab_single
+        )
+
+        # Store statistics
+        if (!y_var_name %in% names(summary_stats$group_stats)) {
+          summary_stats$group_stats[[y_var_name]] <- list()
+        }
+        summary_stats$group_stats[[y_var_name]][[group_var_name]] <- group_stats
+
+        # Add variable labels for multi-plot grids
+        if (n_rows > 1 && j == 1) {
+          # Add y-axis label on the left side of each row
+          mtext(y_var_name, side = 2, line = 3, outer = FALSE, cex = 0.9)
+        }
+
+        if (n_cols > 1 && i == 1) {
+          # Add x-axis label on the top of each column
+          mtext(group_var_name, side = 3, line = 1, outer = FALSE, cex = 0.9)
+        }
       }
-
-      # Save current par settings
-      old_par <- par(no.readonly = TRUE)
-      on.exit(par(old_par))
-
-      # Set up multi-panel plot
-      par(
-        mfrow = c(nrow, ncol),
-        mar = c(4, 4, 2, 1) + 0.1, # Tighter margins for multi-panel
-        oma = c(2, 2, 2, 2), # Outer margins for overall labels
-        las = las
-      )
-    } else {
-      # Single plot setup
-      old_par <- par(no.readonly = TRUE)
-      on.exit(par(old_par))
-      par(mar = c(5, 4, 2, 2) + 0.1, las = las)
     }
 
-    # Create plots for each grouping variable
-    for (i in seq_along(group)) {
-      group_var <- group[i]
-
-      # Use provided labels only for single plot, otherwise use defaults
-      xlab_single <- if (length(group) == 1) xlab else NULL
-      ylab_single <- if (length(group) == 1) ylab else NULL
-
-      group_stats <- create_single_plot(
-        data,
-        group_var,
-        xlab_single,
-        ylab_single
+    # Add overall title if multiple plots
+    if (n_rows > 1 || n_cols > 1) {
+      mtext(
+        "Heterogeneity Analysis",
+        side = 3,
+        line = 1,
+        outer = TRUE,
+        font = 2,
+        cex = 1.2
       )
-      summary_stats$group_stats[[group_var]] <- group_stats
     }
   } else {
     # Calculate statistics without plotting
-    for (group_var in group) {
-      x_var <- data[[group_var]]
-      if (!is.factor(x_var)) {
-        x_var <- as.factor(x_var)
-      }
+    for (y_var_name in selection) {
+      summary_stats$group_stats[[y_var_name]] <- list()
 
-      summary_stats$group_stats[[group_var]] <- list(
-        means = tapply(data[[selection]], x_var, mean, na.rm = TRUE),
-        sd = tapply(data[[selection]], x_var, sd, na.rm = TRUE),
-        n = tapply(data[[selection]], x_var, function(x) sum(!is.na(x)))
-      )
+      for (group_var_name in group) {
+        x_var <- data[[group_var_name]]
+        y_var <- data[[y_var_name]]
+
+        if (!is.factor(x_var)) {
+          x_var <- as.factor(x_var)
+        }
+
+        summary_stats$group_stats[[y_var_name]][[group_var_name]] <- list(
+          means = tapply(y_var, x_var, mean, na.rm = TRUE),
+          sd = tapply(y_var, x_var, sd, na.rm = TRUE),
+          n = tapply(y_var, x_var, function(x) sum(!is.na(x)))
+        )
+      }
     }
   }
 
