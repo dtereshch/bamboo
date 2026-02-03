@@ -293,9 +293,8 @@ plot_heterogeneity <- function(
     old_par <- par(no.readonly = TRUE)
     on.exit(par(old_par))
 
-    # Set up layout with space for common legend
     if (is_multiplot) {
-      # Create layout with extra row for legend
+      # Create layout with space for common legend
       layout_matrix <- matrix(
         1:(n_rows * n_cols),
         nrow = n_rows,
@@ -306,12 +305,16 @@ plot_heterogeneity <- function(
       # Add an extra row at the bottom for the legend
       layout_matrix <- rbind(layout_matrix, rep(n_rows * n_cols + 1, n_cols))
 
-      # Set up the layout
-      layout(layout_matrix, heights = c(rep(5, n_rows), 1)) # Legend gets 1/6th of height
+      # Set up the layout with more space for left labels
+      layout(
+        layout_matrix,
+        heights = c(rep(1, n_rows), 0.3), # Legend gets 0.3 relative height
+        widths = rep(1, n_cols)
+      )
 
-      # Adjust margins for grid plots (no bottom margin needed for legend space)
+      # Adjust margins for grid plots - more left margin for row labels
       par(
-        mar = c(2, 4, 3, 1) + 0.1, # Reduced bottom margin for plots
+        mar = c(2, 5, 3, 1) + 0.1, # Increased left margin from 4 to 5 for better label fit
         oma = c(0, 0, 0, 0),
         las = las
       )
@@ -355,11 +358,12 @@ plot_heterogeneity <- function(
         # Add variable labels for multi-plot grids
         if (is_multiplot) {
           # Add row labels (selection variables) on the left side
+          # Using side = 2 (left) with line = 4 to place it further right, inside the increased margin
           if (j == 1) {
             mtext(
               y_var_name,
               side = 2,
-              line = 3,
+              line = 3.5, # Increased from 3 to 3.5 to move label further right
               outer = FALSE,
               cex = 0.9,
               font = 2
@@ -383,7 +387,7 @@ plot_heterogeneity <- function(
 
     # Add common legend for multi-plot case
     if (is_multiplot) {
-      # Switch to the legend panel
+      # Switch to the legend panel with zero margins
       par(mar = c(0, 0, 0, 0))
       plot.new()
 
