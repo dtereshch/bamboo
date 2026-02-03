@@ -294,6 +294,29 @@ plot_heterogeneity <- function(
     on.exit(par(old_par))
 
     if (is_multiplot) {
+      # Calculate dynamic left margin based on the longest selection variable name
+      # Get the maximum string width in inches for the selection variable names
+      max_name_width <- 0
+
+      # Open a temporary plot to measure text width
+      plot.new()
+
+      # Set the same font characteristics we'll use for the labels
+      par(cex = 0.9, font = 2)
+
+      # Calculate the width of each selection variable name
+      for (var_name in selection) {
+        name_width <- strwidth(var_name, units = "inches")
+        max_name_width <- max(max_name_width, name_width)
+      }
+
+      # Convert inches to lines (approximately 1 inch = 5 lines in default settings)
+      # Add extra padding for safety
+      required_left_margin_lines <- max(4, ceiling(max_name_width * 5.5) + 1)
+
+      # Reset plot
+      plot.window(c(0, 1), c(0, 1))
+
       # Create layout with space for common legend
       layout_matrix <- matrix(
         1:(n_rows * n_cols),
@@ -305,16 +328,17 @@ plot_heterogeneity <- function(
       # Add an extra row at the bottom for the legend
       layout_matrix <- rbind(layout_matrix, rep(n_rows * n_cols + 1, n_cols))
 
-      # Set up the layout with more space for left labels
+      # Set up the layout with dynamic left margin
       layout(
         layout_matrix,
         heights = c(rep(1, n_rows), 0.3), # Legend gets 0.3 relative height
         widths = rep(1, n_cols)
       )
 
-      # Adjust margins for grid plots - more left margin for row labels
+      # Adjust margins for grid plots - dynamic left margin based on text width
+      # Use at least 4 lines, but more if needed for long variable names
       par(
-        mar = c(2, 5, 3, 1) + 0.1, # Increased left margin from 4 to 5 for better label fit
+        mar = c(2, required_left_margin_lines, 3, 1) + 0.1,
         oma = c(0, 0, 0, 0),
         las = las
       )
@@ -358,12 +382,15 @@ plot_heterogeneity <- function(
         # Add variable labels for multi-plot grids
         if (is_multiplot) {
           # Add row labels (selection variables) on the left side
-          # Using side = 2 (left) with line = 4 to place it further right, inside the increased margin
+          # Position depends on the calculated margin
           if (j == 1) {
+            # Calculate optimal line position based on margin size
+            line_position <- max(2.5, required_left_margin_lines - 2)
+
             mtext(
               y_var_name,
               side = 2,
-              line = 3.5, # Increased from 3 to 3.5 to move label further right
+              line = line_position, # Dynamic positioning
               outer = FALSE,
               cex = 0.9,
               font = 2
