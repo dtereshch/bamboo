@@ -21,8 +21,8 @@
 #' When both `selection` and `group` contain multiple variables, plots are arranged in a grid:
 #' - Rows correspond to variables in `selection`
 #' - Columns correspond to variables in `group`
-#' - Y-axis labels are shown only for plots in the left column
-#' - X-axis labels are shown only for plots in the bottom row
+#' - Y-axis titles and tick labels are shown only for plots in the left column
+#' - X-axis titles and tick labels are shown only for plots in the bottom row
 #' - A single common legend is displayed below the grid
 #'
 #' When only one variable is specified for either parameter, a single plot with a legend in the top-right corner is created.
@@ -197,7 +197,7 @@ plot_heterogeneity <- function(
     # Calculate group means
     group_means <- tapply(y_var, x_var, mean, na.rm = TRUE)
 
-    # Create the plot
+    # Create the plot with appropriate axis control
     plot(
       NA,
       xlim = c(0.5, length(levels(x_var)) + 0.5),
@@ -205,7 +205,8 @@ plot_heterogeneity <- function(
       xlab = if (show_xlab) xlab_single else "",
       ylab = if (show_ylab) ylab_single else "",
       main = "",
-      xaxt = if (show_xlab) "n" else "n",
+      xaxt = if (show_xlab) "n" else "n", # Always suppress default x-axis
+      yaxt = if (show_ylab) "n" else "n", # Suppress default y-axis
       frame.plot = FALSE
     )
 
@@ -213,8 +214,16 @@ plot_heterogeneity <- function(
     if (show_xlab) {
       axis(1, at = seq_along(levels(x_var)), labels = levels(x_var))
     } else {
-      # Add ticks but no labels for non-bottom row plots
-      axis(1, at = seq_along(levels(x_var)), labels = FALSE, tick = TRUE)
+      # No ticks or labels for non-bottom row plots
+      axis(1, at = seq_along(levels(x_var)), labels = FALSE, tick = FALSE)
+    }
+
+    # Add y-axis ticks and labels only if show_ylab is TRUE
+    if (show_ylab) {
+      axis(2)
+    } else {
+      # No ticks or labels for non-left column plots
+      axis(2, labels = FALSE, tick = FALSE)
     }
 
     # Add individual points with jitter
@@ -307,9 +316,9 @@ plot_heterogeneity <- function(
       # Set layout with different heights: plots get more space, legend gets less
       layout(layout_matrix, heights = c(rep(4, n_rows), 1))
 
-      # Set inner margins (reduced top margin since no title)
+      # Set inner margins (reduced margins for tighter layout)
       par(
-        mar = c(3, 4, 1.5, 1) + 0.1,
+        mar = c(2.5, 3.5, 1.5, 1) + 0.1, # Reduced margins for multiplot
         oma = c(0, 0, 0, 0), # No outer margins since we use layout
         las = las
       )
@@ -321,9 +330,9 @@ plot_heterogeneity <- function(
         for (j in seq_along(group)) {
           group_var_name <- group[j]
 
-          # Determine if we should show x and y labels
-          # Show Y-axis labels only for left column (j == 1)
-          # Show X-axis labels only for bottom row (i == n_rows)
+          # Determine if we should show x and y labels and ticks
+          # Show Y-axis title and tick labels only for left column (j == 1)
+          # Show X-axis title and tick labels only for bottom row (i == n_rows)
           show_ylab <- (j == 1)
           show_xlab <- (i == n_rows)
 
@@ -363,14 +372,14 @@ plot_heterogeneity <- function(
         lty = c(NA, 1),
         pt.cex = c(0.8, 1.5),
         bty = "n",
-        cex = 1,
+        cex = 0.9,
         horiz = TRUE,
         xpd = TRUE # Allow drawing outside plot region
       )
     } else {
-      # Single plot: use simpler layout with legend inside plot
+      # Single plot: use tighter margins to reduce empty space
       par(
-        mar = c(5, 4, 4, 2) + 0.1, # Standard margins for single plot
+        mar = c(3.5, 3.5, 2, 1) + 0.1, # Reduced margins for single plot
         oma = c(0, 0, 0, 0),
         las = las
       )

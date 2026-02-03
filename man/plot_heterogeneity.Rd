@@ -43,8 +43,8 @@ When both \code{selection} and \code{group} contain multiple variables, plots ar
 \itemize{
 \item Rows correspond to variables in \code{selection}
 \item Columns correspond to variables in \code{group}
-\item Y-axis labels are shown only for plots in the left column
-\item X-axis labels are shown only for plots in the bottom row
+\item Y-axis titles and tick labels are shown only for plots in the left column
+\item X-axis titles and tick labels are shown only for plots in the bottom row
 \item A single common legend is displayed below the grid
 }
 
