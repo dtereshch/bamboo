@@ -345,34 +345,6 @@ explore_balance <- function(
     ))
     cat("\n")
 
-    cat("TIME PERIODS\n")
-    cat("----------------------------------------------------\n")
-    cat(sprintf("%6d  Time periods\n", n_periods))
-    # cat(sprintf("%6d  Minimum observations per entity\n", min_obs_per_entity))
-    # cat(sprintf("%6d  Maximum observations per entity\n", max_obs_per_entity))
-    # cat(sprintf("%6.1f  Average observations per entity\n", avg_obs_per_entity))
-    cat(sprintf(
-      "%6d  Minimum balanced observations per entity\n",
-      min_balanced_per_entity
-    ))
-    cat(sprintf(
-      "%6d  Maximum balanced observations per entity\n",
-      max_balanced_per_entity
-    ))
-    cat(sprintf(
-      "%6.1f  Average balanced observations per entity\n",
-      avg_balanced_per_entity
-    ))
-    cat(sprintf(
-      "%6d  Balanced periods (all entities have ≥1 non-NA)\n",
-      n_balanced_periods
-    ))
-    cat(sprintf(
-      "%6d  Complete periods (no missing values)\n",
-      n_periods_complete
-    ))
-    cat("\n")
-
     cat("ENTITIES\n")
     cat("----------------------------------------------------\n")
     cat(sprintf("%6d  Entities\n", n_entities))
@@ -400,6 +372,34 @@ explore_balance <- function(
       "%6d  Complete entities (%5.1f%%)\n",
       n_entities_complete,
       pct_entities_complete
+    ))
+    cat("\n")
+
+    cat("TIME PERIODS\n")
+    cat("----------------------------------------------------\n")
+    cat(sprintf("%6d  Time periods\n", n_periods))
+    # cat(sprintf("%6d  Minimum observations per entity\n", min_obs_per_entity))
+    # cat(sprintf("%6d  Maximum observations per entity\n", max_obs_per_entity))
+    # cat(sprintf("%6.1f  Average observations per entity\n", avg_obs_per_entity))
+    cat(sprintf(
+      "%6d  Minimum balanced observations per entity\n",
+      min_balanced_per_entity
+    ))
+    cat(sprintf(
+      "%6d  Maximum balanced observations per entity\n",
+      max_balanced_per_entity
+    ))
+    cat(sprintf(
+      "%6.1f  Average balanced observations per entity\n",
+      avg_balanced_per_entity
+    ))
+    cat(sprintf(
+      "%6d  Balanced periods (all entities have ≥1 non-NA)\n",
+      n_balanced_periods
+    ))
+    cat(sprintf(
+      "%6d  Complete periods (no missing values)\n",
+      n_periods_complete
     ))
     cat("\n")
   }
