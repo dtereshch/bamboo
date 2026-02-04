@@ -19,19 +19,19 @@ A data.frame with 4 columns and 3 rows containing panel data summary statistics:
 \strong{Columns:}
 \describe{
 \item{\code{panel_info}}{Character vector describing the type of panel element.
-Contains three values: "observations", "entities", and "time_periods".}
+Contains three values: "observations", "entities", and "periods".}
 \item{\code{total}}{Numeric vector with total counts for each panel element.
 For "observations": total number of rows in the original data.
 For "entities": total number of unique groups present in the data.
-For "time_periods": total number of unique time periods present in the data.}
+For "periods": total number of unique time periods present in the data.}
 \item{\code{balanced}}{Numeric vector with counts of balanced cases.
 For "observations": number of rows with at least one substantive variable that is not NA.
 For "entities": number of groups where all time periods have at least one substantive variable that is not NA.
-For "time_periods": number of time periods where all groups have at least one substantive variable that is not NA.}
+For "periods": number of time periods where all groups have at least one substantive variable that is not NA.}
 \item{\code{complete}}{Numeric vector with counts of cases without missing values.
 For "observations": number of rows with no NAs in substantive variables.
 For "entities": number of groups with no NAs in any of their observations.
-For "time_periods": number of time periods with no NAs in any observation.}
+For "periods": number of time periods with no NAs in any observation.}
 }
 
 \strong{Rows:}
