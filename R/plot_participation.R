@@ -205,9 +205,9 @@ plot_participation <- function(
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
 
-  # Reduce bottom margin to eliminate space for x-axis label
-  # Top margin for legend, right margin for y-labels, reduced bottom margin
-  par(mar = c(3, 1, 4, 8) + 0.1)
+  # Adjust margins: reduced top margin to place legend closer to plot
+  # Original: par(mar = c(3, 1, 4, 8) + 0.1)
+  par(mar = c(3, 1, 2, 8) + 0.1) # Reduced top margin from 4 to 2
 
   # Create a reversed version of the pattern matrix
   pattern_matrix_rev <- 1 - pattern_matrix # 1->0, 0->1
@@ -247,16 +247,16 @@ plot_participation <- function(
   abline(h = seq(0.5, nrow(pattern_matrix_rev) + 0.5, 1), col = "gray", lty = 3)
   abline(v = seq(0.5, ncol(pattern_matrix_rev) + 0.5, 1), col = "gray", lty = 3)
 
-  # Add legend at the top
+  # Add legend at the top - adjust position to be closer to the plot
   legend(
-    "top",
+    x = "top",
     legend = c("Present", "Missing"),
     fill = colors,
     bg = "white",
     horiz = TRUE,
-    xpd = TRUE,
-    bty = "n",
-    inset = c(0, -0.1),
+    xpd = TRUE, # Allow drawing outside plot area
+    bty = "n", # No box around legend
+    inset = c(0, -0.05), # Reduced inset to bring legend closer
     cex = 0.9
   )
 
