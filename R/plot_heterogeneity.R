@@ -268,7 +268,6 @@ plot_heterogeneity <- function(
     on.exit(par(old_par))
 
     # Determine the optimal layout based on the number of plots
-    # We'll create a layout with minimal empty space
     layout_matrix <- matrix(
       1:(n_rows * n_cols),
       nrow = n_rows,
@@ -276,18 +275,18 @@ plot_heterogeneity <- function(
       byrow = TRUE
     )
 
-    # Add an extra row at the bottom for the legend (smaller height)
+    # Add an extra row at the bottom for the legend
     layout_matrix <- rbind(layout_matrix, rep(n_rows * n_cols + 1, n_cols))
 
-    # Adjust heights: plots get most space, legend gets minimal space
-    plot_height <- 5 # Base height for plots
-    legend_height <- 0.8 # Minimal height for legend
+    # Adjust heights: plots get more space, legend gets less but enough
+    plot_height <- 5 # Height for plot rows
+    legend_height <- 1.2 # Height for legend row (increased for better fit)
 
     layout(layout_matrix, heights = c(rep(plot_height, n_rows), legend_height))
 
     # Use outer margins to provide space for labels
-    # Reduced outer margins to minimize empty space
-    par(oma = c(2, 2, 1, 1), las = las)
+    # Set outer margins to ensure labels don't get cut off
+    par(oma = c(3, 3, 1, 1), las = las)
 
     # Create plots in grid: rows = selection variables, columns = group variables
     for (i in seq_along(selection)) {
@@ -302,14 +301,14 @@ plot_heterogeneity <- function(
         show_ylab <- (j == 1)
         show_xlab <- (i == n_rows)
 
-        # Set margins for each plot - minimized but with enough space for labels
-        # Top margin: minimal for all plots (no titles)
+        # Set margins for each plot - ensure enough space for axis labels
         # Bottom margin: more space for bottom row plots (x-axis labels)
         # Left margin: more space for left column plots (y-axis labels)
+        # Top margin: minimal for all plots
         # Right margin: minimal for all plots
         top_margin <- 0.5
-        bottom_margin <- if (show_xlab) 3 else 1
-        left_margin <- if (show_ylab) 3.5 else 1.5
+        bottom_margin <- if (show_xlab) 4.5 else 1.5 # Increased for bottom row
+        left_margin <- if (show_ylab) 4.5 else 2.5 # Increased for left column
         right_margin <- 0.5
 
         par(mar = c(bottom_margin, left_margin, top_margin, right_margin))
@@ -337,13 +336,6 @@ plot_heterogeneity <- function(
     plot.new()
 
     # Create centered horizontal legend
-    # Calculate legend width to position it properly
-    legend_text_width <- strwidth(
-      "Individual observations and Group means",
-      cex = 0.9
-    )
-
-    # Position legend at the center of the legend area
     legend(
       x = 0.5,
       y = 0.5, # Center of the legend area
@@ -351,17 +343,13 @@ plot_heterogeneity <- function(
       col = c(point_col, mean_col),
       pch = c(16, 18),
       lty = c(NA, 1),
-      pt.cex = c(0.8, 1.2), # Slightly reduced point size
+      pt.cex = c(0.8, 1.5),
       bty = "n",
-      cex = 0.85, # Slightly smaller font for better fit
+      cex = 0.9,
       horiz = TRUE,
       xjust = 0.5, # Center horizontally
       yjust = 0.5, # Center vertically
-      xpd = TRUE, # Allow drawing in outer margin area
-      text.width = max(strwidth(
-        c("Individual observations", "Group means"),
-        cex = 0.85
-      ))
+      xpd = TRUE # Allow drawing in outer margin area
     )
   } else {
     # Calculate statistics without plotting
