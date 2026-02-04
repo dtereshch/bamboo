@@ -42,6 +42,7 @@ The returned list contains the following components:
 \item \code{is_balanced}: Logical indicating if panel is balanced
 \item \code{has_duplicates}: Logical indicating duplicate group-time pairs
 \item \code{has_irregular_intervals}: Logical indicating irregular time intervals
+\item \code{has_irregular_time_sequence}: Logical indicating irregular time sequence in entire panel
 }
 }
 \item{\code{vectors}}{List containing useful vectors for further analysis including:
@@ -50,6 +51,7 @@ The returned list contains the following components:
 \item \code{unbalanced_groups}: Groups causing imbalance
 \item \code{irregular_groups}: Groups with irregular time intervals
 \item \code{observations_per_group}: Table of observations per group
+\item \code{time_sequence_regular}: Logical indicating if the entire time sequence is regular
 }
 }
 }

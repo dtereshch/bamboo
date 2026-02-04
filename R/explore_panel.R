@@ -29,6 +29,7 @@
 #'       \item \code{is_balanced}: Logical indicating if panel is balanced
 #'       \item \code{has_duplicates}: Logical indicating duplicate group-time pairs
 #'       \item \code{has_irregular_intervals}: Logical indicating irregular time intervals
+#'       \item \code{has_irregular_time_sequence}: Logical indicating irregular time sequence in entire panel
 #'     }
 #'   }
 #'   \item{\code{vectors}}{List containing useful vectors for further analysis including:
@@ -37,6 +38,7 @@
 #'       \item \code{unbalanced_groups}: Groups causing imbalance
 #'       \item \code{irregular_groups}: Groups with irregular time intervals
 #'       \item \code{observations_per_group}: Table of observations per group
+#'       \item \code{time_sequence_regular}: Logical indicating if the entire time sequence is regular
 #'     }
 #'   }
 #' }
@@ -196,7 +198,28 @@ explore_panel <- function(
     missing_time_info <- list()
   }
 
-  # Check for irregular time intervals
+  # Check for irregular time sequence in entire panel
+  has_irregular_time_sequence <- FALSE
+  time_sequence_regular <- TRUE
+
+  if (
+    is.numeric(time_vector) ||
+      inherits(time_vector, "Date") ||
+      inherits(time_vector, "POSIXt")
+  ) {
+    # Check entire time sequence (across all groups)
+    all_unique_times <- sort(unique(time_vector))
+
+    if (length(all_unique_times) > 1) {
+      global_intervals <- diff(all_unique_times)
+      if (length(unique(global_intervals)) > 1) {
+        has_irregular_time_sequence <- TRUE
+        time_sequence_regular <- FALSE
+      }
+    }
+  }
+
+  # Check for irregular time intervals within groups
   has_irregular_intervals <- FALSE
   irregular_groups <- character()
   interval_details <- list()
@@ -339,6 +362,7 @@ explore_panel <- function(
     )
   )
 
+  # Check time sequence regularity (entire panel)
   if (
     is.numeric(time_vector) ||
       inherits(time_vector, "Date") ||
@@ -347,12 +371,12 @@ explore_panel <- function(
     exploration_results <- rbind(
       exploration_results,
       data.frame(
-        variable = "intervals",
-        status = ifelse(has_irregular_intervals, "FAIL", "PASS"),
+        variable = "time_sequence",
+        status = ifelse(has_irregular_time_sequence, "FAIL", "PASS"),
         message = ifelse(
-          has_irregular_intervals,
-          "Irregular time intervals detected",
-          "Regular time intervals"
+          has_irregular_time_sequence,
+          "Irregular time sequence in entire panel",
+          "Regular time sequence in entire panel"
         ),
         stringsAsFactors = FALSE
       )
@@ -361,7 +385,38 @@ explore_panel <- function(
     exploration_results <- rbind(
       exploration_results,
       data.frame(
-        variable = "intervals",
+        variable = "time_sequence",
+        status = "INFO",
+        message = "Time variable is not numeric/Date-like",
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+
+  # Check interval regularity within groups
+  if (
+    is.numeric(time_vector) ||
+      inherits(time_vector, "Date") ||
+      inherits(time_vector, "POSIXt")
+  ) {
+    exploration_results <- rbind(
+      exploration_results,
+      data.frame(
+        variable = "group_intervals",
+        status = ifelse(has_irregular_intervals, "FAIL", "PASS"),
+        message = ifelse(
+          has_irregular_intervals,
+          "Irregular time intervals within groups",
+          "Regular time intervals within groups"
+        ),
+        stringsAsFactors = FALSE
+      )
+    )
+  } else {
+    exploration_results <- rbind(
+      exploration_results,
+      data.frame(
+        variable = "group_intervals",
         status = "INFO",
         message = "Time variable is not numeric/Date-like",
         stringsAsFactors = FALSE
@@ -408,6 +463,7 @@ explore_panel <- function(
       is_balanced = is_balanced,
       has_duplicates = has_duplicates,
       has_irregular_intervals = has_irregular_intervals,
+      has_irregular_time_sequence = has_irregular_time_sequence,
       group_var = group,
       time_var = time
     ),
@@ -435,7 +491,16 @@ explore_panel <- function(
         character()
       },
 
-      # Time interval information
+      # Time sequence information (entire panel)
+      time_sequence_regular = time_sequence_regular,
+      all_unique_times = sort(unique(time_vector)),
+      global_time_intervals = if (length(unique(time_vector)) > 1) {
+        diff(sort(unique(time_vector)))
+      } else {
+        numeric(0)
+      },
+
+      # Time interval information within groups
       irregular_groups = irregular_groups,
       interval_details = interval_details,
 
