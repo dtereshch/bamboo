@@ -45,14 +45,7 @@ When both \code{selection} and \code{group} contain multiple variables, plots ar
 }
 
 \strong{Font Size Scaling:}
-Font sizes are dynamically adjusted based on the number of plots:
-\itemize{
-\item Single plot: Base font size
-\item 2-4 plots: 90\% of base size
-\item 5-9 plots: 80\% of base size
-\item 10+ plots: 70\% of base size
-Additional adjustments are made for very dense grids
-}
+Font sizes are dynamically adjusted based on the number of plots to ensure readability.
 
 These limits ensure visual clarity and prevent graphical device errors.
 

@@ -29,12 +29,7 @@
 #' - `group`: Maximum 4 variables
 #'
 #' **Font Size Scaling:**
-#' Font sizes are dynamically adjusted based on the number of plots:
-#' - Single plot: Base font size
-#' - 2-4 plots: 90% of base size
-#' - 5-9 plots: 80% of base size
-#' - 10+ plots: 70% of base size
-#' Additional adjustments are made for very dense grids
+#' Font sizes are dynamically adjusted based on the number of plots to ensure readability.
 #'
 #' These limits ensure visual clarity and prevent graphical device errors.
 #'
@@ -188,7 +183,7 @@ plot_heterogeneity <- function(
   base_font_size <- 12
 
   # Calculate scaling factors based on grid dimensions
-  # More aggressive scaling for larger grids
+  # Less aggressive scaling for better readability
   if (total_plots == 1) {
     # Single plot: use base font size
     axis_font_scale <- 1.0
@@ -196,32 +191,23 @@ plot_heterogeneity <- function(
     point_cex_scale <- 1.0
     legend_font_scale <- 1.0
   } else if (total_plots <= 4) {
-    # Small grid (2x2, 1x4, 4x1): moderate scaling
+    # Small grid: minimal scaling
+    axis_font_scale <- 1.0 # No reduction for small grids
+    tick_font_scale <- 0.95
+    point_cex_scale <- 0.9
+    legend_font_scale <- 0.95
+  } else if (total_plots <= 9) {
+    # Medium grid: moderate scaling
     axis_font_scale <- 0.9
     tick_font_scale <- 0.85
     point_cex_scale <- 0.8
     legend_font_scale <- 0.85
-  } else if (total_plots <= 9) {
-    # Medium grid (3x3, 2x4, 4x2): stronger scaling
+  } else {
+    # Large grid: stronger scaling
     axis_font_scale <- 0.8
     tick_font_scale <- 0.75
     point_cex_scale <- 0.7
     legend_font_scale <- 0.75
-  } else {
-    # Large grid (up to 6x4 = 24): strongest scaling
-    axis_font_scale <- 0.7
-    tick_font_scale <- 0.65
-    point_cex_scale <- 0.6
-    legend_font_scale <- 0.65
-  }
-
-  # Apply additional scaling based on number of columns (for axis labels)
-  if (n_cols > 2) {
-    axis_font_scale <- axis_font_scale * 0.9
-  }
-
-  if (n_rows > 2) {
-    axis_font_scale <- axis_font_scale * 0.9
   }
 
   # Calculate final font sizes
@@ -230,9 +216,9 @@ plot_heterogeneity <- function(
   legend_font_size <- base_font_size * legend_font_scale
 
   # Ensure minimum font sizes for readability
-  axis_font_size <- max(axis_font_size, 8)
-  tick_font_size <- max(tick_font_size, 7)
-  legend_font_size <- max(legend_font_size, 7)
+  axis_font_size <- max(axis_font_size, 10)
+  tick_font_size <- max(tick_font_size, 9)
+  legend_font_size <- max(legend_font_size, 9)
 
   # --- Check for potential grid size warnings ---
   if (total_plots > 24) {
@@ -473,6 +459,11 @@ plot_heterogeneity <- function(
         point_cex = point_cex_scale
       )
 
+      # Adjust margins based on font size and grid dimensions
+      # Calculate base margin values
+      base_bottom_margin <- if (n_rows <= 2) 4 else 3.5
+      base_left_margin <- if (n_cols <= 2) 4 else 3.5
+
       # Create plots in grid: rows = selection variables, columns = group variables
       for (i in seq_along(selection)) {
         y_var_name <- selection[i]
@@ -486,10 +477,21 @@ plot_heterogeneity <- function(
           show_ylab <- (j == 1)
           show_xlab <- (i == n_rows)
 
-          # Adjust margins based on whether we need axis labels
-          # For multi-plot grids, we need more space for axis labels when showing them
-          bottom_margin <- if (show_xlab) 4 * (axis_font_size / 12) else 1
-          left_margin <- if (show_ylab) 4 * (axis_font_size / 12) else 1.5
+          # Adjust margins based on whether we need axis labels and font size
+          # Use larger margins for smaller fonts to ensure labels fit
+          if (show_xlab) {
+            # Bottom margin for plots with x-axis labels
+            bottom_margin <- base_bottom_margin * (axis_font_size / 12) + 0.5
+          } else {
+            bottom_margin <- 1
+          }
+
+          if (show_ylab) {
+            # Left margin for plots with y-axis labels
+            left_margin <- base_left_margin * (axis_font_size / 12) + 0.5
+          } else {
+            left_margin <- 1.5
+          }
 
           # Set margins for this specific plot
           par(mar = c(bottom_margin, left_margin, 1, 1))
@@ -521,15 +523,24 @@ plot_heterogeneity <- function(
       plot.new()
 
       # Create a horizontal legend aligned to the right
+      # Adjust legend size based on number of plots
+      legend_cex <- if (total_plots <= 4) {
+        1.0
+      } else if (total_plots <= 9) {
+        0.9
+      } else {
+        0.8
+      }
+
       legend(
-        "right",
+        "center",
         legend = c("Individual observations", "Group means"),
         col = c(point_col, mean_col),
         pch = c(16, 18),
         lty = c(NA, 1),
         pt.cex = c(0.8, 1.5) * point_cex_scale,
         bty = "n",
-        cex = legend_font_size / 12,
+        cex = legend_cex,
         horiz = TRUE,
         xpd = TRUE
       )
