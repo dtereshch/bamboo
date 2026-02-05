@@ -1,10 +1,10 @@
 #' Categorical Variable Summary for Panel Data
 #'
 #' This function performs one-way tabulations and decomposes counts into
-#' between and within components for categorical variables in panel data.
+#' between and within components for categorical (factor) variables in panel data.
 #'
 #' @param data A data.frame containing panel data.
-#' @param selection A character vector specifying which categorical variables to analyze.
+#' @param selection A character vector specifying which categorical (factor) variables to analyze.
 #'   If not specified, all factor variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable.
 #'   Required for decomposition.
@@ -33,14 +33,17 @@
 #'   \item{\code{digits}}{Number of decimal places used for rounding}
 #' }
 #'
+#' @note
+#' When `selection = NULL` (default), only factor variables are analyzed.
+#' When `selection` is explicitly specified, all selected variables are converted to factors.
+#'
 #' @references
-#' For Stata users: This corresponds to the `xttab` command, but returns shares (proportions) instead of percentages.
+#' For Stata users: This corresponds to the `xttab` command.
 #'
 #' @seealso
 #' [summarize_panel()], [summarize_transition()], [summarize_data()]
 #'
 #' @examples
-#' # Assuming 'production' dataset has factor variables
 #' data(production)
 #'
 #' # Basic usage with statistics for all factor variables
@@ -82,24 +85,24 @@ summarize_categorical <- function(
     stop('variable "', group, '" not found in data')
   }
 
-  if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
-    stop(
-      "'digits' must be a single non-negative integer, not ",
-      class(digits)[1]
-    )
+  if (!is.numeric(digits) || length(digits) != 1) {
+    stop("'digits' must be a single numeric value, not ", class(digits)[1])
   }
 
   # Validate digits parameter
-  if (digits != round(digits)) {
-    stop("'digits' must be an integer")
+  if (
+    !is.na(digits) &&
+      (!is.numeric(digits) || digits < 0 || digits != round(digits))
+  ) {
+    stop("'digits' must be a non-negative integer or NA for no rounding")
   }
 
-  # If selection is not specified, use all factor variables
+  # If selection is not specified, use only factor variables (not character)
   if (is.null(selection)) {
     # Check for factor variables
     is_factor <- vapply(
       data,
-      function(x) is.factor(x) || is.character(x),
+      is.factor,
       FUN.VALUE = logical(1)
     )
 
@@ -109,11 +112,11 @@ summarize_categorical <- function(
     selection <- names(data)[is_factor]
 
     if (length(selection) == 0) {
-      stop("no factor or character variables found in the dataset")
+      stop("no factor variables found in the dataset")
     }
 
     message(
-      "Analyzing all factor/character variables: ",
+      "Analyzing all factor variables: ",
       paste(selection, collapse = ", ")
     )
   }
@@ -127,16 +130,17 @@ summarize_categorical <- function(
     )
   }
 
-  # Check if specified columns are factor or character
+  # When selection is explicitly provided, convert all to factors
+  # Check if any variables need conversion
   for (var in selection) {
-    if (!(is.factor(data[[var]]) || is.character(data[[var]]))) {
-      stop(
-        "variable '",
+    if (!is.factor(data[[var]])) {
+      message(
+        "Converting variable '",
         var,
-        "' is not a factor or character variable. ",
-        "Class: ",
+        "' to factor. Original class: ",
         class(data[[var]])[1]
       )
+      data[[var]] <- factor(data[[var]])
     }
   }
 
@@ -165,7 +169,7 @@ summarize_categorical <- function(
       ))
     }
 
-    # Ensure the variable is treated as factor
+    # Ensure the variable is treated as factor (should already be factor)
     if (!is.factor(df_clean[[varname]])) {
       df_clean[[varname]] <- factor(df_clean[[varname]])
     }
@@ -217,7 +221,7 @@ summarize_categorical <- function(
 
     # Apply rounding if digits is specified
     round_if_needed <- function(value) {
-      if (is.numeric(value) && !any(is.na(value))) {
+      if (!is.na(digits_val) && is.numeric(value) && !any(is.na(value))) {
         round(value, digits_val)
       } else {
         value

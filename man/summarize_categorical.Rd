@@ -9,7 +9,7 @@ summarize_categorical(data, selection = NULL, group, digits = 3)
 \arguments{
 \item{data}{A data.frame containing panel data.}
 
-\item{selection}{A character vector specifying which categorical variables to analyze.
+\item{selection}{A character vector specifying which categorical (factor) variables to analyze.
 If not specified, all factor variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the name of the entity/group variable.
@@ -23,7 +23,7 @@ A data.frame with categorical panel data summary statistics.
 }
 \description{
 This function performs one-way tabulations and decomposes counts into
-between and within components for categorical variables in panel data.
+between and within components for categorical (factor) variables in panel data.
 }
 \details{
 Returns a data.frame with the following columns:
@@ -45,8 +45,11 @@ The data.frame has additional attributes:
 \item{\code{digits}}{Number of decimal places used for rounding}
 }
 }
+\note{
+When \code{selection = NULL} (default), only factor variables are analyzed.
+When \code{selection} is explicitly specified, all selected variables are converted to factors.
+}
 \examples{
-# Assuming 'production' dataset has factor variables
 data(production)
 
 # Basic usage with statistics for all factor variables
@@ -63,7 +66,7 @@ summarize_categorical(production, group = "firm", digits = 2)
 
 }
 \references{
-For Stata users: This corresponds to the \code{xttab} command, but returns shares (proportions) instead of percentages.
+For Stata users: This corresponds to the \code{xttab} command.
 }
 \seealso{
 \code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=summarize_transition]{summarize_transition()}}, \code{\link[=summarize_data]{summarize_data()}}
