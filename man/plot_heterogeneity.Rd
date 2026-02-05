@@ -4,20 +4,17 @@
 \alias{plot_heterogeneity}
 \title{Heterogeneity Visualization}
 \usage{
-plot_heterogeneity(
-  data,
-  selection = NULL,
-  group,
-  colors = c("#D55E00", "#0072B2")
-)
+plot_heterogeneity(data, selection, group, colors = c("#D55E00", "#0072B2"))
 }
 \arguments{
 \item{data}{A data.frame containing the variables for analysis.}
 
 \item{selection}{A character vector specifying the numeric variable(s) of interest.
-If not specified, all numeric variables in the dataset will be used.}
+\strong{REQUIRED}: Must be specified (no default). Must contain only numeric variables.
+\strong{LIMIT}: Maximum 6 variables.}
 
-\item{group}{A character vector specifying the grouping variable(s).}
+\item{group}{A character vector specifying the grouping variable(s).
+\strong{LIMIT}: Maximum 4 variables.}
 
 \item{colors}{A character vector of two colors: first for individual points, second for mean line and points.
 Default = c("#D55E00", "#0072B2").}
@@ -41,12 +38,20 @@ When both \code{selection} and \code{group} contain multiple variables, plots ar
 \item Column names are always used as axis labels
 }
 
+\strong{Variable Limits:}
+\itemize{
+\item \code{selection}: Maximum 6 variables (required, must be numeric)
+\item \code{group}: Maximum 4 variables
+}
+
+These limits ensure visual clarity and prevent graphical device errors.
+
 When only one variable is specified for either parameter, a single plot with a legend in the top-right corner is created.
 }
 \examples{
 data(production)
 
-# Plot labor by year (single plot)
+# Plot labor by year (single plot) - REQUIRES selection argument
 plot_heterogeneity(production, selection = "labor", group = "year")
 
 # Plot capital by firm (single plot)
@@ -60,9 +65,6 @@ plot_heterogeneity(production, selection = "sales", group = c("firm", "year", "i
 
 # Plot multiple variables with multiple grouping variables (grid)
 plot_heterogeneity(production, selection = c("sales", "labor"), group = c("year", "industry"))
-
-# Use all numeric variables with default
-plot_heterogeneity(production, group = "year")
 
 # Customize colors
 plot_heterogeneity(production, selection = "sales", group = "year", colors = c("gray", "black"))

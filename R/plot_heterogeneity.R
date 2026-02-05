@@ -6,8 +6,10 @@
 #'
 #' @param data A data.frame containing the variables for analysis.
 #' @param selection A character vector specifying the numeric variable(s) of interest.
-#'        If not specified, all numeric variables in the dataset will be used.
+#'        **REQUIRED**: Must be specified (no default). Must contain only numeric variables.
+#'        **LIMIT**: Maximum 6 variables.
 #' @param group A character vector specifying the grouping variable(s).
+#'        **LIMIT**: Maximum 4 variables.
 #' @param colors A character vector of two colors: first for individual points, second for mean line and points.
 #'        Default = c("#D55E00", "#0072B2").
 #'
@@ -22,6 +24,12 @@
 #' - A single common legend is displayed below the grid
 #' - Column names are always used as axis labels
 #'
+#' **Variable Limits:**
+#' - `selection`: Maximum 6 variables (required, must be numeric)
+#' - `group`: Maximum 4 variables
+#'
+#' These limits ensure visual clarity and prevent graphical device errors.
+#'
 #' When only one variable is specified for either parameter, a single plot with a legend in the top-right corner is created.
 #'
 #' @seealso
@@ -30,7 +38,7 @@
 #' @examples
 #' data(production)
 #'
-#' # Plot labor by year (single plot)
+#' # Plot labor by year (single plot) - REQUIRES selection argument
 #' plot_heterogeneity(production, selection = "labor", group = "year")
 #'
 #' # Plot capital by firm (single plot)
@@ -45,31 +53,34 @@
 #' # Plot multiple variables with multiple grouping variables (grid)
 #' plot_heterogeneity(production, selection = c("sales", "labor"), group = c("year", "industry"))
 #'
-#' # Use all numeric variables with default
-#' plot_heterogeneity(production, group = "year")
-#'
 #' # Customize colors
 #' plot_heterogeneity(production, selection = "sales", group = "year", colors = c("gray", "black"))
 #'
 #' @export
 plot_heterogeneity <- function(
   data,
-  selection = NULL,
+  selection,
   group,
   colors = c("#D55E00", "#0072B2")
 ) {
-  # Input validation
+  # --- Input validation ---
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
-  if (!is.null(selection) && !is.character(selection)) {
+  # Check selection is provided
+  if (missing(selection)) {
     stop(
-      "'selection' must be a character vector or NULL, not ",
-      class(selection)[1]
+      "'selection' argument is REQUIRED and must be specified. ",
+      "Please provide a character vector of numeric variable names."
     )
   }
 
+  if (!is.character(selection)) {
+    stop("'selection' must be a character vector, not ", class(selection)[1])
+  }
+
+  # Check group is provided and is character
   if (!is.character(group)) {
     stop(
       "'group' must be a character string or vector of character strings, not ",
@@ -77,15 +88,57 @@ plot_heterogeneity <- function(
     )
   }
 
+  # --- Check variable limits ---
+  MAX_SELECTION <- 6
+  MAX_GROUP <- 4
+
+  if (length(selection) > MAX_SELECTION) {
+    stop(
+      "'selection' contains ",
+      length(selection),
+      " variables, ",
+      "but the maximum allowed is ",
+      MAX_SELECTION,
+      ". ",
+      "Please select at most ",
+      MAX_SELECTION,
+      " variables to ensure visual clarity."
+    )
+  }
+
+  if (length(group) > MAX_GROUP) {
+    stop(
+      "'group' contains ",
+      length(group),
+      " variables, ",
+      "but the maximum allowed is ",
+      MAX_GROUP,
+      ". ",
+      "Please select at most ",
+      MAX_GROUP,
+      " grouping variables to ensure visual clarity."
+    )
+  }
+
+  if (length(selection) < 1) {
+    stop("'selection' must contain at least 1 variable.")
+  }
+
+  if (length(group) < 1) {
+    stop("'group' must contain at least 1 variable.")
+  }
+
   # Check for missing variables in data
-  missing_vars <- setdiff(c(selection, group), names(data))
+  all_vars <- c(selection, group)
+  missing_vars <- setdiff(all_vars, names(data))
   if (length(missing_vars) > 0) {
     stop(
-      "the following variables were not found in data: ",
+      "The following variables were not found in data: ",
       paste(missing_vars, collapse = ", ")
     )
   }
 
+  # Check colors
   if (!is.character(colors) || length(colors) != 2) {
     stop(
       "'colors' must be a character vector of length 2, not ",
@@ -93,46 +146,48 @@ plot_heterogeneity <- function(
     )
   }
 
+  # Check and convert data
   data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (nrow(data) == 0) {
     stop("'data' must have at least one row")
   }
 
-  # If selection is NULL, use all numeric variables
-  if (is.null(selection)) {
-    # Identify numeric variables
-    numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
-    selection <- names(data)[numeric_vars]
-
-    # Remove group variables from selection if they are numeric
-    selection <- setdiff(selection, group)
-
-    if (length(selection) == 0) {
-      stop(
-        "no numeric variables found in the dataset (excluding group variables)"
-      )
+  # --- Validate selection variables are numeric ---
+  non_numeric_vars <- character(0)
+  for (var in selection) {
+    if (!is.numeric(data[[var]])) {
+      non_numeric_vars <- c(non_numeric_vars, var)
     }
+  }
 
-    message(
-      "Analyzing all numeric variable(s): ",
-      paste(selection, collapse = ", ")
+  if (length(non_numeric_vars) > 0) {
+    stop(
+      "The following variables in 'selection' are not numeric:\n  ",
+      paste(non_numeric_vars, collapse = ", "),
+      "\n",
+      "Please ensure all selection variables are numeric."
     )
   }
 
-  # Validate selection variables are numeric
-  for (var in selection) {
-    if (!is.numeric(data[[var]])) {
-      stop(
-        "variable '",
-        var,
-        "' must be numeric, not ",
-        class(data[[var]])[1]
-      )
-    }
+  # --- Check for potential grid size warnings ---
+  total_plots <- length(selection) * length(group)
+  if (total_plots > 24) {
+    warning(
+      "Creating ",
+      total_plots,
+      " plots in a ",
+      length(selection),
+      "x",
+      length(group),
+      " grid.\n",
+      "Individual plots may be small. Consider reducing the number of variables.",
+      call. = FALSE,
+      immediate. = TRUE
+    )
   }
 
-  # Extract colors
+  # --- Extract colors ---
   point_col <- colors[1]
   mean_col <- colors[2]
 
@@ -143,7 +198,7 @@ plot_heterogeneity <- function(
   las <- 1
   plot <- TRUE
 
-  # Function to create single plot
+  # --- Function to create single plot ---
   create_single_plot <- function(
     data_sub,
     y_var_name,
@@ -158,7 +213,7 @@ plot_heterogeneity <- function(
     # Check group variable type
     if (!is.factor(x_var) && !is.character(x_var) && !is.numeric(x_var)) {
       stop(
-        "group variable '",
+        "Group variable '",
         group_var_name,
         "' must be a factor, character, or numeric variable, not ",
         class(x_var)[1]
@@ -257,10 +312,15 @@ plot_heterogeneity <- function(
     )
   }
 
-  # Initialize summary statistics list
+  # --- Initialize summary statistics list ---
   summary_stats <- list(
     overall_stats = list(),
-    group_stats = list()
+    group_stats = list(),
+    variable_counts = list(
+      selection = length(selection),
+      group = length(group),
+      total_plots = length(selection) * length(group)
+    )
   )
 
   # Calculate overall summary statistics for each selection variable
@@ -288,7 +348,7 @@ plot_heterogeneity <- function(
     if (is_single_plot) {
       # Single plot - reduced vertical space
       par(
-        mar = c(4, 4, 1, 2) + 0.1, # Reduced top margin (from 4 to 1) to remove vertical space
+        mar = c(4, 4, 1, 2) + 0.1,
         las = las
       )
 
@@ -337,8 +397,6 @@ plot_heterogeneity <- function(
           show_xlab <- (i == n_rows)
 
           # Adjust margins based on whether we need axis labels
-          # Bottom margin needs extra space for x-axis labels (4 lines when showing)
-          # Left margin needs extra space for y-axis labels (4 lines when showing)
           bottom_margin <- if (show_xlab) 4 else 1
           left_margin <- if (show_ylab) 4 else 1.5
 
@@ -381,7 +439,7 @@ plot_heterogeneity <- function(
         bty = "n",
         cex = 1,
         horiz = TRUE,
-        xpd = TRUE # Allow drawing outside plot region
+        xpd = TRUE
       )
     }
   } else {
