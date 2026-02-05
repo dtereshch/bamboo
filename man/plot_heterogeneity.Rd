@@ -9,69 +9,33 @@ plot_heterogeneity(data, selection, group, colors = c("#D55E00", "#0072B2"))
 \arguments{
 \item{data}{A data.frame containing the variables for analysis.}
 
-\item{selection}{A character vector specifying the numeric variable(s) of interest.
-\strong{REQUIRED}: Must be specified (no default). Must contain only numeric variables.
-\strong{LIMIT}: Maximum 6 variables.}
+\item{selection}{A character string specifying the numeric variable of interest.}
 
-\item{group}{A character vector specifying the grouping variable(s).
-\strong{LIMIT}: Maximum 4 variables.}
+\item{group}{A character string or vector of character strings specifying the grouping variable(s).}
 
 \item{colors}{A character vector of two colors: first for individual points, second for mean line and points.
 Default = c("#D55E00", "#0072B2").}
 }
 \value{
-Invisibly returns a list with summary statistics. Creates plot(s) showing group heterogeneity.
+Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
 }
 \description{
-This function creates visualizations of heterogeneity among groups. It can handle
-multiple numeric variables and multiple grouping variables, arranging them in a
-grid where selection variables form rows and group variables form columns.
-}
-\details{
-When both \code{selection} and \code{group} contain multiple variables, plots are arranged in a grid:
-\itemize{
-\item Rows correspond to variables in \code{selection}
-\item Columns correspond to variables in \code{group}
-\item Y-axis titles and tick labels are shown only for plots in the left column
-\item X-axis titles and tick labels are shown only for plots in the bottom row
-\item A single common legend is displayed below the grid
-\item Column names are always used as axis labels
-}
-
-\strong{Variable Limits:}
-\itemize{
-\item \code{selection}: Maximum 6 variables (required, must be numeric)
-\item \code{group}: Maximum 4 variables
-}
-
-\strong{Font Size Scaling:}
-Font sizes are dynamically adjusted based on the number of plots to ensure readability.
-
-These limits ensure visual clarity and prevent graphical device errors.
-
-When only one variable is specified for either parameter, a single plot with a legend in the top-right corner is created.
+This function creates visualizations of heterogeneity among groups.
 }
 \examples{
 data(production)
 
-# Plot labor by year (single plot) - REQUIRES selection argument
+# Plot labor by year
 plot_heterogeneity(production, selection = "labor", group = "year")
 
-# Plot capital by firm (single plot)
+# Plot capital by firm
 plot_heterogeneity(production, selection = "capital", group = "firm")
 
-# Plot multiple variables with single grouping variable
-plot_heterogeneity(production, selection = c("sales", "labor", "capital"), group = "year")
-
-# Plot single variable with multiple grouping variables
-plot_heterogeneity(production, selection = "sales", group = c("firm", "year", "industry"))
-
-# Plot multiple variables with multiple grouping variables (grid)
-plot_heterogeneity(production, selection = c("sales", "labor"), group = c("year", "industry"))
+# Plot sales with multiple grouping variables
+plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
 
 # Customize colors
-plot_heterogeneity(production, selection = "sales", group = "year",
-                   colors = c("gray", "black"))
+plot_heterogeneity(production, selection = "sales", group = "year", colors = c("gray", "black"))
 
 }
 \seealso{
