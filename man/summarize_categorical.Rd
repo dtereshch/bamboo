@@ -59,7 +59,7 @@ summarize_categorical(production, group = "firm")
 summarize_categorical(production, selection = "industry", group = "firm")
 
 # Show statistics for multiple categorical variables
-summarize_categorical(production, selection = c("industry", "status"), group = "firm")
+summarize_categorical(production, selection = c("industry", "year"), group = "firm")
 
 # Show statistics with two digits rounding
 summarize_categorical(production, group = "firm", digits = 2)
