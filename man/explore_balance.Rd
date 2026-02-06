@@ -103,12 +103,6 @@ avg_balanced_entity <- balance_result$summary$avg_balanced_per_entity
 # Create a balanced subset
 balanced_data <- production[production$firm \%in\% balanced_entities, ]
 
-# Create a complete subset (balanced and no NAs)
-complete_data <- production[
-  production$firm \%in\% balanced_entities &
-  production$year \%in\% complete_periods,
-]
-
 }
 \seealso{
 \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_participation]{explore_participation()}}, \code{\link[=explore_panel]{explore_panel()}}, \code{\link[=describe_periods]{describe_periods()}}

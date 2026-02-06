@@ -94,12 +94,6 @@
 #' # Create a balanced subset
 #' balanced_data <- production[production$firm %in% balanced_entities, ]
 #'
-#' # Create a complete subset (balanced and no NAs)
-#' complete_data <- production[
-#'   production$firm %in% balanced_entities &
-#'   production$year %in% complete_periods,
-#' ]
-#'
 #' @export
 explore_balance <- function(
   data,

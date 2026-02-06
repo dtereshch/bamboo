@@ -86,13 +86,6 @@ unbalanced_firms <- panel_result$details$unbalanced_groups
 irregular_firms <- panel_result$details$irregular_groups
 obs_per_firm <- panel_result$details$observations_per_group
 
-# Identify problematic observations
-problematic_indices <- unique(c(
-panel_result$details$duplicate_indices,
-panel_result$details$missing_groups,
-panel_result$details$missing_times
-))
-
 }
 \seealso{
 \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=explore_participation]{explore_participation()}}

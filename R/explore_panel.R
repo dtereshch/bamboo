@@ -55,6 +55,9 @@
 #'   \item{\code{message}}{Descriptive message about exploration status}
 #' }
 #'
+#' @seealso
+#' [explore_balance()], [explore_participation()]
+#'
 #' @examples
 #' data(production)
 #'
@@ -72,16 +75,6 @@
 #' unbalanced_firms <- panel_result$details$unbalanced_groups
 #' irregular_firms <- panel_result$details$irregular_groups
 #' obs_per_firm <- panel_result$details$observations_per_group
-#'
-#' # Identify problematic observations
-#' problematic_indices <- unique(c(
-#' panel_result$details$duplicate_indices,
-#' panel_result$details$missing_groups,
-#' panel_result$details$missing_times
-#' ))
-#'
-#' @seealso
-#' [explore_balance()], [explore_participation()]
 #'
 #' @export
 explore_panel <- function(
