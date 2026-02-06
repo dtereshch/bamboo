@@ -4,14 +4,16 @@
 \alias{describe_panel}
 \title{Panel Data Structure Description}
 \usage{
-describe_panel(data, group, time)
+describe_panel(data, group = NULL, time = NULL)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable
+in panel data. Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable in panel data.}
+\item{time}{A character string specifying the name of the time variable in
+panel data. Not required if data has panel attributes.}
 }
 \value{
 A data.frame with three columns:
@@ -27,15 +29,22 @@ This function provides basic summary information about panel data structure.
 \details{
 This function provides basic panel data structure information including
 the number of unique entities, time periods, and total observations.
+When provided with a data.frame that has panel attributes (created by set_panel()),
+the function automatically extracts group and time variable names from the attributes.
 }
 \examples{
 data(production)
 
-# Get panel description
+# Method 1: With regular data.frame
 panel_desc <- describe_panel(production, group = "firm", time = "year")
+print(panel_desc)
+
+# Method 2: With data.frame with panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+panel_desc <- describe_panel(panel_data)
 print(panel_desc)
 
 }
 \seealso{
-\code{\link[=explore_panel]{explore_panel()}} for detailed panel analysis
+\code{\link[=explore_panel]{explore_panel()}}, \code{\link[=set_panel]{set_panel()}}
 }
