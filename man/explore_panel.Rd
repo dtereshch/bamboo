@@ -45,7 +45,7 @@ The returned list contains the following components:
 \item \code{has_irregular_time_sequence}: Logical indicating irregular time sequence in entire panel
 }
 }
-\item{\code{vectors}}{List containing useful vectors for further analysis including:
+\item{\code{panel_details}}{List containing useful vectors for further analysis including:
 \itemize{
 \item \code{duplicate_indices}: Indices of duplicate observations
 \item \code{unbalanced_groups}: Groups causing imbalance
@@ -69,16 +69,16 @@ explore_panel(production, group = "firm", time = "year", detailed = TRUE)
 panel_result <- explore_panel(production, group = "firm", time = "year", print_result = FALSE)
 
 # Access useful vectors for further analysis
-duplicate_rows <- panel_result$vectors$duplicate_rows
-unbalanced_firms <- panel_result$vectors$unbalanced_groups
-irregular_firms <- panel_result$vectors$irregular_groups
-obs_per_firm <- panel_result$vectors$observations_per_group
+duplicate_rows <- panel_result$panel_details$duplicate_rows
+unbalanced_firms <- panel_result$panel_details$unbalanced_groups
+irregular_firms <- panel_result$panel_details$irregular_groups
+obs_per_firm <- panel_result$panel_details$observations_per_group
 
 # Identify problematic observations
 problematic_indices <- unique(c(
-panel_result$vectors$duplicate_indices,
-panel_result$vectors$missing_groups,
-panel_result$vectors$missing_times
+panel_result$panel_details$duplicate_indices,
+panel_result$panel_details$missing_groups,
+panel_result$panel_details$missing_times
 ))
 
 }
