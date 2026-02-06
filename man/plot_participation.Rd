@@ -20,10 +20,7 @@ plot_participation(
 
 \item{time}{A character string specifying the name of the time variable.}
 
-\item{type}{A character string specifying how to define entity presence. Must be one of:
-"balanced" (default): entity is present if it has at least one non-NA substantive variable,
-"observed": entity is present if it has a row in the data (even with only panel ID variables),
-"complete": entity is present only if it has no NA values in all substantive variables.}
+\item{type}{A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".}
 
 \item{max_patterns}{An integer specifying the maximum number of patterns to display.
 Default = 10.}
@@ -37,6 +34,22 @@ Invisibly returns a list with summary statistics. Creates a plot showing partici
 \description{
 This function creates a heatmap visualization of participation patterns
 of entities in panel data over time.
+}
+\details{
+\strong{Type parameter definitions:}
+\describe{
+\item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
+\item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
+\item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
+}
+
+The heatmap shows participation patterns where:
+\itemize{
+\item \strong{Present}: Entity participated in the time period (based on the specified type)
+\item \strong{Missing}: Entity did not participate in the time period
+}
+
+Patterns are sorted by frequency (most common first) and the most common pattern appears at the top of the plot.
 }
 \examples{
 data(production)

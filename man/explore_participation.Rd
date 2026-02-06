@@ -20,10 +20,7 @@ explore_participation(
 
 \item{time}{A character string specifying the name of the time variable.}
 
-\item{type}{A character string specifying how to define entity presence. Must be one of:
-"balanced" (default): entity is present if it has at least one non-NA substantive variable,
-"observed": entity is present if it has a row in the data (even with only panel ID variables),
-"complete": entity is present only if it has no NA values in all substantive variables.}
+\item{type}{A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".}
 
 \item{max_patterns}{An integer specifying the maximum number of patterns to display in detail. Default = 10.}
 
@@ -38,6 +35,13 @@ Provides detailed analysis of participation patterns in panel data, including
 time coverage statistics and pattern distributions.
 }
 \details{
+\strong{Type parameter definitions:}
+\describe{
+\item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
+\item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
+\item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
+}
+
 The returned list contains the following components:
 \describe{
 \item{\code{pattern_matrix}}{Matrix showing presence patterns (rows = patterns, columns = time periods)}

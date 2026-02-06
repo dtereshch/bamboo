@@ -5,18 +5,22 @@
 #' @param data A data.frame containing panel data.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param time A character string specifying the name of the time variable.
-#' @param type A character string specifying how to define entity presence. Must be one of:
-#'   "balanced" (default): entity is present if it has at least one non-NA substantive variable,
-#'   "observed": entity is present if it has a row in the data (even with only panel ID variables),
-#'   "complete": entity is present only if it has no NA values in all substantive variables.
-#' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
+#' @param type A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
+#' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param digits An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
 #' Default = 3.
 #'
 #' @return A data.frame with participation patterns.
 #'
 #' @details
+#' \strong{Type parameter definitions:}
+#' \describe{
+#'   \item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
+#'   \item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
+#'   \item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
+#' }
+#'
 #' The output format depends on the `format` and `detailed` parameters:
 #'
 #' \strong{When `format = "wide"` and `detailed = TRUE` (default):}
@@ -72,8 +76,8 @@ describe_participation <- function(
   group,
   time,
   type = "balanced",
-  detailed = TRUE,
   format = "wide",
+  detailed = TRUE,
   digits = 3
 ) {
   # Input validation

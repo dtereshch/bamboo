@@ -9,8 +9,8 @@ describe_participation(
   group,
   time,
   type = "balanced",
-  detailed = TRUE,
   format = "wide",
+  detailed = TRUE,
   digits = 3
 )
 }
@@ -21,14 +21,11 @@ describe_participation(
 
 \item{time}{A character string specifying the name of the time variable.}
 
-\item{type}{A character string specifying how to define entity presence. Must be one of:
-"balanced" (default): entity is present if it has at least one non-NA substantive variable,
-"observed": entity is present if it has a row in the data (even with only panel ID variables),
-"complete": entity is present only if it has no NA values in all substantive variables.}
-
-\item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
+\item{type}{A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".}
 
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
+
+\item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
 
 \item{digits}{An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
 Default = 3.}
@@ -40,6 +37,13 @@ A data.frame with participation patterns.
 This function describes participation patterns of entities in panel data over time.
 }
 \details{
+\strong{Type parameter definitions:}
+\describe{
+\item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
+\item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
+\item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
+}
+
 The output format depends on the \code{format} and \code{detailed} parameters:
 
 \strong{When \code{format = "wide"} and \code{detailed = TRUE} (default):}

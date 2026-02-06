@@ -6,10 +6,7 @@
 #' @param data A data.frame containing panel data.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param time A character string specifying the name of the time variable.
-#' @param type A character string specifying how to define entity presence. Must be one of:
-#'   "balanced" (default): entity is present if it has at least one non-NA substantive variable,
-#'   "observed": entity is present if it has a row in the data (even with only panel ID variables),
-#'   "complete": entity is present only if it has no NA values in all substantive variables.
+#' @param type A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".
 #' @param max_patterns An integer specifying the maximum number of patterns to display in detail. Default = 10.
 #' @param print_result A logical flag indicating whether to print the validation results.
 #' Default = TRUE.
@@ -17,6 +14,13 @@
 #' @return A list with detailed participation pattern analysis.
 #'
 #' @details
+#' \strong{Type parameter definitions:}
+#' \describe{
+#'   \item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
+#'   \item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
+#'   \item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
+#' }
+#'
 #' The returned list contains the following components:
 #' \describe{
 #'   \item{\code{pattern_matrix}}{Matrix showing presence patterns (rows = patterns, columns = time periods)}
