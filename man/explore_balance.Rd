@@ -4,14 +4,16 @@
 \alias{explore_balance}
 \title{Panel Data Balance Exploration}
 \usage{
-explore_balance(data, group, time, print_result = TRUE)
+explore_balance(data, group = NULL, time = NULL, print_result = TRUE)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable.}
+\item{group}{A character string specifying the name of the entity/group variable.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.}
+\item{time}{A character string specifying the name of the time variable.
+Not required if data has panel attributes.}
 
 \item{print_result}{A logical flag indicating whether to print the validation results.
 Default = TRUE.}
@@ -75,6 +77,10 @@ data(production)
 
 # Basic usage (prints by default)
 explore_balance(production, group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+explore_balance(panel_data)
 
 # Assign the results without printing
 balance_result <- explore_balance(production, group = "firm", time = "year", print_result = FALSE)

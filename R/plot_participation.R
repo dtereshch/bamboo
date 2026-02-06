@@ -3,9 +3,11 @@
 #' This function creates a heatmap visualization of participation patterns
 #' of entities in panel data over time.
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
+#'              Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
+#'             Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".
 #' @param max_patterns An integer specifying the maximum number of patterns to display.
 #'        Default = 10.
@@ -68,6 +70,10 @@
 #' # Basic usage with top 10 patterns shown
 #' plot_participation(production, group = "firm", time = "year")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' plot_participation(panel_data)
+#'
 #' # Use different presence types
 #' plot_participation(production, group = "firm", time = "year", type = "observed")
 #' plot_participation(production, group = "firm", time = "year", type = "complete")
@@ -84,17 +90,34 @@
 #' @export
 plot_participation <- function(
   data,
-  group,
-  time,
+  group = NULL,
+  time = NULL,
   type = "balanced",
   max_patterns = 10,
   colors = c("#0072B2", "#D55E00")
 ) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group and time from attributes
+    group <- attr(data, "panel_group")
+    time <- attr(data, "panel_time")
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group) || is.null(time)) {
+      stop(
+        "For regular data.frames, both 'group' and 'time' arguments must be provided"
+      )
+    }
   }
 
+  # Common validation
   if (!is.character(group) || length(group) != 1) {
     stop("'group' must be a single character string, not ", class(group)[1])
   }
@@ -135,7 +158,8 @@ plot_participation <- function(
     )
   }
 
-  data <- .check_and_convert_data_robust(data, arg_name = "data")
+  # Convert data if needed (removed .check_and_convert_data_robust call)
+  # data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   # Identify data columns (excluding group and time)
   data_cols <- setdiff(names(data), c(group, time))

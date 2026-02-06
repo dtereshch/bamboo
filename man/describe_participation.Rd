@@ -6,8 +6,8 @@
 \usage{
 describe_participation(
   data,
-  group,
-  time,
+  group = NULL,
+  time = NULL,
   type = "balanced",
   format = "wide",
   detailed = TRUE,
@@ -15,11 +15,13 @@ describe_participation(
 )
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.}
+\item{time}{A character string specifying the name of the time variable.
+Not required if data has panel attributes.}
 
 \item{type}{A character string specifying how to define entity presence: "observed", "balanced", or "complete". Default = "balanced".}
 
@@ -76,6 +78,10 @@ data(production)
 
 # Basic usage
 describe_participation(production, group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+describe_participation(panel_data)
 
 # Use different presence types
 describe_participation(production, group = "firm", time = "year", type = "observed")

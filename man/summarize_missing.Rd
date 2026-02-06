@@ -7,21 +7,23 @@
 summarize_missing(
   data,
   selection = NULL,
-  group,
-  time,
+  group = NULL,
+  time = NULL,
   detailed = FALSE,
   digits = 3
 )
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
 \item{selection}{A character vector specifying which variables to analyze for missing values.
 If not specified, all variables in the data.frame will be used.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.}
+\item{time}{A character string specifying the name of the time variable.
+Not required if data has panel attributes.}
 
 \item{detailed}{A logical flag indicating whether to return detailed period-specific NA counts.
 Default = FALSE.}
@@ -69,6 +71,10 @@ data(production)
 
 # Basic usage with statistics for all variables
 summarize_missing(production, group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+summarize_missing(panel_data)
 
 # Detailed output with period-specific NA counts
 summarize_missing(production, group = "firm", time = "year", detailed = TRUE)

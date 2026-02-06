@@ -4,17 +4,25 @@
 \alias{plot_heterogeneity}
 \title{Heterogeneity Visualization}
 \usage{
-plot_heterogeneity(data, selection, group, colors = c("#D55E00", "#0072B2"))
+plot_heterogeneity(
+  data,
+  selection,
+  group = NULL,
+  colors = c("#D55E00", "#0072B2")
+)
 }
 \arguments{
-\item{data}{A data.frame containing the variables for analysis.}
+\item{data}{A data.frame containing the variables for analysis, or a data.frame
+with panel attributes.}
 
 \item{selection}{A character string specifying the numeric variable of interest.}
 
-\item{group}{A character string or vector of character strings specifying the grouping variable(s).}
+\item{group}{A character string or vector of character strings specifying the
+grouping variable(s). If data has panel attributes and group is NULL,
+both panel_group and panel_time will be used as group variables.}
 
-\item{colors}{A character vector of two colors: first for individual points, second for mean line and points.
-Default = c("#D55E00", "#0072B2").}
+\item{colors}{A character vector of two colors: first for individual points,
+second for mean line and points. Default = c("#D55E00", "#0072B2").}
 }
 \value{
 Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
@@ -44,12 +52,23 @@ The returned list contains the following components:
 \item \code{selection_var}: The selected variable name
 \item \code{group_vars}: The grouping variable name(s)
 \item \code{colors}: Colors used for plotting
+\item \code{used_panel_attrs}: Logical indicating whether panel attributes were used
 }
 }
 }
 }
 \examples{
 data(production)
+
+# Method 1: With regular data.frame
+plot_heterogeneity(production, selection = "labor", group = "year")
+
+# Method 2: With data.frame with panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+plot_heterogeneity(panel_data, selection = "labor")
+
+# Method 3: Explicit grouping even with panel data
+plot_heterogeneity(panel_data, selection = "capital", group = "year")
 
 # Plot labor by year
 plot_heterogeneity(production, selection = "labor", group = "year")
@@ -65,5 +84,5 @@ plot_heterogeneity(production, selection = "sales", group = "year", colors = c("
 
 }
 \seealso{
-\code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=plot_participation]{plot_participation()}}
+\code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=describe_panel]{describe_panel()}}
 }

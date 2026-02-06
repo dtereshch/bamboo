@@ -4,14 +4,16 @@
 \alias{describe_periods}
 \title{Time Period Coverage Description}
 \usage{
-describe_periods(data, group, time)
+describe_periods(data, group = NULL, time = NULL)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.}
+\item{time}{A character string specifying the name of the time variable.
+Not required if data has panel attributes.}
 }
 \value{
 A data.frame with time period coverage statistics.
@@ -33,6 +35,10 @@ Time periods are sorted naturally (numeric values as numbers, others alphabetica
 \examples{
 data(production)
 describe_periods(production, group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+describe_periods(panel_data)
 
 }
 \seealso{

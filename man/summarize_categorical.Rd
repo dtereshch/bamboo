@@ -4,16 +4,16 @@
 \alias{summarize_categorical}
 \title{Categorical Variable Summary for Panel Data}
 \usage{
-summarize_categorical(data, selection = NULL, group, digits = 3)
+summarize_categorical(data, selection = NULL, group = NULL, digits = 3)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
 \item{selection}{A character vector specifying which categorical (factor) variables to analyze.
 If not specified, all factor variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the name of the entity/group variable.
-Required for decomposition.}
+Required for decomposition. Not required if data has panel attributes.}
 
 \item{digits}{An integer indicating the number of decimal places to round shares.
 Default = 3.}
@@ -54,6 +54,10 @@ data(production)
 
 # Basic usage with statistics for all factor variables
 summarize_categorical(production, group = "firm")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+summarize_categorical(panel_data)
 
 # Show statistics for a single categorical variable
 summarize_categorical(production, selection = "industry", group = "firm")

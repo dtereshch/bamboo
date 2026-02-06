@@ -4,12 +4,13 @@
 \alias{describe_incomplete}
 \title{Incomplete Entities Description}
 \usage{
-describe_incomplete(data, group, time = NULL, detailed = FALSE)
+describe_incomplete(data, group = NULL, time = NULL, detailed = FALSE)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Not required if data has panel attributes.}
 
 \item{time}{A character string specifying the name of the time variable (optional, for checking panel balance).}
 
@@ -51,6 +52,10 @@ data(production)
 
 # Basic usage
 describe_incomplete(production, group = "firm")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+describe_incomplete(panel_data)
 
 # More careful usage with panel balance check
 describe_incomplete(production, group = "firm", time = "year")

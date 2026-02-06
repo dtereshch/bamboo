@@ -4,9 +4,11 @@
 #' information about balanced entities, balanced time periods, and patterns
 #' of missing values.
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param group A character string specifying the name of the entity/group variable.
+#'              Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
+#'             Not required if data has panel attributes.
 #' @param print_result A logical flag indicating whether to print the validation results.
 #' Default = TRUE.
 #'
@@ -67,6 +69,10 @@
 #' # Basic usage (prints by default)
 #' explore_balance(production, group = "firm", time = "year")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' explore_balance(panel_data)
+#'
 #' # Assign the results without printing
 #' balance_result <- explore_balance(production, group = "firm", time = "year", print_result = FALSE)
 #'
@@ -97,15 +103,32 @@
 #' @export
 explore_balance <- function(
   data,
-  group,
-  time,
+  group = NULL,
+  time = NULL,
   print_result = TRUE
 ) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group and time from attributes
+    group <- attr(data, "panel_group")
+    time <- attr(data, "panel_time")
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group) || is.null(time)) {
+      stop(
+        "For regular data.frames, both 'group' and 'time' arguments must be provided"
+      )
+    }
   }
 
+  # Common validation
   if (!is.character(group) || length(group) != 1) {
     stop("'group' must be a single character string")
   }

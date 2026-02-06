@@ -4,14 +4,22 @@
 \alias{explore_panel}
 \title{Panel Data Structure Exploration}
 \usage{
-explore_panel(data, group, time, detailed = FALSE, print_result = TRUE)
+explore_panel(
+  data,
+  group = NULL,
+  time = NULL,
+  detailed = FALSE,
+  print_result = TRUE
+)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable in panel data.}
+\item{time}{A character string specifying the name of the time variable in panel data.
+Not required if data has panel attributes.}
 
 \item{detailed}{A logical flag indicating whether to return detailed exploration results.
 Default = FALSE.}
@@ -73,6 +81,10 @@ data(production)
 
 # Basic usage (prints by default)
 explore_panel(production, group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+explore_panel(panel_data)
 
 # Detailed exploration results
 explore_panel(production, group = "firm", time = "year", detailed = TRUE)

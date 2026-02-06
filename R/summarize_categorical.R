@@ -3,11 +3,11 @@
 #' This function performs one-way tabulations and decomposes counts into
 #' between and within components for categorical (factor) variables in panel data.
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param selection A character vector specifying which categorical (factor) variables to analyze.
 #'   If not specified, all factor variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable.
-#'   Required for decomposition.
+#'              Required for decomposition. Not required if data has panel attributes.
 #' @param digits An integer indicating the number of decimal places to round shares.
 #'   Default = 3.
 #'
@@ -49,6 +49,10 @@
 #' # Basic usage with statistics for all factor variables
 #' summarize_categorical(production, group = "firm")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' summarize_categorical(panel_data)
+#'
 #' # Show statistics for a single categorical variable
 #' summarize_categorical(production, selection = "industry", group = "firm")
 #'
@@ -62,14 +66,28 @@
 summarize_categorical <- function(
   data,
   selection = NULL,
-  group,
+  group = NULL,
   digits = 3
 ) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group from attributes
+    group <- attr(data, "panel_group")
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group)) {
+      stop("For regular data.frames, 'group' argument must be provided")
+    }
   }
 
+  # Common validation
   if (!is.null(selection) && !is.character(selection)) {
     stop(
       "'selection' must be a character vector or NULL, not ",

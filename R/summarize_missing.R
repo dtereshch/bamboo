@@ -3,11 +3,13 @@
 #' This function calculates summary statistics for missing values (NAs) in panel data,
 #' providing both overall and detailed period-specific missing value counts.
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param selection A character vector specifying which variables to analyze for missing values.
 #'        If not specified, all variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
+#'              Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
+#'             Not required if data has panel attributes.
 #' @param detailed A logical flag indicating whether to return detailed period-specific NA counts.
 #'        Default = FALSE.
 #' @param digits An integer indicating the number of decimal places to round the na_share column.
@@ -52,6 +54,10 @@
 #' # Basic usage with statistics for all variables
 #' summarize_missing(production, group = "firm", time = "year")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' summarize_missing(panel_data)
+#'
 #' # Detailed output with period-specific NA counts
 #' summarize_missing(production, group = "firm", time = "year", detailed = TRUE)
 #'
@@ -68,16 +74,33 @@
 summarize_missing <- function(
   data,
   selection = NULL,
-  group,
-  time,
+  group = NULL,
+  time = NULL,
   detailed = FALSE,
   digits = 3
 ) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group and time from attributes
+    group <- attr(data, "panel_group")
+    time <- attr(data, "panel_time")
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group) || is.null(time)) {
+      stop(
+        "For regular data.frames, both 'group' and 'time' arguments must be provided"
+      )
+    }
   }
 
+  # Common validation
   if (!is.null(selection) && !is.character(selection)) {
     stop(
       "'selection' must be a character vector or NULL, not ",
@@ -114,8 +137,8 @@ summarize_missing <- function(
 
   digits <- as.integer(digits)
 
-  # Get data for analysis (similar to other functions)
-  data_df <- .check_and_convert_data_robust(data, arg_name = "data")
+  # Get data for analysis
+  data_df <- data # Using original data as .check_and_convert_data_robust is not defined
 
   # If selection is not specified, use all variables except group and time
   if (is.null(selection)) {

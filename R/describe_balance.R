@@ -3,9 +3,11 @@
 #' Provides simplified summary statistics for panel data structure with focus on balance
 #' and data completeness.
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param group A character string specifying the name of the entity/group variable.
+#'              Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
+#'             Not required if data has panel attributes.
 #'
 #' @return A data.frame with 4 columns and 3 rows containing panel data summary statistics:
 #'
@@ -27,12 +29,11 @@
 #'     For "periods": number of time periods with no NAs in any observation.}
 #' }
 #'
-#' \strong{Rows:}
-#' \describe{
-#'   \item{\strong{Observations}}{Row-level information about data completeness}
-#'   \item{\strong{Entities}}{Group-level balance and data completeness}
-#'   \item{\strong{Time Periods}}{Time-level balance and data completeness}
-#' }
+#' @details
+#' This function provides basic panel data structure information including
+#' the number of unique entities, time periods, and total observations.
+#' When provided with a data.frame that has panel attributes (created by set_panel()),
+#' the function automatically extracts group and time variable names from the attributes.
 #'
 #' @seealso
 #' [explore_balance()], [describe_periods()], [describe_participation()]
@@ -41,15 +42,44 @@
 #' data(production)
 #' describe_balance(production, group = "firm", time = "year")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' describe_balance(panel_data)
+#'
 #' @export
-describe_balance <- function(data, group, time) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+describe_balance <- function(data, group = NULL, time = NULL) {
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group and time from attributes
+    group <- attr(data, "panel_group")
+    time <- attr(data, "panel_time")
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group) || is.null(time)) {
+      stop(
+        "For regular data.frames, both 'group' and 'time' arguments must be provided"
+      )
+    }
+  }
+
+  # Common validation for both cases
+  if (!is.character(group) || length(group) != 1) {
+    stop("'group' must be a single character string")
   }
 
   if (!group %in% names(data)) {
     stop('variable "', group, '" not found in data')
+  }
+
+  if (!is.character(time) || length(time) != 1) {
+    stop("'time' must be a single character string")
   }
 
   if (!time %in% names(data)) {

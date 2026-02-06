@@ -4,16 +4,22 @@
 \alias{summarize_panel}
 \title{Panel Data Summary Statistics}
 \usage{
-summarize_panel(data, selection = NULL, group, detailed = TRUE, digits = 3)
+summarize_panel(
+  data,
+  selection = NULL,
+  group = NULL,
+  detailed = TRUE,
+  digits = 3
+)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
 \item{selection}{A character vector specifying which numeric variables to analyze.
 If not specified, all numeric variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the name of the entity/group variable in panel data.
-Required for variance summary.}
+Required for variance summary. Not required if data has panel attributes.}
 
 \item{detailed}{A logical flag indicating whether to return detailed Stata-like output.
 Default = TRUE.}
@@ -62,6 +68,10 @@ data(production)
 
 # Basic usage with statistics for all numeric variables
 summarize_panel(production, group = "firm")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+summarize_panel(panel_data)
 
 # Simplified output
 summarize_panel(production, group = "firm", detailed = FALSE)

@@ -2,8 +2,9 @@
 #'
 #' This function provides a descriptive table of entities with incomplete observations (missing values).
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
+#'              Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable (optional, for checking panel balance).
 #' @param detailed A logical flag indicating whether to include detailed missing counts
 #'        for each variable. Default = FALSE.
@@ -41,6 +42,10 @@
 #' # Basic usage
 #' describe_incomplete(production, group = "firm")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' describe_incomplete(panel_data)
+#'
 #' # More careful usage with panel balance check
 #' describe_incomplete(production, group = "firm", time = "year")
 #'
@@ -50,15 +55,34 @@
 #' @export
 describe_incomplete <- function(
   data,
-  group,
+  group = NULL,
   time = NULL,
   detailed = FALSE
 ) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group from attributes
+    group <- attr(data, "panel_group")
+
+    # If time is not provided but available in attributes, use it for balance check
+    if (is.null(time)) {
+      time <- attr(data, "panel_time")
+    }
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group)) {
+      stop("For regular data.frames, 'group' argument must be provided")
+    }
   }
 
+  # Common validation
   if (!is.character(group) || length(group) != 1) {
     stop("'group' must be a single character string, not ", class(group)[1])
   }
@@ -82,7 +106,8 @@ describe_incomplete <- function(
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
-  data <- .check_and_convert_data_robust(data, arg_name = "data")
+  # Convert data if needed (removed .check_and_convert_data_robust call as it's not defined)
+  # data <- data
 
   # Validate detailed parameter
   if (!is.logical(detailed) || length(detailed) != 1) {

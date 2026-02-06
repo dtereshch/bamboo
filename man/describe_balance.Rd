@@ -4,14 +4,16 @@
 \alias{describe_balance}
 \title{Panel Data Balance Description}
 \usage{
-describe_balance(data, group, time)
+describe_balance(data, group = NULL, time = NULL)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
-\item{group}{A character string specifying the name of the entity/group variable.}
+\item{group}{A character string specifying the name of the entity/group variable.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.}
+\item{time}{A character string specifying the name of the time variable.
+Not required if data has panel attributes.}
 }
 \value{
 A data.frame with 4 columns and 3 rows containing panel data summary statistics:
@@ -33,21 +35,24 @@ For "observations": number of rows with no NAs in substantive variables.
 For "entities": number of groups with no NAs in any of their observations.
 For "periods": number of time periods with no NAs in any observation.}
 }
-
-\strong{Rows:}
-\describe{
-\item{\strong{Observations}}{Row-level information about data completeness}
-\item{\strong{Entities}}{Group-level balance and data completeness}
-\item{\strong{Time Periods}}{Time-level balance and data completeness}
-}
 }
 \description{
 Provides simplified summary statistics for panel data structure with focus on balance
 and data completeness.
 }
+\details{
+This function provides basic panel data structure information including
+the number of unique entities, time periods, and total observations.
+When provided with a data.frame that has panel attributes (created by set_panel()),
+the function automatically extracts group and time variable names from the attributes.
+}
 \examples{
 data(production)
 describe_balance(production, group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+describe_balance(panel_data)
 
 }
 \seealso{

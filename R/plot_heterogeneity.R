@@ -2,11 +2,14 @@
 #'
 #' This function creates visualizations of heterogeneity among groups.
 #'
-#' @param data A data.frame containing the variables for analysis.
+#' @param data A data.frame containing the variables for analysis, or a data.frame
+#'        with panel attributes.
 #' @param selection A character string specifying the numeric variable of interest.
-#' @param group A character string or vector of character strings specifying the grouping variable(s).
-#' @param colors A character vector of two colors: first for individual points, second for mean line and points.
-#'        Default = c("#D55E00", "#0072B2").
+#' @param group A character string or vector of character strings specifying the
+#'        grouping variable(s). If data has panel attributes and group is NULL,
+#'        both panel_group and panel_time will be used as group variables.
+#' @param colors A character vector of two colors: first for individual points,
+#'        second for mean line and points. Default = c("#D55E00", "#0072B2").
 #'
 #' @return Invisibly returns a list with summary statistics. Creates a plot showing group heterogeneity.
 #'
@@ -32,15 +35,26 @@
 #'       \item \code{selection_var}: The selected variable name
 #'       \item \code{group_vars}: The grouping variable name(s)
 #'       \item \code{colors}: Colors used for plotting
+#'       \item \code{used_panel_attrs}: Logical indicating whether panel attributes were used
 #'     }
 #'   }
 #' }
 #'
 #' @seealso
-#' [summarize_panel()], [plot_participation()]
+#' [summarize_panel()], [plot_participation()], [describe_panel()]
 #'
 #' @examples
 #' data(production)
+#'
+#' # Method 1: With regular data.frame
+#' plot_heterogeneity(production, selection = "labor", group = "year")
+#'
+#' # Method 2: With data.frame with panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' plot_heterogeneity(panel_data, selection = "labor")
+#'
+#' # Method 3: Explicit grouping even with panel data
+#' plot_heterogeneity(panel_data, selection = "capital", group = "year")
 #'
 #' # Plot labor by year
 #' plot_heterogeneity(production, selection = "labor", group = "year")
@@ -58,14 +72,28 @@
 plot_heterogeneity <- function(
   data,
   selection,
-  group,
+  group = NULL,
   colors = c("#D55E00", "#0072B2")
 ) {
-  # Input validation
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  # Handle panel attributes if present and group is not specified
+  if (has_panel_attrs && is.null(group)) {
+    # Extract group and time from attributes and use both as group variables
+    group <- c(attr(data, "panel_group"), attr(data, "panel_time"))
+    used_panel_attrs <- TRUE
+  } else {
+    used_panel_attrs <- FALSE
+  }
+
+  # Input validation for data
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
   }
 
+  # Input validation for selection
   if (!is.character(selection) || length(selection) != 1) {
     stop(
       "'selection' must be a single character string, not ",
@@ -84,6 +112,13 @@ plot_heterogeneity <- function(
     )
   }
 
+  # Input validation for group (after potential extraction from panel attributes)
+  if (is.null(group)) {
+    stop(
+      "'group' must be specified. For regular data.frames, provide a character string or vector."
+    )
+  }
+
   if (!is.character(group)) {
     stop(
       "'group' must be a character string or vector of character strings, not ",
@@ -91,6 +126,7 @@ plot_heterogeneity <- function(
     )
   }
 
+  # Check that all group variables exist in data
   missing_groups <- group[!group %in% names(data)]
   if (length(missing_groups) > 0) {
     stop(
@@ -100,6 +136,7 @@ plot_heterogeneity <- function(
     )
   }
 
+  # Validate colors parameter
   if (!is.character(colors) || length(colors) != 2) {
     stop(
       "'colors' must be a character vector of length 2, not ",
@@ -107,13 +144,14 @@ plot_heterogeneity <- function(
     )
   }
 
+  # Additional data validation (from original function)
   data <- .check_and_convert_data_robust(data, arg_name = "data")
 
   if (nrow(data) == 0) {
     stop("'data' must have at least one row")
   }
 
-  # Check if variables exist in data
+  # Check if variables exist in data (redundant but kept for consistency)
   if (!selection %in% names(data)) {
     stop("variable '", selection, "' not found in data")
   }
@@ -125,11 +163,6 @@ plot_heterogeneity <- function(
       paste(missing_groups, collapse = "', '"),
       "' not found in data"
     )
-  }
-
-  # Validate colors parameter
-  if (!is.character(colors) || length(colors) != 2) {
-    stop("'colors' must be a character vector of length 2")
   }
 
   # Extract colors
@@ -257,7 +290,8 @@ plot_heterogeneity <- function(
     metadata = list(
       selection_var = selection,
       group_vars = group,
-      colors = colors
+      colors = colors,
+      used_panel_attrs = used_panel_attrs
     )
   )
 

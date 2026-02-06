@@ -3,11 +3,11 @@
 #' This function calculates summary statistics for panel data and decomposes
 #' variance into between and within components.
 #'
-#' @param data A data.frame containing panel data.
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param selection A character vector specifying which numeric variables to analyze.
 #'   If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
-#'   Required for variance summary.
+#'              Required for variance summary. Not required if data has panel attributes.
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
 #'   Default = TRUE.
 #' @param digits An integer indicating the number of decimal places to round statistics.
@@ -56,6 +56,10 @@
 #' # Basic usage with statistics for all numeric variables
 #' summarize_panel(production, group = "firm")
 #'
+#' # With panel attributes
+#' panel_data <- set_panel(production, group = "firm", time = "year")
+#' summarize_panel(panel_data)
+#'
 #' # Simplified output
 #' summarize_panel(production, group = "firm", detailed = FALSE)
 #'
@@ -75,15 +79,29 @@
 summarize_panel <- function(
   data,
   selection = NULL,
-  group,
+  group = NULL,
   detailed = TRUE,
   digits = 3
 ) {
-  # Input validation
-  if (!is.data.frame(data)) {
-    stop("'data' must be a data.frame, not ", class(data)[1])
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract group from attributes
+    group <- attr(data, "panel_group")
+  } else {
+    # Handle regular data.frame
+    if (!is.data.frame(data)) {
+      stop("'data' must be a data.frame, not ", class(data)[1])
+    }
+
+    if (is.null(group)) {
+      stop("For regular data.frames, 'group' argument must be provided")
+    }
   }
 
+  # Common validation
   if (!is.null(selection) && !is.character(selection)) {
     stop(
       "'selection' must be a character vector or NULL, not ",
@@ -91,7 +109,6 @@ summarize_panel <- function(
     )
   }
 
-  # Group is now required, no NULL default
   if (!is.character(group) || length(group) != 1) {
     stop("'group' must be a single character string")
   }
@@ -118,7 +135,7 @@ summarize_panel <- function(
     stop("'digits' must be a non-negative integer or NA for no rounding")
   }
 
-  # Validate group parameter (simplified since group is required)
+  # Validate group parameter
   if (group == "" || length(group) == 0) {
     stop("'group' must be a non-empty character string")
   }

@@ -4,16 +4,25 @@
 \alias{summarize_transition}
 \title{Transition Probabilities Summary}
 \usage{
-summarize_transition(data, selection, group, time, format = "wide", digits = 3)
+summarize_transition(
+  data,
+  selection,
+  group = NULL,
+  time = NULL,
+  format = "wide",
+  digits = 3
+)
 }
 \arguments{
-\item{data}{A data.frame containing panel data.}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
 \item{selection}{A character string specifying the factor variable to analyze transitions for.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.}
+\item{group}{A character string specifying the name of the entity/group variable in panel data.
+Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.}
+\item{time}{A character string specifying the name of the time variable.
+Not required if data has panel attributes.}
 
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
@@ -55,6 +64,10 @@ data(production)
 
 # Analyze transitions in wide format (default)
 summarize_transition(production, selection = "industry", group = "firm", time = "year")
+
+# With panel attributes
+panel_data <- set_panel(production, group = "firm", time = "year")
+summarize_transition(panel_data, selection = "industry")
 
 # Analyze transitions in long format
 summarize_transition(production, selection = "industry", group = "firm", time = "year", format = "long")
