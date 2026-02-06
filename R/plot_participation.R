@@ -15,7 +15,7 @@
 #' @return Invisibly returns a list with summary statistics. Creates a plot showing participation patterns.
 #'
 #' @details
-#' \strong{Type parameter definitions:}
+#' \strong{Type} parameter definitions:
 #' \describe{
 #'   \item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 #'   \item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -287,9 +287,9 @@ plot_participation <- function(
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
 
-  # Reduce bottom margin to eliminate space for x-axis label
-  # Top margin for legend, right margin for y-labels, reduced bottom margin
-  par(mar = c(3, 1, 4, 8) + 0.1)
+  # Reduced top margin since we're not showing a title
+  # Keep space for legend but reduce top margin
+  par(mar = c(3, 1, 3, 8) + 0.1) # Changed from c(3, 1, 4, 8) to c(3, 1, 3, 8)
 
   # Create a reversed version of the pattern matrix
   pattern_matrix_rev <- 1 - pattern_matrix # 1->0, 0->1
@@ -341,9 +341,6 @@ plot_participation <- function(
     inset = c(0, -0.1),
     cex = 0.9
   )
-
-  # Add title with type information
-  title(main = paste("Participation Patterns (Type:", type, ")"), line = 2.5)
 
   # Return the pattern matrix invisibly for further use
   invisible(list(

@@ -36,7 +36,7 @@ This function creates a heatmap visualization of participation patterns
 of entities in panel data over time.
 }
 \details{
-\strong{Type parameter definitions:}
+\strong{Type} parameter definitions:
 \describe{
 \item{\code{"observed"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 \item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
