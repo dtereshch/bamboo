@@ -8,6 +8,7 @@ explore_participation(
   data,
   group,
   time,
+  type = "balanced",
   max_patterns = 10,
   print_result = TRUE
 )
@@ -18,6 +19,11 @@ explore_participation(
 \item{group}{A character string specifying the name of the entity/group variable in panel data.}
 
 \item{time}{A character string specifying the name of the time variable.}
+
+\item{type}{A character string specifying how to define entity presence. Must be one of:
+"balanced" (default): entity is present if it has at least one non-NA substantive variable,
+"observed": entity is present if it has a row in the data (even with only panel ID variables),
+"complete": entity is present only if it has no NA values in all substantive variables.}
 
 \item{max_patterns}{An integer specifying the maximum number of patterns to display in detail. Default = 10.}
 
@@ -50,7 +56,8 @@ The returned list contains the following components:
 \item{\code{presence_matrix}}{Original presence matrix used for analysis}
 \item{\code{group_var}}{The group variable name}
 \item{\code{time_var}}{The time variable name}
-\item{\code{filtered_data}}{The filtered data used for analysis (excluding rows with all NAs)}
+\item{\code{type}}{The presence type used for analysis}
+\item{\code{filtered_data}}{The filtered data used for analysis (depending on type)}
 \item{\code{time_coverage_stats}}{Named vector with quantiles (min, 5\%, 25\%, 50\%, 75\%, 95\%, max) of time periods covered across all entities}
 \item{\code{time_coverage_by_entity}}{Named vector with number of time periods covered for each entity}
 }
@@ -65,6 +72,10 @@ explore_participation(production, group = "firm", time = "year")
 
 # Show only top 5 patterns
 explore_participation(production, group = "firm", time = "year", max_patterns = 5)
+
+# Use different presence types
+explore_participation(production, group = "firm", time = "year", type = "observed")
+explore_participation(production, group = "firm", time = "year", type = "complete")
 
 # Assign the results without printing
 participation_result <- explore_participation(production, group = "firm", time = "year",

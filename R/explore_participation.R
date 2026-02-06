@@ -6,6 +6,10 @@
 #' @param data A data.frame containing panel data.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #' @param time A character string specifying the name of the time variable.
+#' @param type A character string specifying how to define entity presence. Must be one of:
+#'   "balanced" (default): entity is present if it has at least one non-NA substantive variable,
+#'   "observed": entity is present if it has a row in the data (even with only panel ID variables),
+#'   "complete": entity is present only if it has no NA values in all substantive variables.
 #' @param max_patterns An integer specifying the maximum number of patterns to display in detail. Default = 10.
 #' @param print_result A logical flag indicating whether to print the validation results.
 #' Default = TRUE.
@@ -31,7 +35,8 @@
 #'   \item{\code{presence_matrix}}{Original presence matrix used for analysis}
 #'   \item{\code{group_var}}{The group variable name}
 #'   \item{\code{time_var}}{The time variable name}
-#'   \item{\code{filtered_data}}{The filtered data used for analysis (excluding rows with all NAs)}
+#'   \item{\code{type}}{The presence type used for analysis}
+#'   \item{\code{filtered_data}}{The filtered data used for analysis (depending on type)}
 #'   \item{\code{time_coverage_stats}}{Named vector with quantiles (min, 5%, 25%, 50%, 75%, 95%, max) of time periods covered across all entities}
 #'   \item{\code{time_coverage_by_entity}}{Named vector with number of time periods covered for each entity}
 #' }
@@ -49,6 +54,10 @@
 #'
 #' # Show only top 5 patterns
 #' explore_participation(production, group = "firm", time = "year", max_patterns = 5)
+#'
+#' # Use different presence types
+#' explore_participation(production, group = "firm", time = "year", type = "observed")
+#' explore_participation(production, group = "firm", time = "year", type = "complete")
 #'
 #' # Assign the results without printing
 #' participation_result <- explore_participation(production, group = "firm", time = "year",
@@ -71,6 +80,7 @@ explore_participation <- function(
   data,
   group,
   time,
+  type = "balanced",
   max_patterns = 10,
   print_result = TRUE
 ) {
@@ -85,6 +95,14 @@ explore_participation <- function(
 
   if (!is.character(time) || length(time) != 1) {
     stop("'time' must be a single character string, not ", class(time)[1])
+  }
+
+  if (!is.character(type) || length(type) != 1) {
+    stop("'type' must be a single character string, not ", class(type)[1])
+  }
+
+  if (!type %in% c("balanced", "observed", "complete")) {
+    stop('type must be one of: "balanced", "observed", "complete"')
   }
 
   if (!group %in% names(data)) {
@@ -111,15 +129,26 @@ explore_participation <- function(
     )
   }
 
-  # Filter data for analysis
+  # Get substantive variables
   substantive_vars <- setdiff(names(data), c(group, time))
 
   if (length(substantive_vars) == 0) {
     stop("no substantive variables found (besides group and time variables)")
   }
 
-  has_data <- apply(data[substantive_vars], 1, function(x) any(!is.na(x)))
-  filtered_data <- data[has_data, ]
+  # Filter data based on type
+  if (type == "observed") {
+    # Keep all rows (no filtering)
+    filtered_data <- data
+  } else if (type == "balanced") {
+    # Keep rows with at least one non-NA substantive variable
+    has_data <- apply(data[substantive_vars], 1, function(x) any(!is.na(x)))
+    filtered_data <- data[has_data, ]
+  } else if (type == "complete") {
+    # Keep rows with no NAs in substantive variables
+    complete_cases <- complete.cases(data[substantive_vars])
+    filtered_data <- data[complete_cases, ]
+  }
 
   # Extract variables
   group_var <- as.character(filtered_data[[group]])
@@ -145,11 +174,43 @@ explore_participation <- function(
     dimnames = list(unique_groups, ordered_times)
   )
 
-  for (i in seq_along(group_var)) {
-    row_idx <- which(unique_groups == group_var[i])
-    col_idx <- which(ordered_times == time_var[i])
-    if (length(col_idx) > 0) {
-      presence_matrix[row_idx, col_idx] <- 1
+  # Fill presence matrix based on type
+  if (type == "observed") {
+    # Count all rows as presence
+    for (i in seq_along(group_var)) {
+      row_idx <- which(unique_groups == group_var[i])
+      col_idx <- which(ordered_times == time_var[i])
+      if (length(col_idx) > 0) {
+        presence_matrix[row_idx, col_idx] <- 1
+      }
+    }
+  } else if (type == "balanced") {
+    # Use filtered data which already has at least one non-NA
+    for (i in seq_along(group_var)) {
+      row_idx <- which(unique_groups == group_var[i])
+      col_idx <- which(ordered_times == time_var[i])
+      if (length(col_idx) > 0) {
+        presence_matrix[row_idx, col_idx] <- 1
+      }
+    }
+  } else if (type == "complete") {
+    # For complete type, need to check each (group, time) combination
+    # Get original data to check completeness for all combinations
+    all_groups <- as.character(data[[group]])
+    all_times <- as.character(data[[time]])
+
+    # Create a completeness indicator for each row
+    complete_rows <- complete.cases(data[substantive_vars])
+
+    # Fill presence matrix with 1 only for complete rows
+    for (i in seq_along(all_groups)) {
+      if (complete_rows[i]) {
+        row_idx <- which(unique_groups == all_groups[i])
+        col_idx <- which(ordered_times == all_times[i])
+        if (length(row_idx) > 0 && length(col_idx) > 0) {
+          presence_matrix[row_idx, col_idx] <- 1
+        }
+      }
     }
   }
 
@@ -253,6 +314,7 @@ explore_participation <- function(
     presence_matrix = presence_matrix,
     group_var = group,
     time_var = time,
+    type = type,
     filtered_data = filtered_data,
     time_coverage_stats = time_coverage_stats,
     time_coverage_by_entity = time_coverage_by_entity
@@ -261,6 +323,7 @@ explore_participation <- function(
   # Print if requested
   if (print_result) {
     cat("PANEL DATA PARTICIPATION ANALYSIS\n")
+    cat(sprintf("Type: %s\n", type))
     cat(
       "====================================================================\n\n"
     )
