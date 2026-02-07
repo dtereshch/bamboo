@@ -372,7 +372,6 @@ explore_participation <- function(
   # Print if requested
   if (print_result) {
     cat("PANEL DATA PARTICIPATION ANALYSIS\n")
-    cat(sprintf("Type: %s\n", type))
     cat(
       "====================================================================\n\n"
     )
