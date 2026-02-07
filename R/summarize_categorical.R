@@ -76,6 +76,7 @@ summarize_categorical <- function(
   if (has_panel_attrs) {
     # Extract group from attributes
     group <- attr(data, "panel_group")
+    panel_time <- attr(data, "panel_time")
   } else {
     # Handle regular data.frame
     if (!is.data.frame(data)) {
@@ -129,6 +130,23 @@ summarize_categorical <- function(
 
     # Exclude group variable from selection
     is_factor[group] <- FALSE
+
+    # Exclude panel variables if data has panel attributes
+    if (has_panel_attrs) {
+      panel_vars <- c(group, panel_time)
+      is_factor[panel_vars] <- FALSE
+
+      # Check which panel variables are actually factors and being excluded
+      excluded_vars <- panel_vars[panel_vars %in% names(data)[is_factor]]
+
+      if (length(excluded_vars) > 0) {
+        message(
+          "Excluding panel variable(s) from analysis: ",
+          paste(excluded_vars, collapse = ", ")
+        )
+        messages_printed <- TRUE
+      }
+    }
 
     selection <- names(data)[is_factor]
 

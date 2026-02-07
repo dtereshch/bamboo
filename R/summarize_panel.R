@@ -88,8 +88,9 @@ summarize_panel <- function(
     !is.null(attr(data, "panel_time"))
 
   if (has_panel_attrs) {
-    # Extract group from attributes
+    # Extract group and time from attributes
     group <- attr(data, "panel_group")
+    panel_time <- attr(data, "panel_time")
   } else {
     # Handle regular data.frame
     if (!is.data.frame(data)) {
@@ -156,6 +157,31 @@ summarize_panel <- function(
   if (is.null(selection)) {
     numeric_vars <- vapply(data_df, is.numeric, FUN.VALUE = logical(1))
     selection <- names(data_df)[numeric_vars]
+
+    # Exclude panel variables if data has panel attributes
+    if (has_panel_attrs) {
+      panel_vars <- c(group, panel_time)
+
+      # Check which panel variables are actually numeric and in the selection
+      excluded_vars <- panel_vars[panel_vars %in% selection]
+
+      if (length(excluded_vars) > 0) {
+        message(
+          "Excluding panel variable(s) from analysis: ",
+          paste(excluded_vars, collapse = ", ")
+        )
+        messages_printed <- TRUE
+
+        selection <- selection[!selection %in% panel_vars]
+      }
+
+      if (length(selection) == 0) {
+        stop(
+          "no numeric variables remaining after removing panel variables: ",
+          paste(panel_vars, collapse = ", ")
+        )
+      }
+    }
 
     # Remove the group variable from selection if it's numeric
     if (group %in% selection) {

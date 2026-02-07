@@ -83,6 +83,21 @@ summarize_data <- function(
   detailed = FALSE,
   digits = 3
 ) {
+  # Check if data has panel attributes
+  has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
+    !is.null(attr(data, "panel_time"))
+
+  if (has_panel_attrs) {
+    # Extract panel variables from attributes
+    panel_group <- attr(data, "panel_group")
+    panel_time <- attr(data, "panel_time")
+
+    # Use panel_group as the group parameter if not specified
+    if (is.null(group)) {
+      group <- panel_group
+    }
+  }
+
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data.frame, not ", class(data)[1])
@@ -135,8 +150,41 @@ summarize_data <- function(
       stop("no numeric variables found in the dataset")
     }
 
+    # Exclude panel variables if data has panel attributes
+    if (has_panel_attrs) {
+      # Remove panel_group and panel_time from selection
+      panel_vars <- c(panel_group, panel_time)
+
+      # Check which panel variables are actually numeric and in the selection
+      excluded_vars <- panel_vars[panel_vars %in% selection]
+
+      if (length(excluded_vars) > 0) {
+        message(
+          "Excluding panel variable(s) from analysis: ",
+          paste(excluded_vars, collapse = ", ")
+        )
+        messages_printed <- TRUE
+
+        selection <- selection[!selection %in% panel_vars]
+      }
+
+      if (length(selection) == 0) {
+        stop(
+          "no numeric variables remaining after removing panel variables: ",
+          paste(panel_vars, collapse = ", ")
+        )
+      }
+    }
+
     # Remove the group variable from selection if it's numeric and provided
     if (!is.null(group) && group %in% selection) {
+      message(
+        "Excluding grouping variable '",
+        group,
+        "' from analysis"
+      )
+      messages_printed <- TRUE
+
       selection <- selection[selection != group]
     }
 
