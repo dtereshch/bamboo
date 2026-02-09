@@ -10,8 +10,8 @@
 #'             Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "balanced", "observed", or "complete".
 #'        Default = "balanced".
-#' @param color A character string specifying the fill color for the histogram.
-#'        Default = "#0072B2".
+#' @param colors A character vector of length 2 specifying the line color and fill color for the histogram.
+#'        Default = c("black", "#0072B2").
 #' @param detailed A logical flag indicating whether to display detailed summary statistics.
 #'        Default = TRUE.
 #'
@@ -52,7 +52,8 @@
 #'       \item \code{group_var}: The group variable name
 #'       \item \code{time_var}: The time variable name
 #'       \item \code{type}: The presence type used for analysis
-#'       \item \code{color}: Color used for plotting
+#'       \item \code{line_color}: Line color used for plotting
+#'       \item \code{fill_color}: Fill color used for plotting
 #'       \item \code{detailed}: Whether detailed statistics were shown
 #'     }
 #'   }
@@ -75,8 +76,11 @@
 #' plot_periods(production, group = "firm", time = "year", type = "observed")
 #' plot_periods(production, group = "firm", time = "year", type = "complete")
 #'
-#' # Custom color
-#' plot_periods(production, group = "firm", time = "year", color = "darkred")
+#' # Custom colors - black line with gray fill
+#' plot_periods(production, group = "firm", time = "year", colors = c("black", "gray"))
+#'
+#' # Custom colors - blue line with light blue fill
+#' plot_periods(production, group = "firm", time = "year", colors = c("blue", "lightblue"))
 #'
 #' # Show plot without summary statistics
 #' plot_periods(production, group = "firm", time = "year", detailed = FALSE)
@@ -87,7 +91,7 @@ plot_periods <- function(
   group = NULL,
   time = NULL,
   type = "balanced",
-  color = "#0072B2",
+  colors = c("black", "#0072B2"),
   detailed = TRUE
 ) {
   # Check if data has panel attributes
@@ -128,10 +132,11 @@ plot_periods <- function(
     stop('type must be one of: "balanced", "observed", "complete"')
   }
 
-  if (!is.character(color) || length(color) != 1) {
+  # Validate colors parameter
+  if (!is.character(colors) || length(colors) != 2) {
     stop(
-      "'color' must be a single character string, not ",
-      class(color)[1]
+      "'colors' must be a character vector of length 2, not ",
+      class(colors)[1]
     )
   }
 
@@ -149,6 +154,10 @@ plot_periods <- function(
   if (!time %in% names(data)) {
     stop('variable "', time, '" not found in data')
   }
+
+  # Extract colors
+  line_color <- colors[1]
+  fill_color <- colors[2]
 
   # Get substantive variables
   substantive_vars <- setdiff(names(data), c(group, time))
@@ -299,13 +308,29 @@ plot_periods <- function(
     # Round statistics to nearest whole number (since they represent counts)
     summary_stats <- round(summary_stats)
 
-    # Prepare histogram data
-    hist_data <- hist(time_coverage_by_entity, plot = FALSE)
+    # Prepare histogram data with integer breaks
+    # Create a table of counts for each integer value
+    coverage_table <- table(time_coverage_by_entity)
+    coverage_values <- as.numeric(names(coverage_table))
+    coverage_counts <- as.numeric(coverage_table)
+
+    # Create custom histogram-like data structure
+    hist_data <- list(
+      breaks = coverage_values - 0.5, # Breaks at integer - 0.5
+      counts = coverage_counts,
+      mids = coverage_values, # Mids at integer values
+      xname = "Time coverage",
+      equidist = TRUE
+    )
+
+    # Add the last break point
+    hist_data$breaks <- c(hist_data$breaks, max(coverage_values) + 0.5)
 
     return(list(
       coverage_by_entity = time_coverage_by_entity,
       summary_stats = summary_stats,
-      histogram_data = hist_data
+      histogram_data = hist_data,
+      coverage_table = coverage_table
     ))
   }
 
@@ -336,50 +361,84 @@ plot_periods <- function(
   # Create x-axis label (without type in parentheses)
   x_label <- paste("Time coverage by", group)
 
-  # Create empty plot frame
+  # Get the actual data range (time coverage values)
+  coverage_values <- coverage_result$coverage_by_entity
+
+  # Ensure x-axis doesn't include 0 (since time coverage is at least 1 if an entity appears)
+  # Find minimum and maximum coverage values
+  x_min <- min(coverage_values)
+  x_max <- max(coverage_values)
+
+  # Since time coverage represents number of periods, it should be at least 1
+  # But in practice, min could be 1 or more
+  x_min <- max(1, x_min) # Start at 1 or the actual minimum, whichever is larger
+
+  # Add space between axes and plot
+  x_padding <- 0.8 # Space on x-axis
+  y_padding <- max(hist_data$counts) * 0.05 # 5% space on y-axis
+
+  # Create empty plot frame with adjusted xlim and ylim for spacing
   plot(
     NA,
-    xlim = range(hist_data$breaks),
-    ylim = c(0, max(hist_data$counts) * 1.05),
+    xlim = c(x_min - x_padding, x_max + x_padding),
+    ylim = c(0, max(hist_data$counts) * 1.05 + y_padding),
     xlab = x_label,
     ylab = "Count",
     main = "", # No main title
     frame.plot = FALSE,
-    xaxs = "i",
-    yaxs = "i"
+    xaxs = "r", # Regular axis style (adds padding)
+    yaxs = "r", # Regular axis style (adds padding)
+    xaxt = "n" # Suppress default x-axis
   )
 
-  # Add histogram bars WITH FILL
+  # Add grid FIRST (behind the histogram)
+  grid()
+
+  # Add histogram bars WITH FILL - properly aligned to integer positions
+  # Bars should go from integer-0.5 to integer+0.5
   for (i in seq_along(hist_data$counts)) {
     if (hist_data$counts[i] > 0) {
+      # Calculate bar boundaries
+      bar_left <- hist_data$mids[i] - 0.5
+      bar_right <- hist_data$mids[i] + 0.5
+
       rect(
-        xleft = hist_data$breaks[i],
+        xleft = bar_left,
         ybottom = 0,
-        xright = hist_data$breaks[i + 1],
+        xright = bar_right,
         ytop = hist_data$counts[i],
-        col = color, # FILL with color
-        border = "black", # Black border for definition
+        col = fill_color, # FILL with second color
+        border = line_color, # Line with first color
         lwd = 1
       )
     }
   }
 
-  # Add grid behind the histogram
-  grid()
+  # Create integer x-axis ticks
+  # Since time coverage can only be integer, use only integer ticks
+  # Generate appropriate integer tick positions
+  tick_start <- floor(x_min)
+  tick_end <- ceiling(x_max)
 
-  # Redraw histogram bars on top of grid (to ensure they're visible)
-  for (i in seq_along(hist_data$counts)) {
-    if (hist_data$counts[i] > 0) {
-      rect(
-        xleft = hist_data$breaks[i],
-        ybottom = 0,
-        xright = hist_data$breaks[i + 1],
-        ytop = hist_data$counts[i],
-        col = color,
-        border = "black",
-        lwd = 1
-      )
+  # Create sequence of integer ticks
+  tick_positions <- tick_start:tick_end
+
+  # Only show ticks if we have reasonable range and not too many
+  if (length(tick_positions) <= 20) {
+    # Limit to avoid overcrowding
+    axis(1, at = tick_positions, labels = tick_positions)
+  } else {
+    # If too many, show every 2nd, 5th, or 10th value
+    if (length(tick_positions) > 50) {
+      show_every <- 10
+    } else if (length(tick_positions) > 20) {
+      show_every <- 5
+    } else {
+      show_every <- 2
     }
+
+    show_positions <- seq(tick_start, tick_end, by = show_every)
+    axis(1, at = show_positions, labels = show_positions)
   }
 
   # Add summary statistics below the plot if detailed = TRUE
@@ -434,13 +493,14 @@ plot_periods <- function(
     coverage = list(
       coverage_by_entity = coverage_result$coverage_by_entity,
       summary_stats = coverage_result$summary_stats,
-      histogram_data = coverage_result$histogram_data
+      histogram_data = hist_data
     ),
     metadata = list(
       group_var = group,
       time_var = time,
       type = type,
-      color = color,
+      line_color = line_color,
+      fill_color = fill_color,
       detailed = detailed
     )
   )

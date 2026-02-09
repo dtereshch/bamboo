@@ -9,7 +9,7 @@ plot_periods(
   group = NULL,
   time = NULL,
   type = "balanced",
-  color = "#0072B2",
+  colors = c("black", "#0072B2"),
   detailed = TRUE
 )
 }
@@ -25,8 +25,8 @@ Not required if data has panel attributes.}
 \item{type}{A character string specifying how to define entity presence: "balanced", "observed", or "complete".
 Default = "balanced".}
 
-\item{color}{A character string specifying the fill color for the histogram.
-Default = "#0072B2".}
+\item{colors}{A character vector of length 2 specifying the line color and fill color for the histogram.
+Default = c("black", "#0072B2").}
 
 \item{detailed}{A logical flag indicating whether to display detailed summary statistics.
 Default = TRUE.}
@@ -73,7 +73,8 @@ The returned list contains the following components:
 \item \code{group_var}: The group variable name
 \item \code{time_var}: The time variable name
 \item \code{type}: The presence type used for analysis
-\item \code{color}: Color used for plotting
+\item \code{line_color}: Line color used for plotting
+\item \code{fill_color}: Fill color used for plotting
 \item \code{detailed}: Whether detailed statistics were shown
 }
 }
@@ -93,8 +94,11 @@ plot_periods(panel_data)
 plot_periods(production, group = "firm", time = "year", type = "observed")
 plot_periods(production, group = "firm", time = "year", type = "complete")
 
-# Custom color
-plot_periods(production, group = "firm", time = "year", color = "darkred")
+# Custom colors - black line with gray fill
+plot_periods(production, group = "firm", time = "year", colors = c("black", "gray"))
+
+# Custom colors - blue line with light blue fill
+plot_periods(production, group = "firm", time = "year", colors = c("blue", "lightblue"))
 
 # Show plot without summary statistics
 plot_periods(production, group = "firm", time = "year", detailed = FALSE)
