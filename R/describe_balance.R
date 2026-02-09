@@ -20,8 +20,8 @@
 #'     Contains three values: "observations", "entities", and "periods".}
 #'   \item{\code{overall}}{Numeric vector with total counts for each panel element.
 #'     For "observations": number of rows meeting the type criteria.
-#'     For "entities": number of entities meeting the type criteria.
-#'     For "periods": number of time periods meeting the type criteria.}
+#'     For "entities": number of entities where ALL time periods have presence according to the type criteria.
+#'     For "periods": number of time periods where ALL entities have presence according to the type criteria.}
 #'   \item{\code{mean}}{Numeric vector with mean counts.
 #'     For "observations": not applicable (NA).
 #'     For "entities": mean number of time periods per entity meeting the type criteria.
@@ -39,7 +39,7 @@
 #' \strong{Type parameter definitions:}
 #' \describe{
 #'   \item{\code{"observed"}}{Entity/time is present if it has a row in the data (even with only panel ID variables)}
-#'   \item{\code{"balanced"}}{Entity/time is present if it has at least one non-NA substantive variable (default)}
+#'   \item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
 #'   \item{\code{"complete"}}{Entity/time is present only if it has no NA values in all substantive variables}
 #' }
 #'
@@ -236,18 +236,24 @@ describe_balance <- function(
   # 2. Entities
   # Calculate per-entity statistics based on type_matrix
   per_entity_counts <- rowSums(type_matrix)
-  overall_entities <- sum(per_entity_counts > 0)
-  mean_entities <- if (overall_entities > 0) {
+
+  # Overall entities: entities present in ALL periods according to type
+  overall_entities <- sum(per_entity_counts == total_periods)
+
+  # Mean, min, max: statistics for entities with at least some presence
+  mean_entities <- if (sum(per_entity_counts > 0) > 0) {
     round(mean(per_entity_counts[per_entity_counts > 0], na.rm = TRUE), digits)
   } else {
     NA
   }
-  min_entities <- if (overall_entities > 0) {
+
+  min_entities <- if (sum(per_entity_counts > 0) > 0) {
     min(per_entity_counts[per_entity_counts > 0])
   } else {
     NA
   }
-  max_entities <- if (overall_entities > 0) {
+
+  max_entities <- if (sum(per_entity_counts > 0) > 0) {
     max(per_entity_counts[per_entity_counts > 0])
   } else {
     NA
@@ -256,18 +262,24 @@ describe_balance <- function(
   # 3. Periods
   # Calculate per-period statistics based on type_matrix
   per_period_counts <- colSums(type_matrix)
-  overall_periods <- sum(per_period_counts > 0)
-  mean_periods <- if (overall_periods > 0) {
+
+  # Overall periods: periods where ALL entities have presence according to type
+  overall_periods <- sum(per_period_counts == total_entities)
+
+  # Mean, min, max: statistics for periods with at least some presence
+  mean_periods <- if (sum(per_period_counts > 0) > 0) {
     round(mean(per_period_counts[per_period_counts > 0], na.rm = TRUE), digits)
   } else {
     NA
   }
-  min_periods <- if (overall_periods > 0) {
+
+  min_periods <- if (sum(per_period_counts > 0) > 0) {
     min(per_period_counts[per_period_counts > 0])
   } else {
     NA
   }
-  max_periods <- if (overall_periods > 0) {
+
+  max_periods <- if (sum(per_period_counts > 0) > 0) {
     max(per_period_counts[per_period_counts > 0])
   } else {
     NA

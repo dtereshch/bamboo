@@ -35,8 +35,8 @@ A data.frame with 5 columns and 3 rows containing panel data summary statistics:
 Contains three values: "observations", "entities", and "periods".}
 \item{\code{overall}}{Numeric vector with total counts for each panel element.
 For "observations": number of rows meeting the type criteria.
-For "entities": number of entities meeting the type criteria.
-For "periods": number of time periods meeting the type criteria.}
+For "entities": number of entities where ALL time periods have presence according to the type criteria.
+For "periods": number of time periods where ALL entities have presence according to the type criteria.}
 \item{\code{mean}}{Numeric vector with mean counts.
 For "observations": not applicable (NA).
 For "entities": mean number of time periods per entity meeting the type criteria.
@@ -54,7 +54,7 @@ For "periods": maximum number of entities per period meeting the type criteria.}
 \strong{Type parameter definitions:}
 \describe{
 \item{\code{"observed"}}{Entity/time is present if it has a row in the data (even with only panel ID variables)}
-\item{\code{"balanced"}}{Entity/time is present if it has at least one non-NA substantive variable (default)}
+\item{\code{"balanced"}}{Entity is present if it has at least one non-NA substantive variable (default)}
 \item{\code{"complete"}}{Entity/time is present only if it has no NA values in all substantive variables}
 }
 
