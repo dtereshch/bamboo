@@ -158,9 +158,6 @@ plot_participation <- function(
     )
   }
 
-  # Convert data if needed (removed .check_and_convert_data_robust call)
-  # data <- .check_and_convert_data_robust(data, arg_name = "data")
-
   # Identify data columns (excluding group and time)
   data_cols <- setdiff(names(data), c(group, time))
 
@@ -168,106 +165,75 @@ plot_participation <- function(
     stop("no data columns found (excluding group and time variables)")
   }
 
-  # Filter data based on type
-  if (type == "observed") {
-    # Keep all rows (no filtering)
-    data_filtered <- data
-  } else if (type == "balanced") {
-    # Keep rows where at least one data column is not NA
-    if (nrow(data) > 0) {
-      has_data <- apply(data[data_cols], 1, function(row) {
-        !all(is.na(row))
-      })
-      data_filtered <- data[has_data, ]
-    } else {
-      data_filtered <- data
-    }
-  } else if (type == "complete") {
-    # Keep rows where all data columns are not NA
-    if (nrow(data) > 0) {
-      complete_rows <- complete.cases(data[data_cols])
-      data_filtered <- data[complete_rows, ]
-    } else {
-      data_filtered <- data
-    }
+  # Get all entities and time periods
+  all_groups <- unique(as.character(data[[group]]))
+  all_times <- unique(as.character(data[[time]]))
+
+  # Sort time periods if they appear numeric
+  if (all(grepl("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$", all_times))) {
+    all_times <- as.character(sort(as.numeric(all_times)))
+  } else {
+    all_times <- sort(all_times)
   }
 
-  # For "complete" type, we need to handle differently to include all group-time combinations
-  # even if some have NAs (they should be marked as 0)
-  if (type == "complete") {
-    # Get all unique groups and times from the complete data
-    group_vec <- as.character(data_filtered[[group]])
-    time_vec <- as.character(data_filtered[[time]])
-    complete_combinations <- unique(data.frame(
-      group = group_vec,
-      time = time_vec
-    ))
+  time_cols <- all_times
 
-    # Get all possible groups and times from original data
-    all_groups <- unique(as.character(data[[group]]))
-    all_times <- sort(unique(as.character(data[[time]])))
+  # Create a matrix of all possible combinations (initialize with 0)
+  participation_binary <- matrix(
+    0,
+    nrow = length(all_groups),
+    ncol = length(all_times),
+    dimnames = list(all_groups, all_times)
+  )
 
-    # Create a matrix of all possible combinations
-    participation_binary <- matrix(
-      0,
-      nrow = length(all_groups),
-      ncol = length(all_times),
-      dimnames = list(all_groups, all_times)
+  # Convert to character for consistent handling
+  group_vec <- as.character(data[[group]])
+  time_vec <- as.character(data[[time]])
+
+  # Fill the binary matrix based on type
+  if (type == "observed") {
+    # For observed type, mark 1 for all rows
+    for (i in seq_along(group_vec)) {
+      row_group <- as.character(group_vec[i])
+      row_time <- as.character(time_vec[i])
+      participation_binary[row_group, row_time] <- 1
+    }
+  } else if (type == "balanced") {
+    # For balanced type, mark 1 for rows with at least one non-NA
+    has_at_least_one_non_na <- apply(
+      data[data_cols],
+      1,
+      function(row) {
+        !all(is.na(row))
+      }
     )
 
-    # Mark 1 for complete cases
-    for (i in seq_len(nrow(complete_combinations))) {
-      row_group <- as.character(complete_combinations$group[i])
-      row_time <- as.character(complete_combinations$time[i])
-      if (
-        row_group %in%
-          rownames(participation_binary) &&
-          row_time %in% colnames(participation_binary)
-      ) {
+    for (i in seq_along(group_vec)) {
+      if (has_at_least_one_non_na[i]) {
+        row_group <- as.character(group_vec[i])
+        row_time <- as.character(time_vec[i])
         participation_binary[row_group, row_time] <- 1
       }
     }
+  } else if (type == "complete") {
+    # For complete type, mark 1 for complete rows only
+    complete_rows <- complete.cases(data[data_cols])
 
-    # Convert to data frame for pattern analysis
-    participation_df <- as.data.frame(participation_binary)
-    participation_df$group <- rownames(participation_df)
-    time_cols <- all_times
-  } else {
-    # For "observed" and "balanced" types, use the original logic
-    # Convert group and time to character to handle different classes
-    group_vec <- as.character(data_filtered[[group]])
-    time_vec <- as.character(data_filtered[[time]])
-
-    # Create unique combinations of group and time
-    unique_combinations <- unique(data.frame(
-      group = group_vec,
-      time = time_vec
-    ))
-
-    # Get all unique time periods and sort them
-    all_times <- sort(unique(time_vec))
-
-    # Create participation matrix
-    participation <- table(unique_combinations$group, unique_combinations$time)
-
-    # Convert to binary matrix (1 = present, 0 = missing)
-    participation_binary <- ifelse(participation > 0, 1, 0)
-
-    # Convert to data frame for pattern analysis
-    participation_df <- as.data.frame(participation_binary)
-    participation_df$group <- rownames(participation_df)
-
-    # Ensure all time periods are present as columns
-    for (t in all_times) {
-      if (!t %in% names(participation_df)) {
-        participation_df[[t]] <- 0
+    for (i in seq_along(group_vec)) {
+      if (complete_rows[i]) {
+        row_group <- as.character(group_vec[i])
+        row_time <- as.character(time_vec[i])
+        if (row_time %in% time_cols) {
+          participation_binary[row_group, row_time] <- 1
+        }
       }
     }
-
-    # Reorder columns to have time periods in order
-    time_cols <- as.character(sort(all_times))
-    participation_df <- participation_df[c("group", time_cols)]
   }
+
+  # Convert to data frame for pattern analysis
+  participation_df <- as.data.frame(participation_binary)
+  participation_df$group <- rownames(participation_df)
+  participation_df <- participation_df[c("group", time_cols)]
 
   # Count patterns and create pattern matrix
   pattern_cols <- setdiff(names(participation_df), "group")
@@ -284,7 +250,7 @@ plot_participation <- function(
     stop("No participation patterns found in the data")
   }
 
-  # Create pattern matrix for heatmap - FIX: Handle single row matrix properly
+  # Create pattern matrix for heatmap
   if (n_patterns == 1) {
     # Single pattern case
     pattern_matrix <- matrix(
@@ -315,7 +281,7 @@ plot_participation <- function(
   pattern_matrix <- pattern_matrix[sorted_order, , drop = FALSE]
   counts <- counts[sorted_order]
 
-  # Apply max_patterns limit - FIX: Handle single pattern case
+  # Apply max_patterns limit
   n_patterns_to_display <- min(nrow(pattern_matrix), max_patterns)
 
   if (n_patterns_to_display > 0) {
@@ -341,8 +307,7 @@ plot_participation <- function(
   on.exit(par(old_par))
 
   # Reduced top margin since we're not showing a title
-  # Keep space for legend but reduce top margin
-  par(mar = c(3, 1, 3, 8) + 0.1) # Changed from c(3, 1, 4, 8) to c(3, 1, 3, 8)
+  par(mar = c(3, 1, 3, 8) + 0.1)
 
   # Create a reversed version of the pattern matrix
   pattern_matrix_rev <- 1 - pattern_matrix # 1->0, 0->1
@@ -408,7 +373,8 @@ plot_participation <- function(
       pattern_matrix_reversed = pattern_matrix_rev,
       pattern_labels = y_labels,
       counts = counts,
-      time_periods = time_cols
+      time_periods = time_cols,
+      participation_matrix = participation_binary # Added for compatibility
     ),
     metadata = list(
       group_var = group,
