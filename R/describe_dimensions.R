@@ -1,4 +1,4 @@
-#' Panel Data Structure Description
+#' Panel Data Dimensions Description
 #'
 #' This function provides basic summary information about panel data structure.
 #'
@@ -8,17 +8,18 @@
 #' @param time A character string specifying the name of the time variable in
 #'             panel data. Not required if data has panel attributes.
 #'
-#' @return A data.frame with three columns:
+#' @return A data.frame with two columns:
 #' \describe{
-#'   \item{\code{observations}}{Total number of observations in the panel}
-#'   \item{\code{entities}}{Number of unique groups/entities in the panel}
-#'   \item{\code{periods}}{Number of unique time periods in the panel}
+#'   \item{\code{dimension}}{Dimension name: "observations", "entities", or "periods"}
+#'   \item{\code{count}}{The count for each dimension}
 #' }
 #'
 #' The data.frame has additional attributes:
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_time}}{The time variable name}
+#'   \item{\code{entity_values}}{Vector of all unique entity/group values}
+#'   \item{\code{period_values}}{Vector of all unique time period values}
 #' }
 #'
 #' @details
@@ -31,19 +32,19 @@
 #' data(production)
 #'
 #' # Method 1: With regular data.frame
-#' panel_desc <- describe_panel(production, group = "firm", time = "year")
+#' panel_desc <- describe_dimensions(production, group = "firm", time = "year")
 #' print(panel_desc)
 #'
 #' # Method 2: With data.frame with panel attributes
 #' panel_data <- set_panel(production, group = "firm", time = "year")
-#' panel_desc <- describe_panel(panel_data)
+#' panel_desc <- describe_dimensions(panel_data)
 #' print(panel_desc)
 #'
 #' @seealso
 #' [explore_panel()], [set_panel()]
 #'
 #' @export
-describe_panel <- function(data, group = NULL, time = NULL) {
+describe_dimensions <- function(data, group = NULL, time = NULL) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
     !is.null(attr(data, "panel_time"))
@@ -92,17 +93,22 @@ describe_panel <- function(data, group = NULL, time = NULL) {
   n_periods <- length(unique(data[[time]]))
   n_obs <- nrow(data)
 
-  # Create result data.frame
+  # Get unique values
+  entity_values <- sort(unique(data[[group]]))
+  period_values <- sort(unique(data[[time]]))
+
+  # Create result data.frame with transposed structure
   result <- data.frame(
-    observations = n_obs,
-    entities = n_groups,
-    periods = n_periods,
+    dimension = c("observations", "entities", "periods"),
+    count = c(n_obs, n_groups, n_periods),
     stringsAsFactors = FALSE
   )
 
   # Add standardized attributes
   attr(result, "panel_group") <- group
   attr(result, "panel_time") <- time
+  attr(result, "entity_values") <- entity_values
+  attr(result, "period_values") <- period_values
 
   return(result)
 }
