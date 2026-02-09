@@ -61,6 +61,8 @@
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
 #'   \item{\code{panel_n_patterns}}{Number of distinct participation patterns}
+#'   \item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified type}
+#'   \item{\code{panel_pattern_groups}}{List of entities belonging to each participation pattern}
 #' }
 #'
 #' @seealso
@@ -215,84 +217,83 @@ describe_participation <- function(
   group_vec <- as.character(data_filtered[[group]])
   time_vec <- as.character(data_filtered[[time]])
 
-  # For "complete" type, we need to handle differently to include all group-time combinations
-  # even if some have NAs (they should be marked as 0)
-  if (type == "complete") {
-    # Get all unique groups and times from the complete data
-    complete_combinations <- unique(data.frame(
-      group = group_vec,
-      time = time_vec
-    ))
+  # Get all entities and time periods
+  all_groups <- unique(as.character(data[[group]]))
+  all_times <- sort(unique_periods)
 
-    # Get all possible groups and times from original data
-    all_groups <- unique(as.character(data[[group]]))
-    all_times <- sort(unique(as.character(data[[time]])))
+  # Create a matrix of all possible combinations (initialize with 0)
+  participation_binary <- matrix(
+    0,
+    nrow = length(all_groups),
+    ncol = length(all_times),
+    dimnames = list(all_groups, all_times)
+  )
 
-    # Create a matrix of all possible combinations
-    participation_binary <- matrix(
-      0,
-      nrow = length(all_groups),
-      ncol = length(all_times),
-      dimnames = list(all_groups, all_times)
-    )
+  time_cols <- all_times
 
-    # Mark 1 for complete cases
-    for (i in seq_len(nrow(complete_combinations))) {
-      row_group <- as.character(complete_combinations$group[i])
-      row_time <- as.character(complete_combinations$time[i])
-      if (
-        row_group %in%
-          rownames(participation_binary) &&
-          row_time %in% colnames(participation_binary)
-      ) {
-        participation_binary[row_group, row_time] <- 1
+  # Fill the binary matrix based on type
+  if (type == "observed") {
+    # For observed type, mark 1 for all rows in filtered data
+    for (i in seq_along(group_vec)) {
+      row_group <- as.character(group_vec[i])
+      row_time <- as.character(time_vec[i])
+      participation_binary[row_group, row_time] <- 1
+    }
+  } else if (type == "balanced") {
+    # For balanced type, mark 1 for rows with at least one non-NA
+    # The data_filtered already contains only rows with at least one non-NA
+    for (i in seq_along(group_vec)) {
+      row_group <- as.character(group_vec[i])
+      row_time <- as.character(time_vec[i])
+      participation_binary[row_group, row_time] <- 1
+    }
+  } else if (type == "complete") {
+    # For complete type, mark 1 for complete rows only
+    # Need to check all rows in original data
+    complete_rows <- complete.cases(data[data_cols])
+    all_group_vec <- as.character(data[[group]])
+    all_time_vec <- as.character(data[[time]])
+
+    for (i in seq_along(all_group_vec)) {
+      if (complete_rows[i]) {
+        row_group <- as.character(all_group_vec[i])
+        row_time <- as.character(all_time_vec[i])
+        if (row_time %in% time_cols) {
+          participation_binary[row_group, row_time] <- 1
+        }
       }
     }
-
-    # Convert to data frame for pattern analysis
-    participation_df <- as.data.frame(participation_binary)
-    participation_df$group <- rownames(participation_df)
-    time_cols <- all_times
-  } else {
-    # For "observed" and "balanced" types, use the original logic
-    # Create unique combinations of group and time
-    unique_combinations <- unique(data.frame(
-      group = group_vec,
-      time = time_vec
-    ))
-
-    # Get all unique time periods and sort them
-    all_times <- sort(unique(time_vec))
-
-    # Create participation matrix
-    participation <- table(unique_combinations$group, unique_combinations$time)
-
-    # Convert to binary matrix (1 = present, 0 = missing)
-    participation_binary <- ifelse(participation > 0, 1, 0)
-
-    # Convert to data frame for pattern analysis
-    participation_df <- as.data.frame(participation_binary)
-    participation_df$group <- rownames(participation_df)
-
-    # Ensure all time periods are present as columns
-    for (t in all_times) {
-      if (!t %in% names(participation_df)) {
-        participation_df[[t]] <- 0
-      }
-    }
-
-    # Reorder columns to have time periods in order
-    time_cols <- as.character(sort(all_times))
-    participation_df <- participation_df[c("group", time_cols)]
   }
 
-  # Count patterns
+  # Convert to data frame for pattern analysis
+  participation_df <- as.data.frame(participation_binary)
+  participation_df$group <- rownames(participation_df)
+  participation_df <- participation_df[c("group", time_cols)]
+
+  # Count patterns and create pattern groups
   pattern_cols <- setdiff(names(participation_df), "group")
   pattern_strings <- apply(participation_df[pattern_cols], 1, function(x) {
     paste(x, collapse = "")
   })
 
   pattern_counts <- table(pattern_strings)
+
+  # Create pattern_groups list (similar to explore_participation)
+  pattern_groups <- list()
+
+  # Create pattern groups from the binary matrix
+  for (entity in all_groups) {
+    pattern_vec <- participation_binary[entity, ]
+    pattern_string <- paste(pattern_vec, collapse = "")
+
+    if (!pattern_string %in% names(pattern_groups)) {
+      pattern_groups[[pattern_string]] <- character(0)
+    }
+    pattern_groups[[pattern_string]] <- c(
+      pattern_groups[[pattern_string]],
+      entity
+    )
+  }
 
   # Create result data frame
   result <- data.frame(
@@ -318,6 +319,20 @@ describe_participation <- function(
   # Reset pattern numbers to follow the new sorted order
   result$pattern <- seq_len(nrow(result))
   rownames(result) <- NULL
+
+  # Reorder pattern_groups to match the sorted patterns in result
+  # First, get the pattern strings in the sorted order
+  sorted_pattern_strings <- apply(result[time_cols], 1, function(x) {
+    paste(x, collapse = "")
+  })
+
+  # Create a reordered pattern_groups list
+  pattern_groups_sorted <- list()
+  for (i in seq_along(sorted_pattern_strings)) {
+    pattern_string <- sorted_pattern_strings[i]
+    pattern_groups_sorted[[as.character(i)]] <- pattern_groups[[pattern_string]]
+  }
+  pattern_groups <- pattern_groups_sorted
 
   # Convert to long format if requested
   if (format == "long") {
@@ -360,6 +375,8 @@ describe_participation <- function(
       attr(simplified_result, "panel_n_entities") <- length(unique_groups)
       attr(simplified_result, "panel_n_periods") <- length(unique_periods)
       attr(simplified_result, "panel_n_patterns") <- nrow(result)
+      attr(simplified_result, "panel_matrix") <- participation_binary
+      attr(simplified_result, "panel_pattern_groups") <- pattern_groups
 
       return(simplified_result)
     }
@@ -374,6 +391,8 @@ describe_participation <- function(
     attr(long_result, "panel_n_entities") <- length(unique_groups)
     attr(long_result, "panel_n_periods") <- length(unique_periods)
     attr(long_result, "panel_n_patterns") <- nrow(result)
+    attr(long_result, "panel_matrix") <- participation_binary
+    attr(long_result, "panel_pattern_groups") <- pattern_groups
 
     return(long_result)
   }
@@ -393,6 +412,8 @@ describe_participation <- function(
     attr(simplified_result, "panel_n_entities") <- length(unique_groups)
     attr(simplified_result, "panel_n_periods") <- length(unique_periods)
     attr(simplified_result, "panel_n_patterns") <- nrow(result)
+    attr(simplified_result, "panel_matrix") <- participation_binary
+    attr(simplified_result, "panel_pattern_groups") <- pattern_groups
 
     return(simplified_result)
   }
@@ -407,6 +428,8 @@ describe_participation <- function(
   attr(result, "panel_n_entities") <- length(unique_groups)
   attr(result, "panel_n_periods") <- length(unique_periods)
   attr(result, "panel_n_patterns") <- nrow(result)
+  attr(result, "panel_matrix") <- participation_binary
+  attr(result, "panel_pattern_groups") <- pattern_groups
 
   return(result)
 }

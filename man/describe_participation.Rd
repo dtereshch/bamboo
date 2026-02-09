@@ -84,6 +84,8 @@ The data.frame has additional attributes:
 \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 \item{\code{panel_n_periods}}{Total number of unique time periods}
 \item{\code{panel_n_patterns}}{Number of distinct participation patterns}
+\item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified type}
+\item{\code{panel_pattern_groups}}{List of entities belonging to each participation pattern}
 }
 }
 \examples{
