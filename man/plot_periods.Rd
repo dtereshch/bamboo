@@ -9,8 +9,8 @@ plot_periods(
   group = NULL,
   time = NULL,
   type = "balanced",
-  colors = c("black", "#0072B2"),
-  detailed = TRUE
+  detailed = TRUE,
+  colors = c("black", "#0072B2")
 )
 }
 \arguments{
@@ -25,11 +25,11 @@ Not required if data has panel attributes.}
 \item{type}{A character string specifying how to define entity presence: "balanced", "observed", or "complete".
 Default = "balanced".}
 
-\item{colors}{A character vector of length 2 specifying the line color and fill color for the histogram.
-Default = c("black", "#0072B2").}
-
 \item{detailed}{A logical flag indicating whether to display detailed summary statistics.
 Default = TRUE.}
+
+\item{colors}{A character vector of length 2 specifying the line color and fill color for the histogram.
+Default = c("black", "#0072B2").}
 }
 \value{
 Invisibly returns a list with summary statistics for the specified type.

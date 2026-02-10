@@ -10,10 +10,10 @@
 #'             Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "balanced", "observed", or "complete".
 #'        Default = "balanced".
-#' @param colors A character vector of length 2 specifying the line color and fill color for the histogram.
-#'        Default = c("black", "#0072B2").
 #' @param detailed A logical flag indicating whether to display detailed summary statistics.
 #'        Default = TRUE.
+#' @param colors A character vector of length 2 specifying the line color and fill color for the histogram.
+#'        Default = c("black", "#0072B2").
 #'
 #' @return Invisibly returns a list with summary statistics for the specified type.
 #'         Creates a plot showing time coverage distribution.
@@ -91,8 +91,8 @@ plot_periods <- function(
   group = NULL,
   time = NULL,
   type = "balanced",
-  colors = c("black", "#0072B2"),
-  detailed = TRUE
+  detailed = TRUE,
+  colors = c("black", "#0072B2")
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
