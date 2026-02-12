@@ -19,7 +19,7 @@ summarize_panel(
 If not specified, all numeric variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the name of the entity/group variable in panel data.
-Required for variance summary. Not required if data has panel attributes.}
+Not required if data has panel attributes.}
 
 \item{detailed}{A logical flag indicating whether to return detailed Stata-like output.
 Default = TRUE.}

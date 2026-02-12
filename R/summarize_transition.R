@@ -6,12 +6,12 @@
 #' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param selection A character string specifying the factor variable to analyze transitions for.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
-#'              Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
-#'             Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round transition shares.
-#'               Default = 3.
+#'        Default = 3.
 #'
 #' @return A data.frame containing transition probability summary.
 #'

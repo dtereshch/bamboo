@@ -14,8 +14,8 @@ Not required if data has panel attributes.}
 
 \item{time}{A character string specifying the name of the time variable (optional, for checking panel balance).}
 
-\item{detailed}{A logical flag indicating whether to include detailed missing counts
-for each variable. Default = FALSE.}
+\item{detailed}{A logical flag indicating whether to include detailed missing counts for each variable.
+Default = FALSE.}
 }
 \value{
 A data.frame with incomplete entities description or a character message.

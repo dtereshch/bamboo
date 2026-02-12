@@ -3,10 +3,10 @@
 #' This function provides basic summary information about panel data structure.
 #'
 #' @param data A data.frame containing panel data, or a data.frame with panel attributes.
-#' @param group A character string specifying the name of the entity/group variable
-#'              in panel data. Not required if data has panel attributes.
-#' @param time A character string specifying the name of the time variable in
-#'             panel data. Not required if data has panel attributes.
+#' @param group A character string specifying the name of the entity/group variable in panel data.
+#'        Not required if data has panel attributes.
+#' @param time A character string specifying the name of the time variable in panel data.
+#'        Not required if data has panel attributes.
 #'
 #' @return A data.frame with two columns:
 #' \describe{

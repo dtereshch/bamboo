@@ -7,13 +7,13 @@
 #' @param selection A character vector specifying which variables to analyze for missing values.
 #'        If not specified, all variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
-#'              Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
-#'             Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param detailed A logical flag indicating whether to return detailed period-specific NA counts.
 #'        Default = FALSE.
 #' @param digits An integer indicating the number of decimal places to round the share column.
-#'               Default = 3.
+#'        Default = 3.
 #'
 #' @return A data.frame with missing value summary statistics.
 #'

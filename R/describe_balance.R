@@ -5,12 +5,12 @@
 #'
 #' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param group A character string specifying the name of the entity/group variable.
-#'              Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
-#'             Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
 #' @param digits An integer specifying the number of decimal places for rounding mean values.
-#'               Default = 3.
+#'        Default = 3.
 #'
 #' @return A data.frame with 5 columns and 3 rows containing panel data summary statistics.
 #'

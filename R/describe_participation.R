@@ -4,14 +4,14 @@
 #'
 #' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
-#'              Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
-#'             Not required if data has panel attributes.
+#'        Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param digits An integer specifying the number of decimal places for rounding share column.
-#'               Default = 3.
+#'        Default = 3.
 #'
 #' @return A data.frame with participation patterns.
 #'

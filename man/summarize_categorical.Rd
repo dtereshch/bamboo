@@ -13,7 +13,7 @@ summarize_categorical(data, selection = NULL, group = NULL, digits = 3)
 If not specified, all factor variables in the data.frame will be used.}
 
 \item{group}{A character string specifying the name of the entity/group variable.
-Required for decomposition. Not required if data has panel attributes.}
+Not required if data has panel attributes.}
 
 \item{digits}{An integer indicating the number of decimal places to round shares.
 Default = 3.}

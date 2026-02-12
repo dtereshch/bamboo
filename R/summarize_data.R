@@ -9,8 +9,7 @@
 #' @param group A character string specifying the grouping variable name.
 #'        If not specified, overall statistics will be returned.
 #' @param detailed A logical flag indicating whether to return additional statistics in
-#'        the style of pandas describe method. If TRUE, includes count, mean, sd,
-#'        min, p25, median, p75, and max. Default = FALSE.
+#'        the style of pandas describe method. Default = FALSE.
 #' @param digits An integer specifying the number of decimal places for rounding statistics.
 #'        Default = 3.
 #'

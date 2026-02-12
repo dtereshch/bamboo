@@ -22,8 +22,7 @@ If not specified, all numeric variables in the data.frame will be used.}
 If not specified, overall statistics will be returned.}
 
 \item{detailed}{A logical flag indicating whether to return additional statistics in
-the style of pandas describe method. If TRUE, includes count, mean, sd,
-min, p25, median, p75, and max. Default = FALSE.}
+the style of pandas describe method. Default = FALSE.}
 
 \item{digits}{An integer specifying the number of decimal places for rounding statistics.
 Default = 3.}
