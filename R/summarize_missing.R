@@ -12,7 +12,7 @@
 #'             Not required if data has panel attributes.
 #' @param detailed A logical flag indicating whether to return detailed period-specific NA counts.
 #'        Default = FALSE.
-#' @param digits An integer indicating the number of decimal places to round the na_share column.
+#' @param digits An integer indicating the number of decimal places to round the share column.
 #'               Default = 3.
 #'
 #' @return A data.frame with missing value summary statistics.
@@ -21,10 +21,10 @@
 #' When `detailed = FALSE` (default), returns a data.frame with the following columns:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
-#'   \item{\code{na_count}}{Total number of missing values (NAs) for the variable}
-#'   \item{\code{na_share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
-#'   \item{\code{entities_with_na}}{Number of entities/groups with at least one missing value for this variable}
-#'   \item{\code{periods_with_na}}{Number of time periods with at least one missing value for this variable}
+#'   \item{\code{na}}{Total number of missing values (NAs) for the variable}
+#'   \item{\code{share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
+#'   \item{\code{entities}}{Number of entities/groups with at least one missing value for this variable}
+#'   \item{\code{periods}}{Number of time periods with at least one missing value for this variable}
 #' }
 #'
 #' When `detailed = TRUE`, additional columns are included:
@@ -39,7 +39,7 @@
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_time}}{The time variable name}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding na_share}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding share}
 #'   \item{\code{panel_total_obs}}{Total number of observations in the data}
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
@@ -235,13 +235,13 @@ summarize_missing <- function(
       periods_with_na <- 0
     }
 
-    # Create base result row
+    # Create base result row with renamed columns
     result_row <- data.frame(
       variable = var,
-      na_count = na_count,
-      na_share = na_share,
-      entities_with_na = entities_with_na,
-      periods_with_na = periods_with_na,
+      na = na_count,
+      share = na_share,
+      entities = entities_with_na,
+      periods = periods_with_na,
       stringsAsFactors = FALSE
     )
 

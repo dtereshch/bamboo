@@ -26,7 +26,7 @@ Not required if data has panel attributes.}
 
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
-\item{digits}{An integer indicating the number of decimal places to round probabilities.
+\item{digits}{An integer indicating the number of decimal places to round transition shares.
 Default = 3.}
 }
 \value{
@@ -55,7 +55,7 @@ Returns a data.frame with:
 \item{\code{from}}{The originating state}
 \item{\code{to}}{The destination state}
 \item{\code{n}}{Number of transitions observed from \code{from} to \code{to}}
-\item{\code{prob}}{Transition probability (rounded to specified digits)}
+\item{\code{share}}{Transition share (rounded to specified digits)}
 }
 
 Includes all possible state combinations, even those with zero transitions.

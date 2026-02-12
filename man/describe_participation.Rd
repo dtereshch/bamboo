@@ -29,7 +29,7 @@ Not required if data has panel attributes.}
 
 \item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
 
-\item{digits}{An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
+\item{digits}{An integer specifying the number of decimal places for rounding share column.
 Default = 3.}
 }
 \value{
@@ -50,26 +50,24 @@ The output format depends on the \code{format} and \code{detailed} parameters:
 
 \strong{When \code{format = "wide"} and \code{detailed = TRUE} (default):}
 \describe{
-\item{\code{pattern}}{Pattern identifier (1, 2, 3, ...)}
+\item{\code{rank}}{Pattern rank (1, 2, 3, ...) ordered by frequency}
 \item{\code{[time_period]}}{Columns for each time period showing participation
 (1 = present, 0 = missing). Column names match the time variable values.}
-\item{\code{count}}{Number of entities with this pattern}
+\item{\code{n}}{Number of entities with this pattern}
 \item{\code{share}}{Proportion of entities with this pattern (0 to 1)}
-\item{\code{cumulative}}{Cumulative proportion of entities}
 }
 
 \strong{When \code{format = "long"} and \code{detailed = TRUE}:}
 \describe{
-\item{\code{pattern}}{Pattern identifier (1, 2, 3, ...)}
+\item{\code{rank}}{Pattern rank (1, 2, 3, ...) ordered by frequency}
 \item{\code{[time]}}{The time period variable (named according to the \code{time} argument)}
 \item{\code{participation}}{0/1 values indicating absence/presence in the period}
-\item{\code{count}}{Number of entities with this pattern}
+\item{\code{n}}{Number of entities with this pattern}
 \item{\code{share}}{Proportion of entities with this pattern}
-\item{\code{cumulative}}{Cumulative proportion of entities}
 }
 
 \strong{When \code{detailed = FALSE}:}
-Returns only the Pattern and time period columns (without count, share, or cumulative).
+Returns only the rank and time period columns (without n or share).
 
 Patterns are sorted by frequency (most common first).
 

@@ -10,7 +10,7 @@
 #' @param time A character string specifying the name of the time variable.
 #'             Not required if data has panel attributes.
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
-#' @param digits An integer indicating the number of decimal places to round probabilities.
+#' @param digits An integer indicating the number of decimal places to round transition shares.
 #'               Default = 3.
 #'
 #' @return A data.frame containing transition probability summary.
@@ -34,7 +34,7 @@
 #'   \item{\code{from}}{The originating state}
 #'   \item{\code{to}}{The destination state}
 #'   \item{\code{n}}{Number of transitions observed from `from` to `to`}
-#'   \item{\code{prob}}{Transition probability (rounded to specified digits)}
+#'   \item{\code{share}}{Transition share (rounded to specified digits)}
 #' }
 #'
 #' Includes all possible state combinations, even those with zero transitions.
@@ -259,7 +259,7 @@ summarize_transition <- function(
 
   # Create long format result
   long_result <- count_df
-  long_result$prob <- long_result$n /
+  long_result$share <- long_result$n /
     from_totals[as.character(long_result$from)]
 
   # Ensure all factor levels are represented in the output
@@ -275,10 +275,10 @@ summarize_transition <- function(
     all.x = TRUE
   )
   long_result$n[is.na(long_result$n)] <- 0
-  long_result$prob[is.na(long_result$prob)] <- 0
+  long_result$share[is.na(long_result$share)] <- 0
 
-  # Round probabilities to specified digits
-  long_result$prob <- round_if_needed(long_result$prob, digits)
+  # Round transition shares to specified digits
+  long_result$share <- round_if_needed(long_result$share, digits)
 
   # Order by from and to
   long_result <- long_result[order(long_result$from, long_result$to), ]
@@ -286,7 +286,7 @@ summarize_transition <- function(
 
   # Create wide format (transition matrix)
   wide_matrix <- matrix(
-    long_result$prob,
+    long_result$share,
     nrow = length(all_levels),
     ncol = length(all_levels),
     byrow = FALSE,

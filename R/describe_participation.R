@@ -10,7 +10,7 @@
 #' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
-#' @param digits An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
+#' @param digits An integer specifying the number of decimal places for rounding share column.
 #'               Default = 3.
 #'
 #' @return A data.frame with participation patterns.
@@ -27,26 +27,24 @@
 #'
 #' \strong{When `format = "wide"` and `detailed = TRUE` (default):}
 #' \describe{
-#'   \item{\code{pattern}}{Pattern identifier (1, 2, 3, ...)}
+#'   \item{\code{rank}}{Pattern rank (1, 2, 3, ...) ordered by frequency}
 #'   \item{\code{[time_period]}}{Columns for each time period showing participation
 #'     (1 = present, 0 = missing). Column names match the time variable values.}
-#'   \item{\code{count}}{Number of entities with this pattern}
+#'   \item{\code{n}}{Number of entities with this pattern}
 #'   \item{\code{share}}{Proportion of entities with this pattern (0 to 1)}
-#'   \item{\code{cumulative}}{Cumulative proportion of entities}
 #' }
 #'
 #' \strong{When `format = "long"` and `detailed = TRUE`:}
 #' \describe{
-#'   \item{\code{pattern}}{Pattern identifier (1, 2, 3, ...)}
+#'   \item{\code{rank}}{Pattern rank (1, 2, 3, ...) ordered by frequency}
 #'   \item{\code{[time]}}{The time period variable (named according to the `time` argument)}
 #'   \item{\code{participation}}{0/1 values indicating absence/presence in the period}
-#'   \item{\code{count}}{Number of entities with this pattern}
+#'   \item{\code{n}}{Number of entities with this pattern}
 #'   \item{\code{share}}{Proportion of entities with this pattern}
-#'   \item{\code{cumulative}}{Cumulative proportion of entities}
 #' }
 #'
 #' \strong{When `detailed = FALSE`:}
-#' Returns only the Pattern and time period columns (without count, share, or cumulative).
+#' Returns only the rank and time period columns (without n or share).
 #'
 #' Patterns are sorted by frequency (most common first).
 #'
@@ -306,7 +304,7 @@ describe_participation <- function(
 
   # Create result data frame
   result <- data.frame(
-    pattern = seq_along(pattern_counts),
+    rank = seq_along(pattern_counts),
     stringsAsFactors = FALSE
   )
 
@@ -316,17 +314,14 @@ describe_participation <- function(
   }
 
   # Add count and share columns
-  result$count <- as.numeric(pattern_counts)
-  result$share <- round_if_needed(result$count / sum(result$count), digits)
+  result$n <- as.numeric(pattern_counts)
+  result$share <- round_if_needed(result$n / sum(result$n), digits)
 
-  # Sort by count (descending) FIRST, then calculate cumulative sum
-  result <- result[order(-result$count), ]
+  # Sort by count (descending) FIRST
+  result <- result[order(-result$n), ]
 
-  # Now calculate cumulative sum on the sorted data
-  result$cumulative <- round_if_needed(cumsum(result$share), digits)
-
-  # Reset pattern numbers to follow the new sorted order
-  result$pattern <- seq_len(nrow(result))
+  # Reset rank numbers to follow the new sorted order
+  result$rank <- seq_len(nrow(result))
   rownames(result) <- NULL
 
   # Reorder pattern_groups to match the sorted patterns in result
@@ -355,12 +350,11 @@ describe_participation <- function(
         long_result <- rbind(
           long_result,
           data.frame(
-            pattern = pattern_row$pattern,
+            rank = pattern_row$rank,
             time = t,
             participation = as.integer(pattern_row[[t]]),
-            count = pattern_row$count,
+            n = pattern_row$n,
             share = pattern_row$share,
-            cumulative = pattern_row$cumulative,
             stringsAsFactors = FALSE
           )
         )
@@ -371,8 +365,8 @@ describe_participation <- function(
     names(long_result)[names(long_result) == "time"] <- time
 
     if (!detailed) {
-      # Return simplified version with only pattern, time, and participation columns
-      simplified_result <- long_result[c("pattern", time, "participation")]
+      # Return simplified version with only rank, time, and participation columns
+      simplified_result <- long_result[c("rank", time, "participation")]
 
       # Add standardized attributes to simplified result
       attr(simplified_result, "panel_group") <- group
@@ -408,8 +402,8 @@ describe_participation <- function(
 
   # Wide format handling (original behavior)
   if (!detailed) {
-    # Return simplified version with only pattern and time period columns
-    simplified_result <- result[c("pattern", time_cols)]
+    # Return simplified version with only rank and time period columns
+    simplified_result <- result[c("rank", time_cols)]
 
     # Add standardized attributes to simplified result
     attr(simplified_result, "panel_group") <- group
