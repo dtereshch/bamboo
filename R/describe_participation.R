@@ -11,7 +11,7 @@
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param digits An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
-#' Default = 3.
+#'               If not specified, no rounding occurs.
 #'
 #' @return A data.frame with participation patterns.
 #'
@@ -57,7 +57,7 @@
 #'   \item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
 #'   \item{\code{panel_format}}{Output format ("wide" or "long")}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
 #'   \item{\code{panel_n_patterns}}{Number of distinct participation patterns}
@@ -91,6 +91,9 @@
 #' # With custom rounding
 #' describe_participation(production, group = "firm", time = "year", digits = 4)
 #'
+#' # No rounding
+#' describe_participation(production, group = "firm", time = "year", digits = NULL)
+#'
 #' @export
 describe_participation <- function(
   data,
@@ -99,7 +102,7 @@ describe_participation <- function(
   type = "observed",
   format = "wide",
   detailed = TRUE,
-  digits = 3
+  digits = NULL
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -159,14 +162,25 @@ describe_participation <- function(
     stop('format must be either "wide" or "long", not "', format, '"')
   }
 
-  if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
-    stop(
-      "'digits' must be a single non-negative integer, not ",
-      class(digits)[1]
-    )
+  # Harmonized digits validation
+  if (!is.null(digits)) {
+    if (!is.numeric(digits) || length(digits) != 1) {
+      stop("'digits' must be a single non-negative integer or NULL")
+    }
+    if (digits < 0 || digits != round(digits)) {
+      stop("'digits' must be a non-negative integer or NULL")
+    }
+    digits <- as.integer(digits)
   }
 
-  digits <- as.integer(digits)
+  # Helper function for rounding
+  round_if_needed <- function(x, digits) {
+    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+      round(x, digits)
+    } else {
+      x
+    }
+  }
 
   # Identify data columns (excluding group and time)
   data_cols <- setdiff(names(data), c(group, time))
@@ -305,13 +319,13 @@ describe_participation <- function(
 
   # Add count and share columns
   result$count <- as.numeric(pattern_counts)
-  result$share <- round(result$count / sum(result$count), digits)
+  result$share <- round_if_needed(result$count / sum(result$count), digits)
 
   # Sort by count (descending) FIRST, then calculate cumulative sum
   result <- result[order(-result$count), ]
 
   # Now calculate cumulative sum on the sorted data
-  result$cumulative <- round(cumsum(result$share), digits)
+  result$cumulative <- round_if_needed(cumsum(result$share), digits)
 
   # Reset pattern numbers to follow the new sorted order
   result$pattern <- seq_len(nrow(result))

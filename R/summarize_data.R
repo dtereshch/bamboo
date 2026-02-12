@@ -11,8 +11,8 @@
 #' @param detailed A logical flag indicating whether to return additional statistics in
 #'        the style of pandas describe method. If TRUE, includes count, mean, sd,
 #'        min, p25, median, p75, and max. Default = FALSE.
-#' @param digits An integer specifying the number of decimal places for rounding
-#'        statistics. Default = 3.
+#' @param digits An integer specifying the number of decimal places for rounding statistics.
+#'        If not specified, no rounding occurs.
 #'
 #' @return A data.frame with descriptive statistics summary.
 #'
@@ -42,7 +42,7 @@
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name (if provided)}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 #'   \item{\code{panel_n_variables}}{Number of variables analyzed}
 #'   \item{\code{panel_n_groups}}{Number of unique groups (if grouping variable provided)}
 #'   \item{\code{panel_total_obs}}{Total number of observations in the data}
@@ -72,8 +72,8 @@
 #' # Show statistics with two digits rounding
 #' summarize_data(production, digits = 2)
 #'
-#' # Show statistics with no rounding
-#' summarize_data(production, digits = 999999)
+#' # No rounding
+#' summarize_data(production, digits = NULL)
 #'
 #' @export
 summarize_data <- function(
@@ -81,7 +81,7 @@ summarize_data <- function(
   selection = NULL,
   group = NULL,
   detailed = FALSE,
-  digits = 3
+  digits = NULL
 ) {
   # Input validation
   if (!is.data.frame(data)) {
@@ -111,12 +111,24 @@ summarize_data <- function(
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
-  # Validate digits
-  if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
-    stop(
-      "'digits' must be a single non-negative integer, not ",
-      class(digits)[1]
-    )
+  # Harmonized digits validation
+  if (!is.null(digits)) {
+    if (!is.numeric(digits) || length(digits) != 1) {
+      stop("'digits' must be a single non-negative integer or NULL")
+    }
+    if (digits < 0 || digits != round(digits)) {
+      stop("'digits' must be a non-negative integer or NULL")
+    }
+    digits <- as.integer(digits)
+  }
+
+  # Helper function for rounding
+  round_if_needed <- function(x, digits) {
+    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+      round(x, digits)
+    } else {
+      x
+    }
   }
 
   # Track if any messages were printed
@@ -191,15 +203,6 @@ summarize_data <- function(
     sum(!is.na(x))
   }
 
-  # Helper function to round numeric values
-  round_values <- function(x) {
-    if (is.numeric(x)) {
-      round(x, digits = digits)
-    } else {
-      x
-    }
-  }
-
   # Calculate statistics without grouping
   if (is.null(group)) {
     results <- lapply(selection, function(var) {
@@ -253,7 +256,9 @@ summarize_data <- function(
       }
 
       # Round numeric statistics
-      stats_row[] <- lapply(stats_row, round_values)
+      stats_row[] <- lapply(stats_row, function(col) {
+        round_if_needed(col, digits)
+      })
 
       # Add variable name only (no group column)
       data.frame(variable = var, stats_row)
@@ -337,7 +342,9 @@ summarize_data <- function(
         }
 
         # Round numeric statistics
-        stats_row[] <- lapply(stats_row, round_values)
+        stats_row[] <- lapply(stats_row, function(col) {
+          round_if_needed(col, digits)
+        })
 
         # Add group information and variable name
         data.frame(

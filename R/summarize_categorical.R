@@ -9,7 +9,7 @@
 #' @param group A character string specifying the name of the entity/group variable.
 #'              Required for decomposition. Not required if data has panel attributes.
 #' @param digits An integer indicating the number of decimal places to round shares.
-#'   Default = 3.
+#'               If not specified, no rounding occurs.
 #'
 #' @return A data.frame with categorical panel data summary statistics.
 #'
@@ -30,7 +30,7 @@
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_n_groups}}{Number of unique groups}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 #' }
 #'
 #' @note
@@ -62,12 +62,15 @@
 #' # Show statistics with two digits rounding
 #' summarize_categorical(production, group = "firm", digits = 2)
 #'
+#' # No rounding
+#' summarize_categorical(production, group = "firm", digits = NULL)
+#'
 #' @export
 summarize_categorical <- function(
   data,
   selection = NULL,
   group = NULL,
-  digits = 3
+  digits = NULL
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -103,16 +106,24 @@ summarize_categorical <- function(
     stop('variable "', group, '" not found in data')
   }
 
-  if (!is.numeric(digits) || length(digits) != 1) {
-    stop("'digits' must be a single numeric value, not ", class(digits)[1])
+  # Harmonized digits validation
+  if (!is.null(digits)) {
+    if (!is.numeric(digits) || length(digits) != 1) {
+      stop("'digits' must be a single non-negative integer or NULL")
+    }
+    if (digits < 0 || digits != round(digits)) {
+      stop("'digits' must be a non-negative integer or NULL")
+    }
+    digits <- as.integer(digits)
   }
 
-  # Validate digits parameter
-  if (
-    !is.na(digits) &&
-      (!is.numeric(digits) || digits < 0 || digits != round(digits))
-  ) {
-    stop("'digits' must be a non-negative integer or NA for no rounding")
+  # Helper function for rounding
+  round_if_needed <- function(x, digits) {
+    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+      round(x, digits)
+    } else {
+      x
+    }
   }
 
   # Track if any messages were printed
@@ -242,29 +253,20 @@ summarize_categorical <- function(
     share_overall <- as.numeric(overall_counts / total_obs)
     share_between <- as.numeric(between_counts / n_groups)
 
-    # Apply rounding if digits is specified
-    round_if_needed <- function(value) {
-      if (!is.na(digits_val) && is.numeric(value) && !any(is.na(value))) {
-        round(value, digits_val)
-      } else {
-        value
-      }
-    }
-
-    # Round the share columns
-    share_overall_rounded <- round_if_needed(share_overall)
-    share_between_rounded <- round_if_needed(share_between)
-    within_shares_rounded <- round_if_needed(within_shares)
+    # Apply rounding
+    share_overall <- round_if_needed(share_overall, digits_val)
+    share_between <- round_if_needed(share_between, digits_val)
+    within_shares <- round_if_needed(within_shares, digits_val)
 
     # Prepare result data frame
     result <- data.frame(
       variable = rep(varname, length(categories)),
       category = categories,
       n_overall = as.integer(overall_counts),
-      share_overall = share_overall_rounded,
+      share_overall = share_overall,
       n_between = as.integer(between_counts),
-      share_between = share_between_rounded,
-      share_within = within_shares_rounded,
+      share_between = share_between,
+      share_within = within_shares,
       stringsAsFactors = FALSE
     )
 

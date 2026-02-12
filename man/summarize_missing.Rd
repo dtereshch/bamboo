@@ -10,7 +10,7 @@ summarize_missing(
   group = NULL,
   time = NULL,
   detailed = FALSE,
-  digits = 3
+  digits = NULL
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ Not required if data has panel attributes.}
 Default = FALSE.}
 
 \item{digits}{An integer indicating the number of decimal places to round the na_share column.
-Default = 3.}
+If not specified, no rounding occurs.}
 }
 \value{
 A data.frame with missing value summary statistics.
@@ -60,7 +60,7 @@ The data.frame has additional attributes:
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_time}}{The time variable name}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
-\item{\code{panel_digits}}{Number of decimal places used for rounding na_share}
+\item{\code{panel_digits}}{Number of decimal places used for rounding na_share (NULL if no rounding)}
 \item{\code{panel_total_obs}}{Total number of observations in the data}
 \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 \item{\code{panel_n_periods}}{Total number of unique time periods}
@@ -87,6 +87,9 @@ summarize_missing(production, selection = c("capital", "labor"), group = "firm",
 
 # Customize rounding
 summarize_missing(production, group = "firm", time = "year", digits = 4)
+
+# No rounding
+summarize_missing(production, group = "firm", time = "year", digits = NULL)
 
 }
 \seealso{

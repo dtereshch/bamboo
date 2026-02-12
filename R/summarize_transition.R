@@ -10,7 +10,8 @@
 #' @param time A character string specifying the name of the time variable.
 #'             Not required if data has panel attributes.
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
-#' @param digits An integer indicating the number of decimal places to round probabilities. Default = 3.
+#' @param digits An integer indicating the number of decimal places to round probabilities.
+#'               If not specified, no rounding occurs.
 #'
 #' @return A data.frame containing transition probability summary.
 #'
@@ -44,7 +45,7 @@
 #'   \item{\code{panel_time}}{The time variable name}
 #'   \item{\code{panel_variable}}{The analyzed categorical variable name}
 #'   \item{\code{panel_format}}{Output format ("wide" or "long")}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 #' }
 #'
 #' @references
@@ -69,6 +70,9 @@
 #' # Customize rounding
 #' summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
 #'
+#' # No rounding
+#' summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = NULL)
+#'
 #' @export
 summarize_transition <- function(
   data,
@@ -76,7 +80,7 @@ summarize_transition <- function(
   group = NULL,
   time = NULL,
   format = "wide",
-  digits = 3
+  digits = NULL
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -144,21 +148,24 @@ summarize_transition <- function(
     stop('format must be either "long" or "wide", not "', format, '"')
   }
 
-  if (!is.numeric(digits) || length(digits) != 1) {
-    stop("'digits' must be a single numeric value, not ", class(digits)[1])
+  # Harmonized digits validation
+  if (!is.null(digits)) {
+    if (!is.numeric(digits) || length(digits) != 1) {
+      stop("'digits' must be a single non-negative integer or NULL")
+    }
+    if (digits < 0 || digits != round(digits)) {
+      stop("'digits' must be a non-negative integer or NULL")
+    }
+    digits <- as.integer(digits)
   }
 
-  # Validate format argument
-  if (!format %in% c("long", "wide")) {
-    stop("format must be either 'long' or 'wide'")
-  }
-
-  # Validate digits argument
-  if (
-    !is.na(digits) &&
-      (!is.numeric(digits) || digits < 0 || digits != round(digits))
-  ) {
-    stop("'digits' must be a non-negative integer or NA for no rounding")
+  # Helper function for rounding
+  round_if_needed <- function(x, digits) {
+    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+      round(x, digits)
+    } else {
+      x
+    }
   }
 
   # Track if any messages were printed
@@ -273,7 +280,7 @@ summarize_transition <- function(
   long_result$prob[is.na(long_result$prob)] <- 0
 
   # Round probabilities to specified digits
-  long_result$prob <- round(long_result$prob, digits = digits)
+  long_result$prob <- round_if_needed(long_result$prob, digits)
 
   # Order by from and to
   long_result <- long_result[order(long_result$from, long_result$to), ]

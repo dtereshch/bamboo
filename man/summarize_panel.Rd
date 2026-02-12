@@ -9,7 +9,7 @@ summarize_panel(
   selection = NULL,
   group = NULL,
   detailed = TRUE,
-  digits = 3
+  digits = NULL
 )
 }
 \arguments{
@@ -25,7 +25,7 @@ Required for variance summary. Not required if data has panel attributes.}
 Default = TRUE.}
 
 \item{digits}{An integer indicating the number of decimal places to round statistics.
-Default = 3.}
+If not specified, no rounding occurs.}
 }
 \value{
 A data.frame with panel data summary statistics.
@@ -60,7 +60,7 @@ The data.frame has additional attributes:
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_n_groups}}{Number of unique groups}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
-\item{\code{panel_digits}}{Number of decimal places used for rounding}
+\item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 }
 }
 \examples{
@@ -85,8 +85,8 @@ summarize_panel(production, selection = c("capital", "labor"), group = "firm")
 # Show statistics with two digits rounding
 summarize_panel(production, group = "firm", digits = 2)
 
-# Show statistics with no rounding
-summarize_panel(production, group = "firm", digits = 999999)
+# No rounding
+summarize_panel(production, group = "firm", digits = NULL)
 
 }
 \references{

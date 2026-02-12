@@ -4,7 +4,7 @@
 \alias{summarize_categorical}
 \title{Categorical Variable Summary for Panel Data}
 \usage{
-summarize_categorical(data, selection = NULL, group = NULL, digits = 3)
+summarize_categorical(data, selection = NULL, group = NULL, digits = NULL)
 }
 \arguments{
 \item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
@@ -16,7 +16,7 @@ If not specified, all factor variables in the data.frame will be used.}
 Required for decomposition. Not required if data has panel attributes.}
 
 \item{digits}{An integer indicating the number of decimal places to round shares.
-Default = 3.}
+If not specified, no rounding occurs.}
 }
 \value{
 A data.frame with categorical panel data summary statistics.
@@ -42,7 +42,7 @@ The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_n_groups}}{Number of unique groups}
-\item{\code{panel_digits}}{Number of decimal places used for rounding}
+\item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 }
 }
 \note{
@@ -67,6 +67,9 @@ summarize_categorical(production, selection = c("industry", "year"), group = "fi
 
 # Show statistics with two digits rounding
 summarize_categorical(production, group = "firm", digits = 2)
+
+# No rounding
+summarize_categorical(production, group = "firm", digits = NULL)
 
 }
 \references{

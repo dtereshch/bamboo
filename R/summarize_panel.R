@@ -11,7 +11,7 @@
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
 #'   Default = TRUE.
 #' @param digits An integer indicating the number of decimal places to round statistics.
-#'   Default = 3.
+#'               If not specified, no rounding occurs.
 #'
 #' @return A data.frame with panel data summary statistics.
 #'
@@ -41,7 +41,7 @@
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_n_groups}}{Number of unique groups}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 #' }
 #'
 #' @references
@@ -72,8 +72,8 @@
 #' # Show statistics with two digits rounding
 #' summarize_panel(production, group = "firm", digits = 2)
 #'
-#' # Show statistics with no rounding
-#' summarize_panel(production, group = "firm", digits = 999999)
+#' # No rounding
+#' summarize_panel(production, group = "firm", digits = NULL)
 #'
 #' @export
 summarize_panel <- function(
@@ -81,7 +81,7 @@ summarize_panel <- function(
   selection = NULL,
   group = NULL,
   detailed = TRUE,
-  digits = 3
+  digits = NULL
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -121,16 +121,24 @@ summarize_panel <- function(
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
 
-  if (!is.numeric(digits) || length(digits) != 1) {
-    stop("'digits' must be a single numeric value, not ", class(digits)[1])
+  # Harmonized digits validation
+  if (!is.null(digits)) {
+    if (!is.numeric(digits) || length(digits) != 1) {
+      stop("'digits' must be a single non-negative integer or NULL")
+    }
+    if (digits < 0 || digits != round(digits)) {
+      stop("'digits' must be a non-negative integer or NULL")
+    }
+    digits <- as.integer(digits)
   }
 
-  # Validate digits parameter
-  if (
-    !is.na(digits) &&
-      (!is.numeric(digits) || digits < 0 || digits != round(digits))
-  ) {
-    stop("'digits' must be a non-negative integer or NA for no rounding")
+  # Helper function for rounding
+  round_if_needed <- function(x, digits) {
+    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+      round(x, digits)
+    } else {
+      x
+    }
   }
 
   # Validate group parameter
@@ -277,26 +285,18 @@ summarize_panel <- function(
     obs_per_group <- table(group_vec)
     avg_obs_per_group <- mean(obs_per_group, na.rm = TRUE)
 
-    # Apply rounding if digits is specified
-    round_if_needed <- function(value) {
-      if (!is.na(digits_val) && is.numeric(value) && !is.na(value)) {
-        round(value, digits_val)
-      } else {
-        value
-      }
-    }
-
-    overall_mean <- round_if_needed(overall_mean)
-    overall_sd <- round_if_needed(overall_sd)
-    min_val <- round_if_needed(min_val)
-    max_val <- round_if_needed(max_val)
-    between_sd <- round_if_needed(between_sd)
-    between_min <- round_if_needed(between_min)
-    between_max <- round_if_needed(between_max)
-    within_sd <- round_if_needed(within_sd)
-    within_min <- round_if_needed(within_min)
-    within_max <- round_if_needed(within_max)
-    avg_obs_per_group <- round_if_needed(avg_obs_per_group)
+    # Apply rounding
+    overall_mean <- round_if_needed(overall_mean, digits_val)
+    overall_sd <- round_if_needed(overall_sd, digits_val)
+    min_val <- round_if_needed(min_val, digits_val)
+    max_val <- round_if_needed(max_val, digits_val)
+    between_sd <- round_if_needed(between_sd, digits_val)
+    between_min <- round_if_needed(between_min, digits_val)
+    between_max <- round_if_needed(between_max, digits_val)
+    within_sd <- round_if_needed(within_sd, digits_val)
+    within_min <- round_if_needed(within_min, digits_val)
+    within_max <- round_if_needed(within_max, digits_val)
+    avg_obs_per_group <- round_if_needed(avg_obs_per_group, digits_val)
 
     if (detailed_output) {
       # Create Stata-like output with overall, between, and within rows

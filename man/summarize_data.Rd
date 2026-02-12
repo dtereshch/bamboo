@@ -9,7 +9,7 @@ summarize_data(
   selection = NULL,
   group = NULL,
   detailed = FALSE,
-  digits = 3
+  digits = NULL
 )
 }
 \arguments{
@@ -25,8 +25,8 @@ If not specified, overall statistics will be returned.}
 the style of pandas describe method. If TRUE, includes count, mean, sd,
 min, p25, median, p75, and max. Default = FALSE.}
 
-\item{digits}{An integer specifying the number of decimal places for rounding
-statistics. Default = 3.}
+\item{digits}{An integer specifying the number of decimal places for rounding statistics.
+If not specified, no rounding occurs.}
 }
 \value{
 A data.frame with descriptive statistics summary.
@@ -61,7 +61,7 @@ The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name (if provided)}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
-\item{\code{panel_digits}}{Number of decimal places used for rounding}
+\item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 \item{\code{panel_n_variables}}{Number of variables analyzed}
 \item{\code{panel_n_groups}}{Number of unique groups (if grouping variable provided)}
 \item{\code{panel_total_obs}}{Total number of observations in the data}
@@ -88,8 +88,8 @@ summarize_data(production, group = "year")
 # Show statistics with two digits rounding
 summarize_data(production, digits = 2)
 
-# Show statistics with no rounding
-summarize_data(production, digits = 999999)
+# No rounding
+summarize_data(production, digits = NULL)
 
 }
 \seealso{

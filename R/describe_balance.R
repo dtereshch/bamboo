@@ -10,7 +10,7 @@
 #'             Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
 #' @param digits An integer specifying the number of decimal places for rounding mean values.
-#'               Default = 3.
+#'               If not specified, no rounding occurs.
 #'
 #' @return A data.frame with 5 columns and 3 rows containing panel data summary statistics.
 #'
@@ -48,7 +48,7 @@
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_time}}{The time variable name}
 #'   \item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
 #'   \item{\code{panel_total_rows}}{Total number of rows in the data}
@@ -81,13 +81,16 @@
 #' # With custom rounding
 #' describe_balance(production, group = "firm", time = "year", digits = 4)
 #'
+#' # No rounding
+#' describe_balance(production, group = "firm", time = "year", digits = NULL)
+#'
 #' @export
 describe_balance <- function(
   data,
   group = NULL,
   time = NULL,
   type = "observed",
-  digits = 3
+  digits = NULL
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -135,14 +138,16 @@ describe_balance <- function(
     stop('type must be one of: "nominal", "observed", "complete"')
   }
 
-  if (!is.numeric(digits) || length(digits) != 1 || digits < 0) {
-    stop(
-      "'digits' must be a single non-negative integer, not ",
-      class(digits)[1]
-    )
+  # Harmonized digits validation
+  if (!is.null(digits)) {
+    if (!is.numeric(digits) || length(digits) != 1) {
+      stop("'digits' must be a single non-negative integer or NULL")
+    }
+    if (digits < 0 || digits != round(digits)) {
+      stop("'digits' must be a non-negative integer or NULL")
+    }
+    digits <- as.integer(digits)
   }
-
-  digits <- as.integer(digits)
 
   # Get substantive variables (all except group and time)
   substantive_vars <- setdiff(names(data), c(group, time))
@@ -240,9 +245,21 @@ describe_balance <- function(
   # Overall entities: entities present in ALL periods according to type
   overall_entities <- sum(per_entity_counts == total_periods)
 
+  # Helper function for rounding
+  round_if_needed <- function(x, digits) {
+    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+      round(x, digits)
+    } else {
+      x
+    }
+  }
+
   # Mean, min, max: statistics for entities with at least some presence
   mean_entities <- if (sum(per_entity_counts > 0) > 0) {
-    round(mean(per_entity_counts[per_entity_counts > 0], na.rm = TRUE), digits)
+    round_if_needed(
+      mean(per_entity_counts[per_entity_counts > 0], na.rm = TRUE),
+      digits
+    )
   } else {
     NA
   }
@@ -268,7 +285,10 @@ describe_balance <- function(
 
   # Mean, min, max: statistics for periods with at least some presence
   mean_periods <- if (sum(per_period_counts > 0) > 0) {
-    round(mean(per_period_counts[per_period_counts > 0], na.rm = TRUE), digits)
+    round_if_needed(
+      mean(per_period_counts[per_period_counts > 0], na.rm = TRUE),
+      digits
+    )
   } else {
     NA
   }
