@@ -9,7 +9,7 @@ describe_balance(
   group = NULL,
   time = NULL,
   type = "observed",
-  digits = NULL
+  digits = 3
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ Not required if data has panel attributes.}
 \item{type}{A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".}
 
 \item{digits}{An integer specifying the number of decimal places for rounding mean values.
-If not specified, no rounding occurs.}
+Default = 3.}
 }
 \value{
 A data.frame with 5 columns and 3 rows containing panel data summary statistics.
@@ -33,7 +33,7 @@ A data.frame with 5 columns and 3 rows containing panel data summary statistics.
 \describe{
 \item{\code{dimension}}{Character vector describing the type of panel element.
 Contains three values: "rows", "entities", and "periods".}
-\item{\code{count}}{Numeric vector with total counts for each panel element.
+\item{\code{overall}}{Numeric vector with total counts for each panel element.
 For "rows": number of rows meeting the type criteria.
 For "entities": number of entities where ALL time periods have presence according to the type criteria.
 For "periods": number of time periods where ALL entities have presence according to the type criteria.}
@@ -63,7 +63,7 @@ The data.frame has additional attributes:
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_time}}{The time variable name}
 \item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
-\item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+\item{\code{panel_digits}}{Number of decimal places used for rounding}
 \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 \item{\code{panel_n_periods}}{Total number of unique time periods}
 \item{\code{panel_total_rows}}{Total number of rows in the data}
@@ -97,8 +97,8 @@ describe_balance(production, group = "firm", time = "year", type = "complete")
 # With custom rounding
 describe_balance(production, group = "firm", time = "year", digits = 4)
 
-# No rounding
-describe_balance(production, group = "firm", time = "year", digits = NULL)
+# Effectively no rounding (use large digit value)
+describe_balance(production, group = "firm", time = "year", digits = 999999)
 
 }
 \seealso{

@@ -1,3 +1,4 @@
+# FILE: describe_balance.R
 #' Panel Data Balance Description
 #'
 #' Provides simplified summary statistics for panel data structure with focus on balance
@@ -10,7 +11,7 @@
 #'             Not required if data has panel attributes.
 #' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
 #' @param digits An integer specifying the number of decimal places for rounding mean values.
-#'               If not specified, no rounding occurs.
+#'               Default = 3.
 #'
 #' @return A data.frame with 5 columns and 3 rows containing panel data summary statistics.
 #'
@@ -18,7 +19,7 @@
 #' \describe{
 #'   \item{\code{dimension}}{Character vector describing the type of panel element.
 #'     Contains three values: "rows", "entities", and "periods".}
-#'   \item{\code{count}}{Numeric vector with total counts for each panel element.
+#'   \item{\code{overall}}{Numeric vector with total counts for each panel element.
 #'     For "rows": number of rows meeting the type criteria.
 #'     For "entities": number of entities where ALL time periods have presence according to the type criteria.
 #'     For "periods": number of time periods where ALL entities have presence according to the type criteria.}
@@ -48,7 +49,7 @@
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_time}}{The time variable name}
 #'   \item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
 #'   \item{\code{panel_total_rows}}{Total number of rows in the data}
@@ -81,8 +82,8 @@
 #' # With custom rounding
 #' describe_balance(production, group = "firm", time = "year", digits = 4)
 #'
-#' # No rounding
-#' describe_balance(production, group = "firm", time = "year", digits = NULL)
+#' # Effectively no rounding (use large digit value)
+#' describe_balance(production, group = "firm", time = "year", digits = 999999)
 #'
 #' @export
 describe_balance <- function(
@@ -90,7 +91,7 @@ describe_balance <- function(
   group = NULL,
   time = NULL,
   type = "observed",
-  digits = NULL
+  digits = 3
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -139,15 +140,13 @@ describe_balance <- function(
   }
 
   # Harmonized digits validation
-  if (!is.null(digits)) {
-    if (!is.numeric(digits) || length(digits) != 1) {
-      stop("'digits' must be a single non-negative integer or NULL")
-    }
-    if (digits < 0 || digits != round(digits)) {
-      stop("'digits' must be a non-negative integer or NULL")
-    }
-    digits <- as.integer(digits)
+  if (!is.numeric(digits) || length(digits) != 1) {
+    stop("'digits' must be a single non-negative integer")
   }
+  if (digits < 0 || digits != round(digits)) {
+    stop("'digits' must be a non-negative integer")
+  }
+  digits <- as.integer(digits)
 
   # Get substantive variables (all except group and time)
   substantive_vars <- setdiff(names(data), c(group, time))
@@ -227,13 +226,13 @@ describe_balance <- function(
 
   # 1. Rows
   if (type == "nominal") {
-    row_count <- total_rows
+    overall_rows <- total_rows
   } else if (type == "observed") {
-    row_count <- sum(apply(data[substantive_vars], 1, function(x) {
+    overall_rows <- sum(apply(data[substantive_vars], 1, function(x) {
       any(!is.na(x))
     }))
   } else if (type == "complete") {
-    row_count <- sum(apply(data[substantive_vars], 1, function(x) {
+    overall_rows <- sum(apply(data[substantive_vars], 1, function(x) {
       all(!is.na(x))
     }))
   }
@@ -242,12 +241,12 @@ describe_balance <- function(
   # Calculate per-entity statistics based on type_matrix
   per_entity_counts <- rowSums(type_matrix)
 
-  # Count of entities: entities present in ALL periods according to type
-  entity_count <- sum(per_entity_counts == total_periods)
+  # Overall entities: entities present in ALL periods according to type
+  overall_entities <- sum(per_entity_counts == total_periods)
 
   # Helper function for rounding
   round_if_needed <- function(x, digits) {
-    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+    if (is.numeric(x) && !all(is.na(x))) {
       round(x, digits)
     } else {
       x
@@ -280,8 +279,8 @@ describe_balance <- function(
   # Calculate per-period statistics based on type_matrix
   per_period_counts <- colSums(type_matrix)
 
-  # Count of periods: periods where ALL entities have presence according to type
-  period_count <- sum(per_period_counts == total_entities)
+  # Overall periods: periods where ALL entities have presence according to type
+  overall_periods <- sum(per_period_counts == total_entities)
 
   # Mean, min, max: statistics for periods with at least some presence
   mean_periods <- if (sum(per_period_counts > 0) > 0) {
@@ -308,7 +307,7 @@ describe_balance <- function(
   # Create and return the simplified result data.frame
   result_df <- data.frame(
     dimension = c("rows", "entities", "periods"),
-    count = c(row_count, entity_count, period_count),
+    overall = c(overall_rows, overall_entities, overall_periods),
     mean = c(NA, mean_entities, mean_periods),
     min = c(NA, min_entities, min_periods),
     max = c(NA, max_entities, max_periods),

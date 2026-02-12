@@ -10,7 +10,7 @@ summarize_transition(
   group = NULL,
   time = NULL,
   format = "wide",
-  digits = NULL
+  digits = 3
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ Not required if data has panel attributes.}
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
 \item{digits}{An integer indicating the number of decimal places to round probabilities.
-If not specified, no rounding occurs.}
+Default = 3.}
 }
 \value{
 A data.frame containing transition probability summary.
@@ -66,7 +66,7 @@ The data.frame has additional attributes:
 \item{\code{panel_time}}{The time variable name}
 \item{\code{panel_variable}}{The analyzed categorical variable name}
 \item{\code{panel_format}}{Output format ("wide" or "long")}
-\item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+\item{\code{panel_digits}}{Number of decimal places used for rounding}
 }
 }
 \examples{
@@ -85,8 +85,8 @@ summarize_transition(production, selection = "industry", group = "firm", time = 
 # Customize rounding
 summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
 
-# No rounding
-summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = NULL)
+# Effectively no rounding (use large digit value)
+summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = 999999)
 
 }
 \references{

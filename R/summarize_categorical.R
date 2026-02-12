@@ -9,7 +9,7 @@
 #' @param group A character string specifying the name of the entity/group variable.
 #'              Required for decomposition. Not required if data has panel attributes.
 #' @param digits An integer indicating the number of decimal places to round shares.
-#'               If not specified, no rounding occurs.
+#'               Default = 3.
 #'
 #' @return A data.frame with categorical panel data summary statistics.
 #'
@@ -30,7 +30,7 @@
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_n_groups}}{Number of unique groups}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #' }
 #'
 #' @note
@@ -62,15 +62,15 @@
 #' # Show statistics with two digits rounding
 #' summarize_categorical(production, group = "firm", digits = 2)
 #'
-#' # No rounding
-#' summarize_categorical(production, group = "firm", digits = NULL)
+#' # Effectively no rounding (use large digit value)
+#' summarize_categorical(production, group = "firm", digits = 999999)
 #'
 #' @export
 summarize_categorical <- function(
   data,
   selection = NULL,
   group = NULL,
-  digits = NULL
+  digits = 3
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -107,19 +107,17 @@ summarize_categorical <- function(
   }
 
   # Harmonized digits validation
-  if (!is.null(digits)) {
-    if (!is.numeric(digits) || length(digits) != 1) {
-      stop("'digits' must be a single non-negative integer or NULL")
-    }
-    if (digits < 0 || digits != round(digits)) {
-      stop("'digits' must be a non-negative integer or NULL")
-    }
-    digits <- as.integer(digits)
+  if (!is.numeric(digits) || length(digits) != 1) {
+    stop("'digits' must be a single non-negative integer")
   }
+  if (digits < 0 || digits != round(digits)) {
+    stop("'digits' must be a non-negative integer")
+  }
+  digits <- as.integer(digits)
 
   # Helper function for rounding
   round_if_needed <- function(x, digits) {
-    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+    if (is.numeric(x) && !all(is.na(x))) {
       round(x, digits)
     } else {
       x

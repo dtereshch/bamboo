@@ -13,7 +13,7 @@
 #' @param detailed A logical flag indicating whether to return detailed period-specific NA counts.
 #'        Default = FALSE.
 #' @param digits An integer indicating the number of decimal places to round the na_share column.
-#'               If not specified, no rounding occurs.
+#'               Default = 3.
 #'
 #' @return A data.frame with missing value summary statistics.
 #'
@@ -39,7 +39,7 @@
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_time}}{The time variable name}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding na_share (NULL if no rounding)}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding na_share}
 #'   \item{\code{panel_total_obs}}{Total number of observations in the data}
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
@@ -70,8 +70,8 @@
 #' # Customize rounding
 #' summarize_missing(production, group = "firm", time = "year", digits = 4)
 #'
-#' # No rounding
-#' summarize_missing(production, group = "firm", time = "year", digits = NULL)
+#' # Effectively no rounding (use large digit value)
+#' summarize_missing(production, group = "firm", time = "year", digits = 999999)
 #'
 #' @export
 summarize_missing <- function(
@@ -80,7 +80,7 @@ summarize_missing <- function(
   group = NULL,
   time = NULL,
   detailed = FALSE,
-  digits = NULL
+  digits = 3
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -132,19 +132,17 @@ summarize_missing <- function(
   }
 
   # Harmonized digits validation
-  if (!is.null(digits)) {
-    if (!is.numeric(digits) || length(digits) != 1) {
-      stop("'digits' must be a single non-negative integer or NULL")
-    }
-    if (digits < 0 || digits != round(digits)) {
-      stop("'digits' must be a non-negative integer or NULL")
-    }
-    digits <- as.integer(digits)
+  if (!is.numeric(digits) || length(digits) != 1) {
+    stop("'digits' must be a single non-negative integer")
   }
+  if (digits < 0 || digits != round(digits)) {
+    stop("'digits' must be a non-negative integer")
+  }
+  digits <- as.integer(digits)
 
   # Helper function for rounding
   round_if_needed <- function(x, digits) {
-    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+    if (is.numeric(x) && !all(is.na(x))) {
       round(x, digits)
     } else {
       x

@@ -11,7 +11,7 @@ describe_participation(
   type = "observed",
   format = "wide",
   detailed = TRUE,
-  digits = NULL
+  digits = 3
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ Not required if data has panel attributes.}
 \item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
 
 \item{digits}{An integer specifying the number of decimal places for rounding share and cumulative proportion columns.
-If not specified, no rounding occurs.}
+Default = 3.}
 }
 \value{
 A data.frame with participation patterns.
@@ -80,7 +80,7 @@ The data.frame has additional attributes:
 \item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
 \item{\code{panel_format}}{Output format ("wide" or "long")}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
-\item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+\item{\code{panel_digits}}{Number of decimal places used for rounding}
 \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 \item{\code{panel_n_periods}}{Total number of unique time periods}
 \item{\code{panel_n_patterns}}{Number of distinct participation patterns}
@@ -111,8 +111,8 @@ describe_participation(production, group = "firm", time = "year", detailed = FAL
 # With custom rounding
 describe_participation(production, group = "firm", time = "year", digits = 4)
 
-# No rounding
-describe_participation(production, group = "firm", time = "year", digits = NULL)
+# Effectively no rounding (use large digit value)
+describe_participation(production, group = "firm", time = "year", digits = 999999)
 
 }
 \seealso{

@@ -12,7 +12,7 @@
 #'        the style of pandas describe method. If TRUE, includes count, mean, sd,
 #'        min, p25, median, p75, and max. Default = FALSE.
 #' @param digits An integer specifying the number of decimal places for rounding statistics.
-#'        If not specified, no rounding occurs.
+#'        Default = 3.
 #'
 #' @return A data.frame with descriptive statistics summary.
 #'
@@ -42,7 +42,7 @@
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name (if provided)}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #'   \item{\code{panel_n_variables}}{Number of variables analyzed}
 #'   \item{\code{panel_n_groups}}{Number of unique groups (if grouping variable provided)}
 #'   \item{\code{panel_total_obs}}{Total number of observations in the data}
@@ -72,8 +72,8 @@
 #' # Show statistics with two digits rounding
 #' summarize_data(production, digits = 2)
 #'
-#' # No rounding
-#' summarize_data(production, digits = NULL)
+#' # Effectively no rounding (use large digit value)
+#' summarize_data(production, digits = 999999)
 #'
 #' @export
 summarize_data <- function(
@@ -81,7 +81,7 @@ summarize_data <- function(
   selection = NULL,
   group = NULL,
   detailed = FALSE,
-  digits = NULL
+  digits = 3
 ) {
   # Input validation
   if (!is.data.frame(data)) {
@@ -112,19 +112,17 @@ summarize_data <- function(
   }
 
   # Harmonized digits validation
-  if (!is.null(digits)) {
-    if (!is.numeric(digits) || length(digits) != 1) {
-      stop("'digits' must be a single non-negative integer or NULL")
-    }
-    if (digits < 0 || digits != round(digits)) {
-      stop("'digits' must be a non-negative integer or NULL")
-    }
-    digits <- as.integer(digits)
+  if (!is.numeric(digits) || length(digits) != 1) {
+    stop("'digits' must be a single non-negative integer")
   }
+  if (digits < 0 || digits != round(digits)) {
+    stop("'digits' must be a non-negative integer")
+  }
+  digits <- as.integer(digits)
 
   # Helper function for rounding
   round_if_needed <- function(x, digits) {
-    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+    if (is.numeric(x) && !all(is.na(x))) {
       round(x, digits)
     } else {
       x

@@ -11,7 +11,7 @@
 #'             Not required if data has panel attributes.
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round probabilities.
-#'               If not specified, no rounding occurs.
+#'               Default = 3.
 #'
 #' @return A data.frame containing transition probability summary.
 #'
@@ -45,7 +45,7 @@
 #'   \item{\code{panel_time}}{The time variable name}
 #'   \item{\code{panel_variable}}{The analyzed categorical variable name}
 #'   \item{\code{panel_format}}{Output format ("wide" or "long")}
-#'   \item{\code{panel_digits}}{Number of decimal places used for rounding (NULL if no rounding)}
+#'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #' }
 #'
 #' @references
@@ -70,8 +70,8 @@
 #' # Customize rounding
 #' summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = 4)
 #'
-#' # No rounding
-#' summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = NULL)
+#' # Effectively no rounding (use large digit value)
+#' summarize_transition(production, selection = "industry", group = "firm", time = "year", digits = 999999)
 #'
 #' @export
 summarize_transition <- function(
@@ -80,7 +80,7 @@ summarize_transition <- function(
   group = NULL,
   time = NULL,
   format = "wide",
-  digits = NULL
+  digits = 3
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- !is.null(attr(data, "panel_group")) &&
@@ -149,19 +149,17 @@ summarize_transition <- function(
   }
 
   # Harmonized digits validation
-  if (!is.null(digits)) {
-    if (!is.numeric(digits) || length(digits) != 1) {
-      stop("'digits' must be a single non-negative integer or NULL")
-    }
-    if (digits < 0 || digits != round(digits)) {
-      stop("'digits' must be a non-negative integer or NULL")
-    }
-    digits <- as.integer(digits)
+  if (!is.numeric(digits) || length(digits) != 1) {
+    stop("'digits' must be a single non-negative integer")
   }
+  if (digits < 0 || digits != round(digits)) {
+    stop("'digits' must be a non-negative integer")
+  }
+  digits <- as.integer(digits)
 
   # Helper function for rounding
   round_if_needed <- function(x, digits) {
-    if (!is.null(digits) && is.numeric(x) && !all(is.na(x))) {
+    if (is.numeric(x) && !all(is.na(x))) {
       round(x, digits)
     } else {
       x
