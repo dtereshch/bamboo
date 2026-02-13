@@ -84,5 +84,5 @@ plot_heterogeneity(production, selection = "sales", group = "year", colors = c("
 
 }
 \seealso{
-\code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=describe_panel]{describe_panel()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_numeric]{summarize_numeric()}}
 }

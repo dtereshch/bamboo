@@ -51,5 +51,5 @@ describe_periods(panel_data)
 
 }
 \seealso{
-\code{\link[=describe_balance]{describe_balance()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_participation]{describe_participation()}}
+\code{\link[=plot_periods]{plot_periods()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_patterns]{describe_patterns()}}
 }

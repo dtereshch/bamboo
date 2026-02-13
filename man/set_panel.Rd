@@ -42,5 +42,5 @@ describe_panel(panel_data)
 
 }
 \seealso{
-\code{\link[=check_panel]{check_panel()}}, \code{\link[=get_attributes]{get_attributes()}}, \code{\link[=describe_panel]{describe_panel()}}, \code{\link[=explore_panel]{explore_panel()}}
+\code{\link[=check_panel]{check_panel()}}, \code{\link[=describe_dimensions]{describe_dimensions()}}
 }

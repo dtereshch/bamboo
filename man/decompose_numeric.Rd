@@ -133,5 +133,5 @@ decompose_numeric(production, group = "firm", digits = 999999)
 For Stata users: This corresponds to the \code{xtsum} command.
 }
 \seealso{
-\code{\link[=summarize_data]{summarize_data()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}, \code{\link[=decompose_factor]{decompose_factor()}}
+\code{\link[=summarize_numeric]{summarize_numeric()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}, \code{\link[=decompose_factor]{decompose_factor()}}
 }

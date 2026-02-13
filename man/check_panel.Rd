@@ -85,5 +85,5 @@ panel_check2 <- check_panel(panel_data)
 
 }
 \seealso{
-\code{\link[=explore_panel]{explore_panel()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=explore_participation]{explore_participation()}}
+\code{\link[=set_panel]{set_panel()}}, \code{\link[=describe_dimensions]{describe_dimensions()}}, \code{\link[=describe_balance]{describe_balance()}}
 }

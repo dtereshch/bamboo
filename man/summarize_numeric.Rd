@@ -92,5 +92,5 @@ summarize_numeric(production, digits = 999999)
 
 }
 \seealso{
-\code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=summarize_transition]{summarize_transition()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=decompose_factor]{decompose_factor()}}, \code{\link[=summarize_transition]{summarize_transition()}}, \code{\link[=summarize_missing]{summarize_missing()}}
 }

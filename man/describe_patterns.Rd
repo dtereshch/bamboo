@@ -115,5 +115,5 @@ describe_patterns(production, group = "firm", time = "year", digits = 999999)
 
 }
 \seealso{
-\code{\link[=plot_presence]{plot_presence()}}, \code{\link[=explore_presence]{explore_presence()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}
+\code{\link[=plot_patterns]{plot_patterns()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}
 }

@@ -74,5 +74,5 @@ describe_incomplete(production, group = "firm", detailed = TRUE)
 
 }
 \seealso{
-\code{\link[=explore_participation]{explore_participation()}}, \code{\link[=describe_participation]{describe_participation()}}, \code{\link[=explore_balance]{explore_balance()}}, \code{\link[=describe_balance]{describe_balance()}}
+\code{\link[=summarize_missing]{summarize_missing()}}, \code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=describe_balance]{describe_balance()}}
 }

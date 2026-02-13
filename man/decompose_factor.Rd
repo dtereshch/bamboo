@@ -98,5 +98,5 @@ decompose_factor(production, group = "firm", digits = 999999)
 For Stata users: This corresponds to the \code{xttab} command.
 }
 \seealso{
-\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_transition]{summarize_transition()}}, \code{\link[=summarize_data]{summarize_data()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_transition]{summarize_transition()}}
 }

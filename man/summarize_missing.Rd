@@ -93,5 +93,5 @@ summarize_missing(production, group = "firm", time = "year", digits = 999999)
 
 }
 \seealso{
-\code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=summarize_data]{summarize_data()}}, \code{\link[=summarize_panel]{summarize_panel()}}
+\code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=summarize_numeric]{summarize_numeric()}}
 }

@@ -105,5 +105,5 @@ plot_periods(production, group = "firm", time = "year", detailed = FALSE)
 
 }
 \seealso{
-\code{\link[=describe_periods]{describe_periods()}}, \code{\link[=plot_participation]{plot_participation()}}, \code{\link[=describe_participation]{describe_participation()}}
+\code{\link[=describe_periods]{describe_periods()}}, \code{\link[=plot_patterns]{plot_patterns()}}, \code{\link[=describe_patterns]{describe_patterns()}}
 }

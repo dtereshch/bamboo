@@ -53,5 +53,5 @@ print(panel_desc)
 
 }
 \seealso{
-\code{\link[=explore_panel]{explore_panel()}}, \code{\link[=set_panel]{set_panel()}}
+\code{\link[=check_panel]{check_panel()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=set_panel]{set_panel()}}
 }

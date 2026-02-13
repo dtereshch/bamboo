@@ -93,5 +93,5 @@ summarize_transition(production, selection = "industry", group = "firm", time = 
 For Stata users: This corresponds to the \code{xttrans} command.
 }
 \seealso{
-\code{\link[=summarize_data]{summarize_data()}}, \code{\link[=summarize_panel]{summarize_panel()}}, \code{\link[=describe_participation]{describe_participation()}}
+\code{\link[=decompose_factor]{decompose_factor()}}, \code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=describe_patterns]{describe_patterns()}}
 }

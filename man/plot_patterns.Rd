@@ -107,5 +107,5 @@ plot_patterns(production, group = "firm", time = "year", colors = c("black", "wh
 
 }
 \seealso{
-\code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=explore_presence]{explore_presence()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}
+\code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=plot_periods]{plot_periods()}}
 }
