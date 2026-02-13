@@ -21,8 +21,8 @@
 #' When `detailed = FALSE` (default), returns a data.frame with the following columns:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
-#'   \item{\code{na}}{Total number of missing values (NAs) for the variable}
-#'   \item{\code{share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
+#'   \item{\code{na_count}}{Total number of missing values (NAs) for the variable}
+#'   \item{\code{na_share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
 #'   \item{\code{entities}}{Number of entities/groups with at least one missing value for this variable}
 #'   \item{\code{periods}}{Number of time periods with at least one missing value for this variable}
 #' }
@@ -235,11 +235,11 @@ summarize_missing <- function(
       periods_with_na <- 0
     }
 
-    # Create base result row with renamed columns
+    # Create base result row with renamed columns (count -> na_count, share -> na_share)
     result_row <- data.frame(
       variable = var,
-      na = na_count,
-      share = na_share,
+      na_count = na_count,
+      na_share = na_share,
       entities = entities_with_na,
       periods = periods_with_na,
       stringsAsFactors = FALSE

@@ -42,8 +42,8 @@ providing both overall and detailed period-specific missing value counts.
 When \code{detailed = FALSE} (default), returns a data.frame with the following columns:
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
-\item{\code{na}}{Total number of missing values (NAs) for the variable}
-\item{\code{share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
+\item{\code{na_count}}{Total number of missing values (NAs) for the variable}
+\item{\code{na_share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
 \item{\code{entities}}{Number of entities/groups with at least one missing value for this variable}
 \item{\code{periods}}{Number of time periods with at least one missing value for this variable}
 }
