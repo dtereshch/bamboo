@@ -8,6 +8,7 @@ summarize_panel(
   data,
   selection = NULL,
   group = NULL,
+  format = "long",
   detailed = TRUE,
   digits = 3
 )
@@ -21,6 +22,8 @@ If not specified, all numeric variables in the data.frame will be used.}
 \item{group}{A character string specifying the name of the entity/group variable in panel data.
 Not required if data has panel attributes.}
 
+\item{format}{A character string specifying the output format: "long" or "wide". Default = "long".}
+
 \item{detailed}{A logical flag indicating whether to return detailed Stata-like output.
 Default = TRUE.}
 
@@ -28,14 +31,17 @@ Default = TRUE.}
 Default = 3.}
 }
 \value{
-A data.frame with panel data summary statistics.
+A data.frame with panel data summary statistics. Format depends on
+the combination of \code{format} and \code{detailed} arguments.
 }
 \description{
 This function calculates summary statistics for panel data and decomposes
 variance into between and within components.
 }
 \details{
-When \code{detailed = TRUE} (default), returns a data.frame with the following columns:
+The output format is controlled by two parameters: \code{format} and \code{detailed}.
+
+When \code{format = "long"} and \code{detailed = TRUE} (default), returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
@@ -46,7 +52,33 @@ When \code{detailed = TRUE} (default), returns a data.frame with the following c
 \item{\code{n}}{Number of observations or groups}
 }
 
-When \code{detailed = FALSE}, returns a simplified data.frame with columns:
+When \code{format = "long"} and \code{detailed = FALSE}, returns a data.frame with:
+\describe{
+\item{\code{variable}}{The name of the variable}
+\item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+\item{\code{mean}}{Mean value}
+\item{\code{sd}}{Standard deviation}
+}
+
+When \code{format = "wide"} and \code{detailed = TRUE}, returns a data.frame with:
+\describe{
+\item{\code{variable}}{The name of the variable}
+\item{\code{mean}}{Overall mean}
+\item{\code{sd_overall}}{Overall standard deviation}
+\item{\code{min_overall}}{Overall minimum}
+\item{\code{max_overall}}{Overall maximum}
+\item{\code{n_overall}}{Number of observations}
+\item{\code{sd_between}}{Between-group standard deviation}
+\item{\code{min_between}}{Minimum of group means}
+\item{\code{max_between}}{Maximum of group means}
+\item{\code{n_between}}{Number of groups}
+\item{\code{sd_within}}{Within-group standard deviation}
+\item{\code{min_within}}{Within-group minimum (transformed)}
+\item{\code{max_within}}{Within-group maximum (transformed)}
+\item{\code{n_within}}{Average observations per group}
+}
+
+When \code{format = "wide"} and \code{detailed = FALSE}, returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the variable}
 \item{\code{mean}}{Overall mean}
@@ -59,6 +91,7 @@ The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_n_groups}}{Number of unique groups}
+\item{\code{panel_format}}{Output format ("long" or "wide")}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
 \item{\code{panel_digits}}{Number of decimal places used for rounding}
 }
@@ -75,6 +108,12 @@ summarize_panel(panel_data)
 
 # Simplified output
 summarize_panel(production, group = "firm", detailed = FALSE)
+
+# Wide format with detailed statistics
+summarize_panel(production, group = "firm", format = "wide")
+
+# Wide format with simplified statistics
+summarize_panel(production, group = "firm", format = "wide", detailed = FALSE)
 
 # Show statistics for a single variable
 summarize_panel(production, selection = "sales", group = "firm")

@@ -8,15 +8,19 @@
 #'        If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #'        Not required if data has panel attributes.
+#' @param format A character string specifying the output format: "long" or "wide". Default = "long".
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
 #'        Default = TRUE.
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'        Default = 3.
 #'
-#' @return A data.frame with panel data summary statistics.
+#' @return A data.frame with panel data summary statistics. Format depends on
+#'         the combination of `format` and `detailed` arguments.
 #'
 #' @details
-#' When `detailed = TRUE` (default), returns a data.frame with the following columns:
+#' The output format is controlled by two parameters: `format` and `detailed`.
+#'
+#' When `format = "long"` and `detailed = TRUE` (default), returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
@@ -27,7 +31,33 @@
 #'   \item{\code{n}}{Number of observations or groups}
 #' }
 #'
-#' When `detailed = FALSE`, returns a simplified data.frame with columns:
+#' When `format = "long"` and `detailed = FALSE`, returns a data.frame with:
+#' \describe{
+#'   \item{\code{variable}}{The name of the variable}
+#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{mean}}{Mean value}
+#'   \item{\code{sd}}{Standard deviation}
+#' }
+#'
+#' When `format = "wide"` and `detailed = TRUE`, returns a data.frame with:
+#' \describe{
+#'   \item{\code{variable}}{The name of the variable}
+#'   \item{\code{mean}}{Overall mean}
+#'   \item{\code{sd_overall}}{Overall standard deviation}
+#'   \item{\code{min_overall}}{Overall minimum}
+#'   \item{\code{max_overall}}{Overall maximum}
+#'   \item{\code{n_overall}}{Number of observations}
+#'   \item{\code{sd_between}}{Between-group standard deviation}
+#'   \item{\code{min_between}}{Minimum of group means}
+#'   \item{\code{max_between}}{Maximum of group means}
+#'   \item{\code{n_between}}{Number of groups}
+#'   \item{\code{sd_within}}{Within-group standard deviation}
+#'   \item{\code{min_within}}{Within-group minimum (transformed)}
+#'   \item{\code{max_within}}{Within-group maximum (transformed)}
+#'   \item{\code{n_within}}{Average observations per group}
+#' }
+#'
+#' When `format = "wide"` and `detailed = FALSE`, returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the variable}
 #'   \item{\code{mean}}{Overall mean}
@@ -40,6 +70,7 @@
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_n_groups}}{Number of unique groups}
+#'   \item{\code{panel_format}}{Output format ("long" or "wide")}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
 #'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #' }
@@ -63,6 +94,12 @@
 #' # Simplified output
 #' summarize_panel(production, group = "firm", detailed = FALSE)
 #'
+#' # Wide format with detailed statistics
+#' summarize_panel(production, group = "firm", format = "wide")
+#'
+#' # Wide format with simplified statistics
+#' summarize_panel(production, group = "firm", format = "wide", detailed = FALSE)
+#'
 #' # Show statistics for a single variable
 #' summarize_panel(production, selection = "sales", group = "firm")
 #'
@@ -80,6 +117,7 @@ summarize_panel <- function(
   data,
   selection = NULL,
   group = NULL,
+  format = "long",
   detailed = TRUE,
   digits = 3
 ) {
@@ -110,7 +148,7 @@ summarize_panel <- function(
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop("'group' must be a single character string")
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!group %in% names(data)) {
@@ -119,6 +157,15 @@ summarize_panel <- function(
 
   if (!is.logical(detailed) || length(detailed) != 1) {
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
+  }
+
+  # Validate format argument
+  if (!is.character(format) || length(format) != 1) {
+    stop("'format' must be a single character string, not ", class(format)[1])
+  }
+
+  if (!format %in% c("long", "wide")) {
+    stop('format must be either "long" or "wide", not "', format, '"')
   }
 
   # Harmonized digits validation
@@ -217,6 +264,7 @@ summarize_panel <- function(
     data,
     varname,
     group,
+    format_output,
     detailed_output,
     digits_val
   ) {
@@ -225,7 +273,7 @@ summarize_panel <- function(
     df <- data[complete_cases, , drop = FALSE]
 
     if (nrow(df) == 0) {
-      if (detailed_output) {
+      if (format_output == "long" && detailed_output) {
         return(data.frame(
           variable = character(),
           decomposition = character(),
@@ -236,7 +284,33 @@ summarize_panel <- function(
           n = numeric(),
           stringsAsFactors = FALSE
         ))
+      } else if (format_output == "long" && !detailed_output) {
+        return(data.frame(
+          variable = character(),
+          decomposition = character(),
+          mean = numeric(),
+          sd = numeric(),
+          stringsAsFactors = FALSE
+        ))
+      } else if (format_output == "wide" && detailed_output) {
+        return(data.frame(
+          variable = varname,
+          mean = NA_real_,
+          sd_overall = NA_real_,
+          min_overall = NA_real_,
+          max_overall = NA_real_,
+          n_overall = NA_integer_,
+          sd_between = NA_real_,
+          min_between = NA_real_,
+          max_between = NA_real_,
+          n_between = NA_integer_,
+          sd_within = NA_real_,
+          min_within = NA_real_,
+          max_within = NA_real_,
+          n_within = NA_real_
+        ))
       } else {
+        # wide and !detailed
         return(data.frame(
           variable = varname,
           mean = NA_real_,
@@ -296,27 +370,61 @@ summarize_panel <- function(
     within_max <- round_if_needed(within_max, digits_val)
     avg_obs_per_group <- round_if_needed(avg_obs_per_group, digits_val)
 
-    if (detailed_output) {
-      # Create Stata-like output with overall, between, and within rows
-      result <- data.frame(
-        variable = c(varname, varname, varname),
-        decomposition = c("overall", "between", "within"),
-        mean = c(overall_mean, NA, NA),
-        sd = c(overall_sd, between_sd, within_sd),
-        min = c(min_val, between_min, within_min),
-        max = c(max_val, between_max, within_max),
-        n = c(n_obs, n_groups_var, avg_obs_per_group),
-        stringsAsFactors = FALSE
-      )
+    if (format_output == "long") {
+      if (detailed_output) {
+        # Long format with detailed statistics
+        result <- data.frame(
+          variable = c(varname, varname, varname),
+          decomposition = c("overall", "between", "within"),
+          mean = c(overall_mean, NA, NA),
+          sd = c(overall_sd, between_sd, within_sd),
+          min = c(min_val, between_min, within_min),
+          max = c(max_val, between_max, within_max),
+          n = c(n_obs, n_groups_var, avg_obs_per_group),
+          stringsAsFactors = FALSE
+        )
+      } else {
+        # Long format with simplified statistics
+        result <- data.frame(
+          variable = c(varname, varname, varname),
+          decomposition = c("overall", "between", "within"),
+          mean = c(overall_mean, NA, NA),
+          sd = c(overall_sd, between_sd, within_sd),
+          stringsAsFactors = FALSE
+        )
+      }
     } else {
-      # Simplified output with one row per variable
-      result <- data.frame(
-        variable = varname,
-        mean = overall_mean,
-        sd_overall = overall_sd,
-        sd_between = between_sd,
-        sd_within = within_sd
-      )
+      # format_output == "wide"
+      if (detailed_output) {
+        # Wide format with detailed statistics
+        result <- data.frame(
+          variable = varname,
+          mean = overall_mean,
+          sd_overall = overall_sd,
+          min_overall = min_val,
+          max_overall = max_val,
+          n_overall = n_obs,
+          sd_between = between_sd,
+          min_between = between_min,
+          max_between = between_max,
+          n_between = n_groups_var,
+          sd_within = within_sd,
+          min_within = within_min,
+          max_within = within_max,
+          n_within = avg_obs_per_group,
+          stringsAsFactors = FALSE
+        )
+      } else {
+        # Wide format with simplified statistics
+        result <- data.frame(
+          variable = varname,
+          mean = overall_mean,
+          sd_overall = overall_sd,
+          sd_between = between_sd,
+          sd_within = within_sd,
+          stringsAsFactors = FALSE
+        )
+      }
     }
 
     return(result)
@@ -324,7 +432,7 @@ summarize_panel <- function(
 
   # Calculate statistics for each variable
   results <- lapply(selection, function(varname) {
-    summarize_panel_1(data, varname, group, detailed, digits)
+    summarize_panel_1(data, varname, group, format, detailed, digits)
   })
 
   # Combine all results
@@ -334,6 +442,7 @@ summarize_panel <- function(
   # Add standardized attributes
   attr(result_df, "panel_group") <- group
   attr(result_df, "panel_n_groups") <- n_groups
+  attr(result_df, "panel_format") <- format
   attr(result_df, "panel_detailed") <- detailed
   attr(result_df, "panel_digits") <- digits
 
