@@ -372,8 +372,8 @@ decompose_factor <- function(
       levels = unique(result_df$category)
     )
 
-    # Order by variable and category
-    result_df <- result_df[order(result_df$variable, result_df$category), ]
+    # Order by variable and dimension
+    result_df <- result_df[order(result_df$variable, result_df$dimension), ]
     rownames(result_df) <- NULL
   }
 
