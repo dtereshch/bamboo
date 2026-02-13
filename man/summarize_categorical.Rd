@@ -4,7 +4,13 @@
 \alias{summarize_categorical}
 \title{Categorical Variable Summary for Panel Data}
 \usage{
-summarize_categorical(data, selection = NULL, group = NULL, digits = 3)
+summarize_categorical(
+  data,
+  selection = NULL,
+  group = NULL,
+  format = "wide",
+  digits = 3
+)
 }
 \arguments{
 \item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
@@ -15,18 +21,23 @@ If not specified, all factor variables in the data.frame will be used.}
 \item{group}{A character string specifying the name of the entity/group variable.
 Not required if data has panel attributes.}
 
+\item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
+
 \item{digits}{An integer indicating the number of decimal places to round shares.
 Default = 3.}
 }
 \value{
-A data.frame with categorical panel data summary statistics.
+A data.frame with categorical panel data summary statistics. Format depends on
+the \code{format} argument.
 }
 \description{
 This function performs one-way tabulations and decomposes counts into
 between and within components for categorical (factor) variables in panel data.
 }
 \details{
-Returns a data.frame with the following columns:
+The output format is controlled by the \code{format} parameter:
+
+When \code{format = "wide"} (default), returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{category}}{The category level of the variable}
@@ -36,12 +47,23 @@ Returns a data.frame with the following columns:
 \item{\code{share_between}}{Between-group share (n_between / total_groups)}
 \item{\code{share_within}}{Within-group share (average share of time groups have this category)}
 }
+
+When \code{format = "long"}, returns a data.frame with:
+\describe{
+\item{\code{variable}}{The name of the analyzed variable}
+\item{\code{category}}{The category level of the variable}
+\item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+\item{\code{n}}{Frequency count}
+\item{\code{share}}{Share proportion (0 to 1)}
+}
+
 All shares are proportions ranging from 0 to 1.
 
 The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_n_groups}}{Number of unique groups}
+\item{\code{panel_format}}{Output format ("wide" or "long")}
 \item{\code{panel_digits}}{Number of decimal places used for rounding}
 }
 }
@@ -52,8 +74,11 @@ When \code{selection} is explicitly specified, all selected variables are conver
 \examples{
 data(production)
 
-# Basic usage with statistics for all factor variables
+# Basic usage with statistics for all factor variables (wide format)
 summarize_categorical(production, group = "firm")
+
+# Long format output
+summarize_categorical(production, group = "firm", format = "long")
 
 # With panel attributes
 panel_data <- set_panel(production, group = "firm", time = "year")

@@ -8,13 +8,17 @@
 #'        If not specified, all factor variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable.
 #'        Not required if data has panel attributes.
+#' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round shares.
 #'        Default = 3.
 #'
-#' @return A data.frame with categorical panel data summary statistics.
+#' @return A data.frame with categorical panel data summary statistics. Format depends on
+#'         the `format` argument.
 #'
 #' @details
-#' Returns a data.frame with the following columns:
+#' The output format is controlled by the `format` parameter:
+#'
+#' When `format = "wide"` (default), returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{category}}{The category level of the variable}
@@ -24,12 +28,23 @@
 #'   \item{\code{share_between}}{Between-group share (n_between / total_groups)}
 #'   \item{\code{share_within}}{Within-group share (average share of time groups have this category)}
 #' }
+#'
+#' When `format = "long"`, returns a data.frame with:
+#' \describe{
+#'   \item{\code{variable}}{The name of the analyzed variable}
+#'   \item{\code{category}}{The category level of the variable}
+#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{n}}{Frequency count}
+#'   \item{\code{share}}{Share proportion (0 to 1)}
+#' }
+#'
 #' All shares are proportions ranging from 0 to 1.
 #'
 #' The data.frame has additional attributes:
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_n_groups}}{Number of unique groups}
+#'   \item{\code{panel_format}}{Output format ("wide" or "long")}
 #'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #' }
 #'
@@ -46,8 +61,11 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage with statistics for all factor variables
+#' # Basic usage with statistics for all factor variables (wide format)
 #' summarize_categorical(production, group = "firm")
+#'
+#' # Long format output
+#' summarize_categorical(production, group = "firm", format = "long")
 #'
 #' # With panel attributes
 #' panel_data <- set_panel(production, group = "firm", time = "year")
@@ -70,6 +88,7 @@ summarize_categorical <- function(
   data,
   selection = NULL,
   group = NULL,
+  format = "wide",
   digits = 3
 ) {
   # Check if data has panel attributes
@@ -99,11 +118,20 @@ summarize_categorical <- function(
   }
 
   if (!is.character(group) || length(group) != 1) {
-    stop("'group' must be a single character string")
+    stop("'group' must be a single character string, not ", class(group)[1])
   }
 
   if (!group %in% names(data)) {
     stop('variable "', group, '" not found in data')
+  }
+
+  # Validate format argument
+  if (!is.character(format) || length(format) != 1) {
+    stop("'format' must be a single character string, not ", class(format)[1])
+  }
+
+  if (!format %in% c("wide", "long")) {
+    stop('format must be either "wide" or "long", not "', format, '"')
   }
 
   # Harmonized digits validation
@@ -122,6 +150,20 @@ summarize_categorical <- function(
     } else {
       x
     }
+  }
+
+  # Validate group parameter
+  if (group == "" || length(group) == 0) {
+    stop("'group' must be a non-empty character string")
+  }
+
+  if (!group %in% names(data)) {
+    stop(
+      "variable '",
+      group,
+      "' not found in data. Available variables: ",
+      paste(names(data), collapse = ", ")
+    )
   }
 
   # Track if any messages were printed
@@ -183,22 +225,40 @@ summarize_categorical <- function(
   n_groups <- length(unique(data[[group]]))
 
   # Helper function to calculate categorical statistics for one variable
-  summarize_categorical_1 <- function(df, varname, grp, digits_val) {
+  summarize_categorical_1 <- function(
+    df,
+    varname,
+    grp,
+    format_output,
+    digits_val
+  ) {
     # Remove rows with NA in the variable or group
     complete_cases <- complete.cases(df[[varname]], df[[grp]])
     df_clean <- df[complete_cases, , drop = FALSE]
 
     if (nrow(df_clean) == 0) {
-      return(data.frame(
-        variable = character(),
-        category = character(),
-        n_overall = integer(),
-        share_overall = numeric(),
-        n_between = integer(),
-        share_between = numeric(),
-        share_within = numeric(),
-        stringsAsFactors = FALSE
-      ))
+      if (format_output == "wide") {
+        return(data.frame(
+          variable = character(),
+          category = character(),
+          n_overall = integer(),
+          share_overall = numeric(),
+          n_between = integer(),
+          share_between = numeric(),
+          share_within = numeric(),
+          stringsAsFactors = FALSE
+        ))
+      } else {
+        # long format
+        return(data.frame(
+          variable = character(),
+          category = character(),
+          decomposition = character(),
+          n = integer(),
+          share = numeric(),
+          stringsAsFactors = FALSE
+        ))
+      }
     }
 
     # Ensure the variable is treated as factor (should already be factor)
@@ -256,24 +316,60 @@ summarize_categorical <- function(
     share_between <- round_if_needed(share_between, digits_val)
     within_shares <- round_if_needed(within_shares, digits_val)
 
-    # Prepare result data frame
-    result <- data.frame(
-      variable = rep(varname, length(categories)),
-      category = categories,
-      n_overall = as.integer(overall_counts),
-      share_overall = share_overall,
-      n_between = as.integer(between_counts),
-      share_between = share_between,
-      share_within = within_shares,
-      stringsAsFactors = FALSE
-    )
+    if (format_output == "wide") {
+      # Wide format with one row per category
+      result <- data.frame(
+        variable = rep(varname, length(categories)),
+        category = categories,
+        n_overall = as.integer(overall_counts),
+        share_overall = share_overall,
+        n_between = as.integer(between_counts),
+        share_between = share_between,
+        share_within = within_shares,
+        stringsAsFactors = FALSE
+      )
+    } else {
+      # Long format with decomposition rows
+      # Overall rows
+      overall_rows <- data.frame(
+        variable = rep(varname, length(categories)),
+        category = categories,
+        decomposition = rep("overall", length(categories)),
+        n = as.integer(overall_counts),
+        share = share_overall,
+        stringsAsFactors = FALSE
+      )
+
+      # Between rows
+      between_rows <- data.frame(
+        variable = rep(varname, length(categories)),
+        category = categories,
+        decomposition = rep("between", length(categories)),
+        n = as.integer(between_counts),
+        share = share_between,
+        stringsAsFactors = FALSE
+      )
+
+      # Within rows
+      within_rows <- data.frame(
+        variable = rep(varname, length(categories)),
+        category = categories,
+        decomposition = rep("within", length(categories)),
+        n = NA_integer_, # No direct n for within
+        share = within_shares,
+        stringsAsFactors = FALSE
+      )
+
+      result <- rbind(overall_rows, between_rows, within_rows)
+      rownames(result) <- NULL
+    }
 
     return(result)
   }
 
   # Calculate statistics for each variable
   results <- lapply(selection, function(varname) {
-    summarize_categorical_1(data, varname, group, digits)
+    summarize_categorical_1(data, varname, group, format, digits)
   })
 
   # Combine all results
@@ -283,6 +379,7 @@ summarize_categorical <- function(
   # Add standardized attributes
   attr(result_df, "panel_group") <- group
   attr(result_df, "panel_n_groups") <- n_groups
+  attr(result_df, "panel_format") <- format
   attr(result_df, "panel_digits") <- digits
 
   # Add empty line before returning data.frame if messages were printed
