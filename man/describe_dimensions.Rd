@@ -16,10 +16,12 @@ Not required if data has panel attributes.}
 Not required if data has panel attributes.}
 }
 \value{
-A data.frame with two columns:
+A data.frame with 4 columns:
 \describe{
 \item{\code{dimension}}{Dimension name: "rows", "entities", or "periods"}
-\item{\code{count}}{The count for each dimension}
+\item{\code{nominal}}{Count based on presence of any row (even with only panel ID variables)}
+\item{\code{observed}}{Count based on presence of at least one non-NA substantive variable}
+\item{\code{complete}}{Count based on presence of no NA values in all substantive variables}
 }
 
 The data.frame has additional attributes:
@@ -28,14 +30,27 @@ The data.frame has additional attributes:
 \item{\code{panel_time}}{The time variable name}
 \item{\code{entity_values}}{Vector of all unique entity/group values}
 \item{\code{period_values}}{Vector of all unique time period values}
+\item{\code{panel_total_rows}}{Total number of rows in the data}
+\item{\code{panel_substantive_vars}}{Vector of substantive variable names}
 }
 }
 \description{
-This function provides basic summary information about panel data structure.
+This function provides summary information about panel data structure across
+three presence types: nominal, observed, and complete.
 }
 \details{
-This function provides basic panel data structure information including
-the number of unique entities, time periods, and total rows.
+This function provides panel data structure information across three presence
+definitions:
+\itemize{
+\item{\bold{nominal:}}{ Entity/time is present if it has a row in the data (even with only panel ID variables)}
+\item{\bold{observed:}}{ Entity is present if it has at least one non-NA substantive variable}
+\item{\bold{complete:}}{ Entity/time is present only if it has no NA values in all substantive variables}
+}
+
+For "entities", counts represent the number of unique entities present in the data.
+For "periods", counts represent the number of unique time periods present in the data.
+For "rows", counts represent the total number of rows meeting each presence criterion.
+
 When provided with a data.frame that has panel attributes (created by set_panel()),
 the function automatically extracts group and time variable names from the attributes.
 }
