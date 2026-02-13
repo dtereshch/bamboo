@@ -47,10 +47,10 @@ When \code{format = "long"} and \code{detailed = TRUE} (default), returns a data
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
 \item{\code{mean}}{Mean value (only for "overall" row)}
-\item{\code{sd}}{Standard deviation}
+\item{\code{std}}{Standard deviation}
 \item{\code{min}}{Minimum value}
 \item{\code{max}}{Maximum value}
-\item{\code{n}}{Number of observations or groups}
+\item{\code{count}}{Number of observations or groups}
 }
 
 When \code{format = "long"} and \code{detailed = FALSE}, returns a data.frame with:
@@ -58,40 +58,40 @@ When \code{format = "long"} and \code{detailed = FALSE}, returns a data.frame wi
 \item{\code{variable}}{The name of the variable}
 \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
 \item{\code{mean}}{Mean value}
-\item{\code{sd}}{Standard deviation}
+\item{\code{std}}{Standard deviation}
 }
 
 When \code{format = "wide"} and \code{detailed = TRUE}, returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the variable}
 \item{\code{mean}}{Overall mean}
-\item{\code{sd_overall}}{Overall standard deviation}
+\item{\code{std_overall}}{Overall standard deviation}
 \item{\code{min_overall}}{Overall minimum}
 \item{\code{max_overall}}{Overall maximum}
-\item{\code{n_overall}}{Number of observations}
-\item{\code{sd_between}}{Between-group standard deviation}
+\item{\code{count_overall}}{Number of observations}
+\item{\code{std_between}}{Between-group standard deviation}
 \item{\code{min_between}}{Minimum of group means}
 \item{\code{max_between}}{Maximum of group means}
-\item{\code{n_between}}{Number of groups}
-\item{\code{sd_within}}{Within-group standard deviation}
+\item{\code{count_between}}{Number of groups}
+\item{\code{std_within}}{Within-group standard deviation}
 \item{\code{min_within}}{Within-group minimum (transformed)}
 \item{\code{max_within}}{Within-group maximum (transformed)}
-\item{\code{n_within}}{Average observations per group}
+\item{\code{count_within}}{Average observations per group}
 }
 
 When \code{format = "wide"} and \code{detailed = FALSE}, returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the variable}
 \item{\code{mean}}{Overall mean}
-\item{\code{sd_overall}}{Overall standard deviation}
-\item{\code{sd_between}}{Between-group standard deviation}
-\item{\code{sd_within}}{Within-group standard deviation}
+\item{\code{std_overall}}{Overall standard deviation}
+\item{\code{std_between}}{Between-group standard deviation}
+\item{\code{std_within}}{Within-group standard deviation}
 }
 
 The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
-\item{\code{panel_n_groups}}{Number of unique groups}
+\item{\code{panel_count_groups}}{Number of unique groups}
 \item{\code{panel_format}}{Output format ("long" or "wide")}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
 \item{\code{panel_digits}}{Number of decimal places used for rounding}

@@ -26,10 +26,10 @@
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
 #'   \item{\code{mean}}{Mean value (only for "overall" row)}
-#'   \item{\code{sd}}{Standard deviation}
+#'   \item{\code{std}}{Standard deviation}
 #'   \item{\code{min}}{Minimum value}
 #'   \item{\code{max}}{Maximum value}
-#'   \item{\code{n}}{Number of observations or groups}
+#'   \item{\code{count}}{Number of observations or groups}
 #' }
 #'
 #' When `format = "long"` and `detailed = FALSE`, returns a data.frame with:
@@ -37,40 +37,40 @@
 #'   \item{\code{variable}}{The name of the variable}
 #'   \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
 #'   \item{\code{mean}}{Mean value}
-#'   \item{\code{sd}}{Standard deviation}
+#'   \item{\code{std}}{Standard deviation}
 #' }
 #'
 #' When `format = "wide"` and `detailed = TRUE`, returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the variable}
 #'   \item{\code{mean}}{Overall mean}
-#'   \item{\code{sd_overall}}{Overall standard deviation}
+#'   \item{\code{std_overall}}{Overall standard deviation}
 #'   \item{\code{min_overall}}{Overall minimum}
 #'   \item{\code{max_overall}}{Overall maximum}
-#'   \item{\code{n_overall}}{Number of observations}
-#'   \item{\code{sd_between}}{Between-group standard deviation}
+#'   \item{\code{count_overall}}{Number of observations}
+#'   \item{\code{std_between}}{Between-group standard deviation}
 #'   \item{\code{min_between}}{Minimum of group means}
 #'   \item{\code{max_between}}{Maximum of group means}
-#'   \item{\code{n_between}}{Number of groups}
-#'   \item{\code{sd_within}}{Within-group standard deviation}
+#'   \item{\code{count_between}}{Number of groups}
+#'   \item{\code{std_within}}{Within-group standard deviation}
 #'   \item{\code{min_within}}{Within-group minimum (transformed)}
 #'   \item{\code{max_within}}{Within-group maximum (transformed)}
-#'   \item{\code{n_within}}{Average observations per group}
+#'   \item{\code{count_within}}{Average observations per group}
 #' }
 #'
 #' When `format = "wide"` and `detailed = FALSE`, returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the variable}
 #'   \item{\code{mean}}{Overall mean}
-#'   \item{\code{sd_overall}}{Overall standard deviation}
-#'   \item{\code{sd_between}}{Between-group standard deviation}
-#'   \item{\code{sd_within}}{Within-group standard deviation}
+#'   \item{\code{std_overall}}{Overall standard deviation}
+#'   \item{\code{std_between}}{Between-group standard deviation}
+#'   \item{\code{std_within}}{Within-group standard deviation}
 #' }
 #'
 #' The data.frame has additional attributes:
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
-#'   \item{\code{panel_n_groups}}{Number of unique groups}
+#'   \item{\code{panel_count_groups}}{Number of unique groups}
 #'   \item{\code{panel_format}}{Output format ("long" or "wide")}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
 #'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
@@ -251,11 +251,11 @@ decompose_numeric <- function(
     stop("group variable '", group, "' has zero length")
   }
 
-  n_groups <- length(unique(group_vector))
-  if (n_groups > 10000) {
+  count_groups <- length(unique(group_vector))
+  if (count_groups > 10000) {
     warning(
       "Large number of groups (",
-      n_groups,
+      count_groups,
       "). This may impact performance."
     )
   }
@@ -279,10 +279,10 @@ decompose_numeric <- function(
           variable = character(),
           dimension = character(),
           mean = numeric(),
-          sd = numeric(),
+          std = numeric(),
           min = numeric(),
           max = numeric(),
-          n = numeric(),
+          count = numeric(),
           stringsAsFactors = FALSE
         ))
       } else if (format_output == "long" && !detailed_output) {
@@ -290,34 +290,34 @@ decompose_numeric <- function(
           variable = character(),
           dimension = character(),
           mean = numeric(),
-          sd = numeric(),
+          std = numeric(),
           stringsAsFactors = FALSE
         ))
       } else if (format_output == "wide" && detailed_output) {
         return(data.frame(
           variable = varname,
           mean = NA_real_,
-          sd_overall = NA_real_,
+          std_overall = NA_real_,
           min_overall = NA_real_,
           max_overall = NA_real_,
-          n_overall = NA_integer_,
-          sd_between = NA_real_,
+          count_overall = NA_integer_,
+          std_between = NA_real_,
           min_between = NA_real_,
           max_between = NA_real_,
-          n_between = NA_integer_,
-          sd_within = NA_real_,
+          count_between = NA_integer_,
+          std_within = NA_real_,
           min_within = NA_real_,
           max_within = NA_real_,
-          n_within = NA_real_
+          count_within = NA_real_
         ))
       } else {
         # wide and !detailed
         return(data.frame(
           variable = varname,
           mean = NA_real_,
-          sd_overall = NA_real_,
-          sd_between = NA_real_,
-          sd_within = NA_real_
+          std_overall = NA_real_,
+          std_between = NA_real_,
+          std_within = NA_real_
         ))
       }
     }
@@ -328,17 +328,17 @@ decompose_numeric <- function(
 
     # Calculate overall statistics
     overall_mean <- mean(x, na.rm = TRUE)
-    overall_sd <- sd(x, na.rm = TRUE)
+    overall_std <- sd(x, na.rm = TRUE)
     min_val <- min(x, na.rm = TRUE)
     max_val <- max(x, na.rm = TRUE)
-    n_obs <- length(x)
+    count_obs <- length(x)
 
     # Calculate between variance (variation in group means)
     group_means <- tapply(x, group_vec, mean, na.rm = TRUE)
-    between_sd <- sd(group_means, na.rm = TRUE)
+    between_std <- sd(group_means, na.rm = TRUE)
     between_min <- min(group_means, na.rm = TRUE)
     between_max <- max(group_means, na.rm = TRUE)
-    n_groups_var <- length(group_means)
+    count_groups_var <- length(group_means)
 
     # Calculate within variance (variation around group means)
     # For within: we need to calculate (x - group_mean) + overall_mean
@@ -350,7 +350,7 @@ decompose_numeric <- function(
     # This is what Stata's xtsum does for within min/max
     within_transformed <- deviations + overall_mean
 
-    within_sd <- sd(deviations, na.rm = TRUE)
+    within_std <- sd(deviations, na.rm = TRUE)
     within_min <- min(within_transformed, na.rm = TRUE)
     within_max <- max(within_transformed, na.rm = TRUE)
 
@@ -360,13 +360,13 @@ decompose_numeric <- function(
 
     # Apply rounding
     overall_mean <- round_if_needed(overall_mean, digits_val)
-    overall_sd <- round_if_needed(overall_sd, digits_val)
+    overall_std <- round_if_needed(overall_std, digits_val)
     min_val <- round_if_needed(min_val, digits_val)
     max_val <- round_if_needed(max_val, digits_val)
-    between_sd <- round_if_needed(between_sd, digits_val)
+    between_std <- round_if_needed(between_std, digits_val)
     between_min <- round_if_needed(between_min, digits_val)
     between_max <- round_if_needed(between_max, digits_val)
-    within_sd <- round_if_needed(within_sd, digits_val)
+    within_std <- round_if_needed(within_std, digits_val)
     within_min <- round_if_needed(within_min, digits_val)
     within_max <- round_if_needed(within_max, digits_val)
     avg_obs_per_group <- round_if_needed(avg_obs_per_group, digits_val)
@@ -378,10 +378,10 @@ decompose_numeric <- function(
           variable = c(varname, varname, varname),
           dimension = c("overall", "between", "within"),
           mean = c(overall_mean, NA, NA),
-          sd = c(overall_sd, between_sd, within_sd),
+          std = c(overall_std, between_std, within_std),
           min = c(min_val, between_min, within_min),
           max = c(max_val, between_max, within_max),
-          n = c(n_obs, n_groups_var, avg_obs_per_group),
+          count = c(count_obs, count_groups_var, avg_obs_per_group),
           stringsAsFactors = FALSE
         )
       } else {
@@ -390,7 +390,7 @@ decompose_numeric <- function(
           variable = c(varname, varname, varname),
           dimension = c("overall", "between", "within"),
           mean = c(overall_mean, NA, NA),
-          sd = c(overall_sd, between_sd, within_sd),
+          std = c(overall_std, between_std, within_std),
           stringsAsFactors = FALSE
         )
       }
@@ -401,18 +401,18 @@ decompose_numeric <- function(
         result <- data.frame(
           variable = varname,
           mean = overall_mean,
-          sd_overall = overall_sd,
+          std_overall = overall_std,
           min_overall = min_val,
           max_overall = max_val,
-          n_overall = n_obs,
-          sd_between = between_sd,
+          count_overall = count_obs,
+          std_between = between_std,
           min_between = between_min,
           max_between = between_max,
-          n_between = n_groups_var,
-          sd_within = within_sd,
+          count_between = count_groups_var,
+          std_within = within_std,
           min_within = within_min,
           max_within = within_max,
-          n_within = avg_obs_per_group,
+          count_within = avg_obs_per_group,
           stringsAsFactors = FALSE
         )
       } else {
@@ -420,9 +420,9 @@ decompose_numeric <- function(
         result <- data.frame(
           variable = varname,
           mean = overall_mean,
-          sd_overall = overall_sd,
-          sd_between = between_sd,
-          sd_within = within_sd,
+          std_overall = overall_std,
+          std_between = between_std,
+          std_within = within_std,
           stringsAsFactors = FALSE
         )
       }
@@ -442,7 +442,7 @@ decompose_numeric <- function(
 
   # Add standardized attributes
   attr(result_df, "panel_group") <- group
-  attr(result_df, "panel_n_groups") <- n_groups
+  attr(result_df, "panel_count_groups") <- count_groups
   attr(result_df, "panel_format") <- format
   attr(result_df, "panel_detailed") <- detailed
   attr(result_df, "panel_digits") <- digits

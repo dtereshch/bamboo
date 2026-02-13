@@ -41,10 +41,10 @@ When \code{format = "wide"} (default), returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{category}}{The category level of the variable}
-\item{\code{n_overall}}{Overall frequency (person-time observations)}
-\item{\code{share_overall}}{Overall share (n_overall / total_obs)}
-\item{\code{n_between}}{Between-group frequency (number of groups ever having this category)}
-\item{\code{share_between}}{Between-group share (n_between / total_groups)}
+\item{\code{count_overall}}{Overall frequency (person-time observations)}
+\item{\code{share_overall}}{Overall share (count_overall / total_obs)}
+\item{\code{count_between}}{Between-group frequency (number of groups ever having this category)}
+\item{\code{share_between}}{Between-group share (count_between / total_groups)}
 \item{\code{share_within}}{Within-group share (average share of time groups have this category)}
 }
 
@@ -53,14 +53,14 @@ When \code{format = "long"}, returns a data.frame with:
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{category}}{The category level of the variable}
 \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
-\item{\code{n}}{Frequency count (NA for within dimension)}
+\item{\code{count}}{Frequency count (NA for within dimension)}
 \item{\code{share}}{Share proportion (0 to 1)}
 }
 
 The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
-\item{\code{panel_n_groups}}{Number of unique groups}
+\item{\code{panel_count_groups}}{Number of unique groups}
 \item{\code{panel_format}}{Output format ("wide" or "long")}
 \item{\code{panel_digits}}{Number of decimal places used for rounding}
 }

@@ -22,10 +22,10 @@
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{category}}{The category level of the variable}
-#'   \item{\code{n_overall}}{Overall frequency (person-time observations)}
-#'   \item{\code{share_overall}}{Overall share (n_overall / total_obs)}
-#'   \item{\code{n_between}}{Between-group frequency (number of groups ever having this category)}
-#'   \item{\code{share_between}}{Between-group share (n_between / total_groups)}
+#'   \item{\code{count_overall}}{Overall frequency (person-time observations)}
+#'   \item{\code{share_overall}}{Overall share (count_overall / total_obs)}
+#'   \item{\code{count_between}}{Between-group frequency (number of groups ever having this category)}
+#'   \item{\code{share_between}}{Between-group share (count_between / total_groups)}
 #'   \item{\code{share_within}}{Within-group share (average share of time groups have this category)}
 #' }
 #'
@@ -34,14 +34,14 @@
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{category}}{The category level of the variable}
 #'   \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
-#'   \item{\code{n}}{Frequency count (NA for within dimension)}
+#'   \item{\code{count}}{Frequency count (NA for within dimension)}
 #'   \item{\code{share}}{Share proportion (0 to 1)}
 #' }
 #'
 #' The data.frame has additional attributes:
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
-#'   \item{\code{panel_n_groups}}{Number of unique groups}
+#'   \item{\code{panel_count_groups}}{Number of unique groups}
 #'   \item{\code{panel_format}}{Output format ("wide" or "long")}
 #'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #' }
@@ -216,7 +216,7 @@ decompose_factor <- function(
   data[[group]] <- as.character(data[[group]])
 
   # Get total number of groups
-  n_groups <- length(unique(data[[group]]))
+  count_groups <- length(unique(data[[group]]))
 
   # Helper function to calculate categorical statistics for one variable
   decompose_factor_1 <- function(df, varname, grp, format_output, digits_val) {
@@ -229,9 +229,9 @@ decompose_factor <- function(
         return(data.frame(
           variable = character(),
           category = character(),
-          n_overall = integer(),
+          count_overall = integer(),
           share_overall = numeric(),
-          n_between = integer(),
+          count_between = integer(),
           share_between = numeric(),
           share_within = numeric(),
           stringsAsFactors = FALSE
@@ -242,7 +242,7 @@ decompose_factor <- function(
           variable = character(),
           category = character(),
           dimension = character(),
-          n = integer(),
+          count = integer(),
           share = numeric(),
           stringsAsFactors = FALSE
         ))
@@ -297,7 +297,7 @@ decompose_factor <- function(
 
     # Calculate shares (proportions, not percentages)
     share_overall <- as.numeric(overall_counts / total_obs)
-    share_between <- as.numeric(between_counts / n_groups)
+    share_between <- as.numeric(between_counts / count_groups)
 
     # Apply rounding
     share_overall <- round_if_needed(share_overall, digits_val)
@@ -309,9 +309,9 @@ decompose_factor <- function(
       result <- data.frame(
         variable = rep(varname, length(categories)),
         category = categories,
-        n_overall = as.integer(overall_counts),
+        count_overall = as.integer(overall_counts),
         share_overall = share_overall,
-        n_between = as.integer(between_counts),
+        count_between = as.integer(between_counts),
         share_between = share_between,
         share_within = within_shares,
         stringsAsFactors = FALSE
@@ -323,7 +323,7 @@ decompose_factor <- function(
         variable = rep(varname, length(categories)),
         category = categories,
         dimension = rep("overall", length(categories)),
-        n = as.integer(overall_counts),
+        count = as.integer(overall_counts),
         share = share_overall,
         stringsAsFactors = FALSE
       )
@@ -333,7 +333,7 @@ decompose_factor <- function(
         variable = rep(varname, length(categories)),
         category = categories,
         dimension = rep("between", length(categories)),
-        n = as.integer(between_counts),
+        count = as.integer(between_counts),
         share = share_between,
         stringsAsFactors = FALSE
       )
@@ -343,7 +343,7 @@ decompose_factor <- function(
         variable = rep(varname, length(categories)),
         category = categories,
         dimension = rep("within", length(categories)),
-        n = NA_integer_, # No direct n for within
+        count = NA_integer_, # No direct count for within
         share = within_shares,
         stringsAsFactors = FALSE
       )
@@ -379,7 +379,7 @@ decompose_factor <- function(
 
   # Add standardized attributes
   attr(result_df, "panel_group") <- group
-  attr(result_df, "panel_n_groups") <- n_groups
+  attr(result_df, "panel_count_groups") <- count_groups
   attr(result_df, "panel_format") <- format
   attr(result_df, "panel_digits") <- digits
 
