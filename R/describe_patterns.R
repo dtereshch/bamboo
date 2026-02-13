@@ -38,7 +38,7 @@
 #' \describe{
 #'   \item{\code{rank}}{Pattern rank (1, 2, 3, ...) ordered by frequency}
 #'   \item{\code{[time]}}{The time period variable (named according to the `time` argument)}
-#'   \item{\code{participation}}{0/1 values indicating absence/presence in the period}
+#'   \item{\code{presence}}{0/1 values indicating absence/presence in the period}
 #'   \item{\code{n}}{Number of entities with this pattern}
 #'   \item{\code{share}}{Proportion of entities with this pattern}
 #' }
@@ -70,30 +70,30 @@
 #' data(production)
 #'
 #' # Basic usage
-#' describe_participation(production, group = "firm", time = "year")
+#' describe_patterns(production, group = "firm", time = "year")
 #'
 #' # With panel attributes
 #' panel_data <- set_panel(production, group = "firm", time = "year")
-#' describe_participation(panel_data)
+#' describe_patterns(panel_data)
 #'
 #' # Use different presence types
-#' describe_participation(production, group = "firm", time = "year", type = "nominal")
-#' describe_participation(production, group = "firm", time = "year", type = "complete")
+#' describe_patterns(production, group = "firm", time = "year", type = "nominal")
+#' describe_patterns(production, group = "firm", time = "year", type = "complete")
 #'
 #' # Simplified version
-#' describe_participation(production, group = "firm", time = "year", detailed = FALSE)
+#' describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
 #'
 #' # Simplified version in long format
-#' describe_participation(production, group = "firm", time = "year", detailed = FALSE, format = "long")
+#' describe_patterns(production, group = "firm", time = "year", detailed = FALSE, format = "long")
 #'
 #' # With custom rounding
-#' describe_participation(production, group = "firm", time = "year", digits = 4)
+#' describe_patterns(production, group = "firm", time = "year", digits = 4)
 #'
 #' # Effectively no rounding (use large digit value)
-#' describe_participation(production, group = "firm", time = "year", digits = 999999)
+#' describe_patterns(production, group = "firm", time = "year", digits = 999999)
 #'
 #' @export
-describe_participation <- function(
+describe_patterns <- function(
   data,
   group = NULL,
   time = NULL,
@@ -352,7 +352,7 @@ describe_participation <- function(
           data.frame(
             rank = pattern_row$rank,
             time = t,
-            participation = as.integer(pattern_row[[t]]),
+            presence = as.integer(pattern_row[[t]]),
             n = pattern_row$n,
             share = pattern_row$share,
             stringsAsFactors = FALSE
@@ -365,8 +365,8 @@ describe_participation <- function(
     names(long_result)[names(long_result) == "time"] <- time
 
     if (!detailed) {
-      # Return simplified version with only rank, time, and participation columns
-      simplified_result <- long_result[c("rank", time, "participation")]
+      # Return simplified version with only rank, time, and presence columns
+      simplified_result <- long_result[c("rank", time, "presence")]
 
       # Add standardized attributes to simplified result
       attr(simplified_result, "panel_group") <- group

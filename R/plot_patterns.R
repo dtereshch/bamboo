@@ -62,33 +62,33 @@
 #' }
 #'
 #' @seealso
-#' [describe_participation()], [explore_participation()], [plot_heterogeneity()]
+#' [describe_patterns()], [explore_participation()], [plot_heterogeneity()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Basic usage with top 10 patterns shown
-#' plot_participation(production, group = "firm", time = "year")
+#' plot_patterns(production, group = "firm", time = "year")
 #'
 #' # With panel attributes
 #' panel_data <- set_panel(production, group = "firm", time = "year")
-#' plot_participation(panel_data)
+#' plot_patterns(panel_data)
 #'
 #' # Use different presence types
-#' plot_participation(production, group = "firm", time = "year", type = "nominal")
-#' plot_participation(production, group = "firm", time = "year", type = "complete")
+#' plot_patterns(production, group = "firm", time = "year", type = "nominal")
+#' plot_patterns(production, group = "firm", time = "year", type = "complete")
 #'
 #' # Show only top 5 patterns
-#' plot_participation(production, group = "firm", time = "year", max_patterns = 5)
+#' plot_patterns(production, group = "firm", time = "year", max_patterns = 5)
 #'
 #' # Show all patterns
-#' plot_participation(production, group = "firm", time = "year", max_patterns = 999999)
+#' plot_patterns(production, group = "firm", time = "year", max_patterns = 999999)
 #'
 #' # Custom colors
-#' plot_participation(production, group = "firm", time = "year", colors = c("black", "white"))
+#' plot_patterns(production, group = "firm", time = "year", colors = c("black", "white"))
 #'
 #' @export
-plot_participation <- function(
+plot_patterns <- function(
   data,
   group = NULL,
   time = NULL,
