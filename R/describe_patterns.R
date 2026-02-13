@@ -7,7 +7,8 @@
 #'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
 #'        Not required if data has panel attributes.
-#' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
+#' @param presence A character string specifying how to define entity presence: "nominal", "observed", or "complete".
+#'        Default = "observed".
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param digits An integer specifying the number of decimal places for rounding share column.
@@ -16,7 +17,7 @@
 #' @return A data.frame with participation patterns.
 #'
 #' @details
-#' \strong{Type} parameter definitions:
+#' \strong{Presence} parameter definitions:
 #' \describe{
 #'   \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 #'   \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -52,14 +53,14 @@
 #' \describe{
 #'   \item{\code{panel_group}}{The grouping variable name}
 #'   \item{\code{panel_time}}{The time variable name}
-#'   \item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
+#'   \item{\code{panel_presence}}{Presence type ("nominal", "observed", or "complete")}
 #'   \item{\code{panel_format}}{Output format ("wide" or "long")}
 #'   \item{\code{panel_detailed}}{Logical indicating detailed output}
 #'   \item{\code{panel_digits}}{Number of decimal places used for rounding}
 #'   \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 #'   \item{\code{panel_n_periods}}{Total number of unique time periods}
 #'   \item{\code{panel_n_patterns}}{Number of distinct participation patterns}
-#'   \item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified type}
+#'   \item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified presence type}
 #'   \item{\code{panel_pattern_groups}}{List of entities belonging to each participation pattern}
 #' }
 #'
@@ -77,8 +78,8 @@
 #' describe_patterns(panel_data)
 #'
 #' # Use different presence types
-#' describe_patterns(production, group = "firm", time = "year", type = "nominal")
-#' describe_patterns(production, group = "firm", time = "year", type = "complete")
+#' describe_patterns(production, group = "firm", time = "year", presence = "nominal")
+#' describe_patterns(production, group = "firm", time = "year", presence = "complete")
 #'
 #' # Simplified version
 #' describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
@@ -97,7 +98,7 @@ describe_patterns <- function(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   format = "wide",
   detailed = TRUE,
   digits = 3
@@ -132,12 +133,15 @@ describe_patterns <- function(
     stop("'time' must be a single character string, not ", class(time)[1])
   }
 
-  if (!is.character(type) || length(type) != 1) {
-    stop("'type' must be a single character string, not ", class(type)[1])
+  if (!is.character(presence) || length(presence) != 1) {
+    stop(
+      "'presence' must be a single character string, not ",
+      class(presence)[1]
+    )
   }
 
-  if (!type %in% c("observed", "nominal", "complete")) {
-    stop('type must be one of: "observed", "nominal", "complete"')
+  if (!presence %in% c("observed", "nominal", "complete")) {
+    stop('presence must be one of: "observed", "nominal", "complete"')
   }
 
   if (!group %in% names(data)) {
@@ -196,11 +200,11 @@ describe_patterns <- function(
     unique_periods <- sort(unique_periods)
   }
 
-  # Filter data based on type
-  if (type == "nominal") {
+  # Filter data based on presence
+  if (presence == "nominal") {
     # Keep all rows (no filtering)
     data_filtered <- data
-  } else if (type == "observed") {
+  } else if (presence == "observed") {
     # Keep rows where at least one data column is not NA
     if (nrow(data) > 0) {
       has_data <- apply(data[data_cols], 1, function(row) {
@@ -210,7 +214,7 @@ describe_patterns <- function(
     } else {
       data_filtered <- data
     }
-  } else if (type == "complete") {
+  } else if (presence == "complete") {
     # Keep rows where all data columns are not NA
     if (nrow(data) > 0) {
       complete_rows <- complete.cases(data[data_cols])
@@ -238,15 +242,15 @@ describe_patterns <- function(
 
   time_cols <- all_times
 
-  # Fill the binary matrix based on type
-  if (type == "nominal") {
+  # Fill the binary matrix based on presence
+  if (presence == "nominal") {
     # For nominal type, mark 1 for all rows in filtered data
     for (i in seq_along(group_vec)) {
       row_group <- as.character(group_vec[i])
       row_time <- as.character(time_vec[i])
       participation_binary[row_group, row_time] <- 1
     }
-  } else if (type == "observed") {
+  } else if (presence == "observed") {
     # For observed type, mark 1 for rows with at least one non-NA
     # The data_filtered already contains only rows with at least one non-NA
     for (i in seq_along(group_vec)) {
@@ -254,7 +258,7 @@ describe_patterns <- function(
       row_time <- as.character(time_vec[i])
       participation_binary[row_group, row_time] <- 1
     }
-  } else if (type == "complete") {
+  } else if (presence == "complete") {
     # For complete type, mark 1 for complete rows only
     # Need to check all rows in original data
     complete_rows <- complete.cases(data[data_cols])
@@ -371,7 +375,7 @@ describe_patterns <- function(
       # Add standardized attributes to simplified result
       attr(simplified_result, "panel_group") <- group
       attr(simplified_result, "panel_time") <- time
-      attr(simplified_result, "panel_type") <- type
+      attr(simplified_result, "panel_presence") <- presence
       attr(simplified_result, "panel_format") <- format
       attr(simplified_result, "panel_detailed") <- detailed
       attr(simplified_result, "panel_digits") <- digits
@@ -387,7 +391,7 @@ describe_patterns <- function(
     # Add standardized attributes to long result
     attr(long_result, "panel_group") <- group
     attr(long_result, "panel_time") <- time
-    attr(long_result, "panel_type") <- type
+    attr(long_result, "panel_presence") <- presence
     attr(long_result, "panel_format") <- format
     attr(long_result, "panel_detailed") <- detailed
     attr(long_result, "panel_digits") <- digits
@@ -408,7 +412,7 @@ describe_patterns <- function(
     # Add standardized attributes to simplified result
     attr(simplified_result, "panel_group") <- group
     attr(simplified_result, "panel_time") <- time
-    attr(simplified_result, "panel_type") <- type
+    attr(simplified_result, "panel_presence") <- presence
     attr(simplified_result, "panel_format") <- format
     attr(simplified_result, "panel_detailed") <- detailed
     attr(simplified_result, "panel_digits") <- digits
@@ -424,7 +428,7 @@ describe_patterns <- function(
   # Add standardized attributes to result
   attr(result, "panel_group") <- group
   attr(result, "panel_time") <- time
-  attr(result, "panel_type") <- type
+  attr(result, "panel_presence") <- presence
   attr(result, "panel_format") <- format
   attr(result, "panel_detailed") <- detailed
   attr(result, "panel_digits") <- digits

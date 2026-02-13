@@ -8,18 +8,18 @@
 #'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
 #'        Not required if data has panel attributes.
-#' @param type A character string specifying how to define entity presence: "observed", "nominal", or "complete".
+#' @param presence A character string specifying how to define entity presence: "observed", "nominal", or "complete".
 #'        Default = "observed".
 #' @param detailed A logical flag indicating whether to display detailed summary statistics.
 #'        Default = TRUE.
 #' @param colors A character vector of length 2 specifying the line color and fill color for the histogram.
 #'        Default = c("black", "#0072B2").
 #'
-#' @return Invisibly returns a list with summary statistics for the specified type.
+#' @return Invisibly returns a list with summary statistics for the specified presence type.
 #'         Creates a plot showing time coverage distribution.
 #'
 #' @details
-#' \strong{Type} parameter definitions:
+#' \strong{Presence} parameter definitions:
 #' \describe{
 #'   \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 #'   \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -35,7 +35,7 @@
 #'     \itemize{
 #'       \item \code{n_entities}: Total number of unique entities
 #'       \item \code{n_time_periods}: Total number of unique time periods
-#'       \item \code{type}: Presence type used for analysis
+#'       \item \code{presence}: Presence type used for analysis
 #'       \item \code{group_var}: The group variable name
 #'       \item \code{time_var}: The time variable name
 #'     }
@@ -51,7 +51,7 @@
 #'     \itemize{
 #'       \item \code{group_var}: The group variable name
 #'       \item \code{time_var}: The time variable name
-#'       \item \code{type}: The presence type used for analysis
+#'       \item \code{presence}: The presence type used for analysis
 #'       \item \code{line_color}: Line color used for plotting
 #'       \item \code{fill_color}: Fill color used for plotting
 #'       \item \code{detailed}: Whether detailed statistics were shown
@@ -73,8 +73,8 @@
 #' plot_periods(panel_data)
 #'
 #' # Use different presence types
-#' plot_periods(production, group = "firm", time = "year", type = "nominal")
-#' plot_periods(production, group = "firm", time = "year", type = "complete")
+#' plot_periods(production, group = "firm", time = "year", presence = "nominal")
+#' plot_periods(production, group = "firm", time = "year", presence = "complete")
 #'
 #' # Custom colors - black line with gray fill
 #' plot_periods(production, group = "firm", time = "year", colors = c("black", "gray"))
@@ -90,7 +90,7 @@ plot_periods <- function(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   detailed = TRUE,
   colors = c("black", "#0072B2")
 ) {
@@ -124,12 +124,15 @@ plot_periods <- function(
     stop("'time' must be a single character string, not ", class(time)[1])
   }
 
-  if (!is.character(type) || length(type) != 1) {
-    stop("'type' must be a single character string, not ", class(type)[1])
+  if (!is.character(presence) || length(presence) != 1) {
+    stop(
+      "'presence' must be a single character string, not ",
+      class(presence)[1]
+    )
   }
 
-  if (!type %in% c("observed", "nominal", "complete")) {
-    stop('type must be one of: "observed", "nominal", "complete"')
+  if (!presence %in% c("observed", "nominal", "complete")) {
+    stop('presence must be one of: "observed", "nominal", "complete"')
   }
 
   # Validate colors parameter
@@ -166,9 +169,9 @@ plot_periods <- function(
     stop("no substantive variables found (besides group and time variables)")
   }
 
-  # Helper function to calculate coverage for a given type
-  calculate_coverage <- function(type) {
-    if (type == "nominal") {
+  # Helper function to calculate coverage for a given presence type
+  calculate_coverage <- function(presence) {
+    if (presence == "nominal") {
       # Use all rows (no filtering)
       filtered_data <- data
 
@@ -204,7 +207,7 @@ plot_periods <- function(
           presence_matrix[row_idx, col_idx] <- 1
         }
       }
-    } else if (type == "observed") {
+    } else if (presence == "observed") {
       # Keep rows with at least one non-NA substantive variable
       has_data <- apply(data[substantive_vars], 1, function(x) any(!is.na(x)))
       filtered_data <- data[has_data, ]
@@ -241,7 +244,7 @@ plot_periods <- function(
           presence_matrix[row_idx, col_idx] <- 1
         }
       }
-    } else if (type == "complete") {
+    } else if (presence == "complete") {
       # Keep rows with no NAs in substantive variables
       complete_cases <- complete.cases(data[substantive_vars])
       filtered_data <- data[complete_cases, ]
@@ -334,8 +337,8 @@ plot_periods <- function(
     ))
   }
 
-  # Calculate coverage for the specified type
-  coverage_result <- calculate_coverage(type)
+  # Calculate coverage for the specified presence type
+  coverage_result <- calculate_coverage(presence)
 
   # Get overall information
   unique_groups <- unique(as.character(data[[group]]))
@@ -358,7 +361,7 @@ plot_periods <- function(
   hist_data <- coverage_result$histogram_data
   summary_stats <- coverage_result$summary_stats
 
-  # Create x-axis label (without type in parentheses)
+  # Create x-axis label (without presence in parentheses)
   x_label <- paste("Time coverage by", group)
 
   # Get the actual data range (time coverage values)
@@ -486,7 +489,7 @@ plot_periods <- function(
     summary = list(
       n_entities = length(unique_groups),
       n_time_periods = length(unique_times),
-      type = type,
+      presence = presence,
       group_var = group,
       time_var = time
     ),
@@ -498,7 +501,7 @@ plot_periods <- function(
     metadata = list(
       group_var = group,
       time_var = time,
-      type = type,
+      presence = presence,
       line_color = line_color,
       fill_color = fill_color,
       detailed = detailed

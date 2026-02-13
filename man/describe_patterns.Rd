@@ -8,7 +8,7 @@ describe_patterns(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   format = "wide",
   detailed = TRUE,
   digits = 3
@@ -23,7 +23,8 @@ Not required if data has panel attributes.}
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
 
-\item{type}{A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".}
+\item{presence}{A character string specifying how to define entity presence: "nominal", "observed", or "complete".
+Default = "observed".}
 
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
@@ -39,7 +40,7 @@ A data.frame with participation patterns.
 This function describes participation patterns of entities in panel data over time.
 }
 \details{
-\strong{Type} parameter definitions:
+\strong{Presence} parameter definitions:
 \describe{
 \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -75,14 +76,14 @@ The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_time}}{The time variable name}
-\item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
+\item{\code{panel_presence}}{Presence type ("nominal", "observed", or "complete")}
 \item{\code{panel_format}}{Output format ("wide" or "long")}
 \item{\code{panel_detailed}}{Logical indicating detailed output}
 \item{\code{panel_digits}}{Number of decimal places used for rounding}
 \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 \item{\code{panel_n_periods}}{Total number of unique time periods}
 \item{\code{panel_n_patterns}}{Number of distinct participation patterns}
-\item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified type}
+\item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified presence type}
 \item{\code{panel_pattern_groups}}{List of entities belonging to each participation pattern}
 }
 }
@@ -97,8 +98,8 @@ panel_data <- set_panel(production, group = "firm", time = "year")
 describe_patterns(panel_data)
 
 # Use different presence types
-describe_patterns(production, group = "firm", time = "year", type = "nominal")
-describe_patterns(production, group = "firm", time = "year", type = "complete")
+describe_patterns(production, group = "firm", time = "year", presence = "nominal")
+describe_patterns(production, group = "firm", time = "year", presence = "complete")
 
 # Simplified version
 describe_patterns(production, group = "firm", time = "year", detailed = FALSE)

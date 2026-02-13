@@ -8,7 +8,7 @@ describe_balance(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   digits = 3
 )
 }
@@ -21,7 +21,8 @@ Not required if data has panel attributes.}
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
 
-\item{type}{A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".}
+\item{presence}{A character string specifying how to define entity presence: "nominal", "observed", or "complete".
+Default = "observed".}
 
 \item{digits}{An integer specifying the number of decimal places for rounding mean values.
 Default = 3.}
@@ -34,24 +35,24 @@ A data.frame with 5 columns and 3 rows containing panel data summary statistics.
 \item{\code{dimension}}{Character vector describing the type of panel element.
 Contains three values: "rows", "entities", and "periods".}
 \item{\code{n}}{Numeric vector with total counts for each panel element.
-For "rows": number of rows meeting the type criteria.
-For "entities": number of entities where ALL time periods have presence according to the type criteria.
-For "periods": number of time periods where ALL entities have presence according to the type criteria.}
+For "rows": number of rows meeting the presence criteria.
+For "entities": number of entities where ALL time periods have presence according to the presence criteria.
+For "periods": number of time periods where ALL entities have presence according to the presence criteria.}
 \item{\code{mean}}{Numeric vector with mean counts.
 For "rows": not applicable (NA).
-For "entities": mean number of time periods per entity meeting the type criteria.
-For "periods": mean number of entities per period meeting the type criteria.}
+For "entities": mean number of time periods per entity meeting the presence criteria.
+For "periods": mean number of entities per period meeting the presence criteria.}
 \item{\code{min}}{Numeric vector with minimum counts.
 For "rows": not applicable (NA).
-For "entities": minimum number of time periods per entity meeting the type criteria.
-For "periods": minimum number of entities per period meeting the type criteria.}
+For "entities": minimum number of time periods per entity meeting the presence criteria.
+For "periods": minimum number of entities per period meeting the presence criteria.}
 \item{\code{max}}{Numeric vector with maximum counts.
 For "rows": not applicable (NA).
-For "entities": maximum number of time periods per entity meeting the type criteria.
-For "periods": maximum number of entities per period meeting the type criteria.}
+For "entities": maximum number of time periods per entity meeting the presence criteria.
+For "periods": maximum number of entities per period meeting the presence criteria.}
 }
 
-\strong{Type parameter definitions:}
+\strong{Presence parameter definitions:}
 \describe{
 \item{\code{"nominal"}}{Entity/time is present if it has a row in the data (even with only panel ID variables)}
 \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -62,14 +63,14 @@ The data.frame has additional attributes:
 \describe{
 \item{\code{panel_group}}{The grouping variable name}
 \item{\code{panel_time}}{The time variable name}
-\item{\code{panel_type}}{Presence type ("nominal", "observed", or "complete")}
+\item{\code{panel_presence}}{Presence type ("nominal", "observed", or "complete")}
 \item{\code{panel_digits}}{Number of decimal places used for rounding}
 \item{\code{panel_n_entities}}{Total number of unique entities/groups}
 \item{\code{panel_n_periods}}{Total number of unique time periods}
 \item{\code{panel_total_rows}}{Total number of rows in the data}
 \item{\code{panel_entities}}{Vector of unique entity IDs}
 \item{\code{panel_periods}}{Vector of unique time period IDs}
-\item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified type}
+\item{\code{panel_matrix}}{Binary matrix (entities × periods) showing presence (1) or absence (0) according to the specified presence type}
 }
 }
 \description{
@@ -91,8 +92,8 @@ panel_data <- set_panel(production, group = "firm", time = "year")
 describe_balance(panel_data)
 
 # Use different presence types
-describe_balance(production, group = "firm", time = "year", type = "nominal")
-describe_balance(production, group = "firm", time = "year", type = "complete")
+describe_balance(production, group = "firm", time = "year", presence = "nominal")
+describe_balance(production, group = "firm", time = "year", presence = "complete")
 
 # With custom rounding
 describe_balance(production, group = "firm", time = "year", digits = 4)

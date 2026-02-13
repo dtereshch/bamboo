@@ -8,7 +8,8 @@
 #'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
 #'        Not required if data has panel attributes.
-#' @param type A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".
+#' @param presence A character string specifying how to define entity presence: "nominal", "observed", or "complete".
+#'        Default = "observed".
 #' @param max_patterns An integer specifying the maximum number of patterns to display.
 #'        Default = 10.
 #' @param colors A character vector of two colors for present and missing observations.
@@ -17,7 +18,7 @@
 #' @return Invisibly returns a list with summary statistics. Creates a plot showing participation patterns.
 #'
 #' @details
-#' \strong{Type} parameter definitions:
+#' \strong{Presence} parameter definitions:
 #' \describe{
 #'   \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 #'   \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -26,7 +27,7 @@
 #'
 #' The heatmap shows participation patterns where:
 #' \itemize{
-#'   \item \strong{Present}: Entity participated in the time period (based on the specified type)
+#'   \item \strong{Present}: Entity participated in the time period (based on the specified presence type)
 #'   \item \strong{Missing}: Entity did not participate in the time period
 #' }
 #'
@@ -38,7 +39,7 @@
 #'     \itemize{
 #'       \item \code{n_patterns_displayed}: Number of patterns displayed in the plot
 #'       \item \code{total_patterns}: Total number of patterns found
-#'       \item \code{type}: Presence type used for analysis
+#'       \item \code{presence}: Presence type used for analysis
 #'       \item \code{max_patterns}: Maximum number of patterns to display
 #'     }
 #'   }
@@ -54,7 +55,7 @@
 #'     \itemize{
 #'       \item \code{group_var}: The group variable name
 #'       \item \code{time_var}: The time variable name
-#'       \item \code{type}: The presence type used for analysis
+#'       \item \code{presence}: The presence type used for analysis
 #'       \item \code{max_patterns}: Maximum number of patterns to display
 #'       \item \code{colors}: Colors used for plotting
 #'     }
@@ -75,8 +76,8 @@
 #' plot_patterns(panel_data)
 #'
 #' # Use different presence types
-#' plot_patterns(production, group = "firm", time = "year", type = "nominal")
-#' plot_patterns(production, group = "firm", time = "year", type = "complete")
+#' plot_patterns(production, group = "firm", time = "year", presence = "nominal")
+#' plot_patterns(production, group = "firm", time = "year", presence = "complete")
 #'
 #' # Show only top 5 patterns
 #' plot_patterns(production, group = "firm", time = "year", max_patterns = 5)
@@ -92,7 +93,7 @@ plot_patterns <- function(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   max_patterns = 10,
   colors = c("#0072B2", "#D55E00")
 ) {
@@ -126,12 +127,15 @@ plot_patterns <- function(
     stop("'time' must be a single character string, not ", class(time)[1])
   }
 
-  if (!is.character(type) || length(type) != 1) {
-    stop("'type' must be a single character string, not ", class(type)[1])
+  if (!is.character(presence) || length(presence) != 1) {
+    stop(
+      "'presence' must be a single character string, not ",
+      class(presence)[1]
+    )
   }
 
-  if (!type %in% c("observed", "nominal", "complete")) {
-    stop('type must be one of: "observed", "nominal", "complete"')
+  if (!presence %in% c("observed", "nominal", "complete")) {
+    stop('presence must be one of: "observed", "nominal", "complete"')
   }
 
   if (!group %in% names(data)) {
@@ -190,15 +194,15 @@ plot_patterns <- function(
   group_vec <- as.character(data[[group]])
   time_vec <- as.character(data[[time]])
 
-  # Fill the binary matrix based on type
-  if (type == "nominal") {
+  # Fill the binary matrix based on presence
+  if (presence == "nominal") {
     # For nominal type, mark 1 for all rows
     for (i in seq_along(group_vec)) {
       row_group <- as.character(group_vec[i])
       row_time <- as.character(time_vec[i])
       participation_binary[row_group, row_time] <- 1
     }
-  } else if (type == "observed") {
+  } else if (presence == "observed") {
     # For observed type, mark 1 for rows with at least one non-NA
     has_at_least_one_non_na <- apply(
       data[data_cols],
@@ -215,7 +219,7 @@ plot_patterns <- function(
         participation_binary[row_group, row_time] <- 1
       }
     }
-  } else if (type == "complete") {
+  } else if (presence == "complete") {
     # For complete type, mark 1 for complete rows only
     complete_rows <- complete.cases(data[data_cols])
 
@@ -365,7 +369,7 @@ plot_patterns <- function(
     summary = list(
       n_patterns_displayed = n_patterns_to_display,
       total_patterns = length(pattern_counts),
-      type = type,
+      presence = presence,
       max_patterns = max_patterns
     ),
     patterns = list(
@@ -379,7 +383,7 @@ plot_patterns <- function(
     metadata = list(
       group_var = group,
       time_var = time,
-      type = type,
+      presence = presence,
       max_patterns = max_patterns,
       colors = colors
     )

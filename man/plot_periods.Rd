@@ -8,7 +8,7 @@ plot_periods(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   detailed = TRUE,
   colors = c("black", "#0072B2")
 )
@@ -22,7 +22,7 @@ Not required if data has panel attributes.}
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
 
-\item{type}{A character string specifying how to define entity presence: "observed", "nominal", or "complete".
+\item{presence}{A character string specifying how to define entity presence: "observed", "nominal", or "complete".
 Default = "observed".}
 
 \item{detailed}{A logical flag indicating whether to display detailed summary statistics.
@@ -32,7 +32,7 @@ Default = TRUE.}
 Default = c("black", "#0072B2").}
 }
 \value{
-Invisibly returns a list with summary statistics for the specified type.
+Invisibly returns a list with summary statistics for the specified presence type.
 Creates a plot showing time coverage distribution.
 }
 \description{
@@ -40,7 +40,7 @@ This function creates a histogram showing the distribution of time periods
 covered by each entity in panel data, based on the specified presence definition.
 }
 \details{
-\strong{Type} parameter definitions:
+\strong{Presence} parameter definitions:
 \describe{
 \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -56,7 +56,7 @@ The returned list contains the following components:
 \itemize{
 \item \code{n_entities}: Total number of unique entities
 \item \code{n_time_periods}: Total number of unique time periods
-\item \code{type}: Presence type used for analysis
+\item \code{presence}: Presence type used for analysis
 \item \code{group_var}: The group variable name
 \item \code{time_var}: The time variable name
 }
@@ -72,7 +72,7 @@ The returned list contains the following components:
 \itemize{
 \item \code{group_var}: The group variable name
 \item \code{time_var}: The time variable name
-\item \code{type}: The presence type used for analysis
+\item \code{presence}: The presence type used for analysis
 \item \code{line_color}: Line color used for plotting
 \item \code{fill_color}: Fill color used for plotting
 \item \code{detailed}: Whether detailed statistics were shown
@@ -91,8 +91,8 @@ panel_data <- set_panel(production, group = "firm", time = "year")
 plot_periods(panel_data)
 
 # Use different presence types
-plot_periods(production, group = "firm", time = "year", type = "nominal")
-plot_periods(production, group = "firm", time = "year", type = "complete")
+plot_periods(production, group = "firm", time = "year", presence = "nominal")
+plot_periods(production, group = "firm", time = "year", presence = "complete")
 
 # Custom colors - black line with gray fill
 plot_periods(production, group = "firm", time = "year", colors = c("black", "gray"))

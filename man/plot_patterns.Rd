@@ -8,7 +8,7 @@ plot_patterns(
   data,
   group = NULL,
   time = NULL,
-  type = "observed",
+  presence = "observed",
   max_patterns = 10,
   colors = c("#0072B2", "#D55E00")
 )
@@ -22,7 +22,8 @@ Not required if data has panel attributes.}
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
 
-\item{type}{A character string specifying how to define entity presence: "nominal", "observed", or "complete". Default = "observed".}
+\item{presence}{A character string specifying how to define entity presence: "nominal", "observed", or "complete".
+Default = "observed".}
 
 \item{max_patterns}{An integer specifying the maximum number of patterns to display.
 Default = 10.}
@@ -38,7 +39,7 @@ This function creates a heatmap visualization of participation patterns
 of entities in panel data over time.
 }
 \details{
-\strong{Type} parameter definitions:
+\strong{Presence} parameter definitions:
 \describe{
 \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
 \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
@@ -47,7 +48,7 @@ of entities in panel data over time.
 
 The heatmap shows participation patterns where:
 \itemize{
-\item \strong{Present}: Entity participated in the time period (based on the specified type)
+\item \strong{Present}: Entity participated in the time period (based on the specified presence type)
 \item \strong{Missing}: Entity did not participate in the time period
 }
 
@@ -59,7 +60,7 @@ The returned list contains the following components:
 \itemize{
 \item \code{n_patterns_displayed}: Number of patterns displayed in the plot
 \item \code{total_patterns}: Total number of patterns found
-\item \code{type}: Presence type used for analysis
+\item \code{presence}: Presence type used for analysis
 \item \code{max_patterns}: Maximum number of patterns to display
 }
 }
@@ -75,7 +76,7 @@ The returned list contains the following components:
 \itemize{
 \item \code{group_var}: The group variable name
 \item \code{time_var}: The time variable name
-\item \code{type}: The presence type used for analysis
+\item \code{presence}: The presence type used for analysis
 \item \code{max_patterns}: Maximum number of patterns to display
 \item \code{colors}: Colors used for plotting
 }
@@ -93,8 +94,8 @@ panel_data <- set_panel(production, group = "firm", time = "year")
 plot_patterns(panel_data)
 
 # Use different presence types
-plot_patterns(production, group = "firm", time = "year", type = "nominal")
-plot_patterns(production, group = "firm", time = "year", type = "complete")
+plot_patterns(production, group = "firm", time = "year", presence = "nominal")
+plot_patterns(production, group = "firm", time = "year", presence = "complete")
 
 # Show only top 5 patterns
 plot_patterns(production, group = "firm", time = "year", max_patterns = 5)
