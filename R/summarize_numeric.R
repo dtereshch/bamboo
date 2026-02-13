@@ -8,7 +8,7 @@
 #'        If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the grouping variable name.
 #'        If not specified, overall statistics will be returned.
-#' @param detailed A logical flag indicating whether to return additional statistics (25th and 75th percentiles).
+#' @param detailed A logical flag indicating whether to return additional statistics (25th, 50th, and 75th percentiles).
 #'        Default = FALSE.
 #' @param digits An integer specifying the number of decimal places for rounding statistics.
 #'        Default = 3.
@@ -22,7 +22,6 @@
 #'   \item{\code{group}}{The grouping variable (present only when `group` is specified)}
 #'   \item{\code{count}}{Number of non-NA observations}
 #'   \item{\code{mean}}{Arithmetic mean}
-#'   \item{\code{median}}{Median value}
 #'   \item{\code{std}}{Standard deviation}
 #'   \item{\code{min}}{Minimum value}
 #'   \item{\code{max}}{Maximum value}
@@ -31,6 +30,7 @@
 #' When `detailed = TRUE`, additional columns are included:
 #' \describe{
 #'   \item{\code{p25}}{25th percentile (first quartile)}
+#'   \item{\code{p50}}{50th percentile (median)}
 #'   \item{\code{p75}}{75th percentile (third quartile)}
 #' }
 #'
@@ -214,7 +214,7 @@ summarize_numeric <- function(
             std = NA_real_,
             min = NA_real_,
             p25 = NA_real_,
-            median = NA_real_,
+            p50 = NA_real_,
             p75 = NA_real_,
             max = NA_real_
           )
@@ -222,7 +222,6 @@ summarize_numeric <- function(
           stats_row <- data.frame(
             count = 0,
             mean = NA_real_,
-            median = NA_real_,
             std = NA_real_,
             min = NA_real_,
             max = NA_real_
@@ -236,7 +235,7 @@ summarize_numeric <- function(
             std = stats::sd(x, na.rm = TRUE),
             min = min(x, na.rm = TRUE),
             p25 = stats::quantile(x, probs = 0.25, na.rm = TRUE, names = FALSE),
-            median = median(x, na.rm = TRUE),
+            p50 = stats::quantile(x, probs = 0.50, na.rm = TRUE, names = FALSE),
             p75 = stats::quantile(x, probs = 0.75, na.rm = TRUE, names = FALSE),
             max = max(x, na.rm = TRUE)
           )
@@ -244,7 +243,6 @@ summarize_numeric <- function(
           stats_row <- data.frame(
             count = count_non_na(x),
             mean = mean(x, na.rm = TRUE),
-            median = median(x, na.rm = TRUE),
             std = stats::sd(x, na.rm = TRUE),
             min = min(x, na.rm = TRUE),
             max = max(x, na.rm = TRUE)
@@ -290,7 +288,7 @@ summarize_numeric <- function(
               std = NA_real_,
               min = NA_real_,
               p25 = NA_real_,
-              median = NA_real_,
+              p50 = NA_real_,
               p75 = NA_real_,
               max = NA_real_
             )
@@ -298,7 +296,6 @@ summarize_numeric <- function(
             stats_row <- data.frame(
               count = 0,
               mean = NA_real_,
-              median = NA_real_,
               std = NA_real_,
               min = NA_real_,
               max = NA_real_
@@ -317,7 +314,12 @@ summarize_numeric <- function(
                 na.rm = TRUE,
                 names = FALSE
               ),
-              median = median(x, na.rm = TRUE),
+              p50 = stats::quantile(
+                x,
+                probs = 0.50,
+                na.rm = TRUE,
+                names = FALSE
+              ),
               p75 = stats::quantile(
                 x,
                 probs = 0.75,
@@ -330,7 +332,6 @@ summarize_numeric <- function(
             stats_row <- data.frame(
               count = count_non_na(x),
               mean = mean(x, na.rm = TRUE),
-              median = median(x, na.rm = TRUE),
               std = stats::sd(x, na.rm = TRUE),
               min = min(x, na.rm = TRUE),
               max = max(x, na.rm = TRUE)

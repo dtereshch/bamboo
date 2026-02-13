@@ -21,7 +21,7 @@ If not specified, all numeric variables in the data.frame will be used.}
 \item{group}{A character string specifying the grouping variable name.
 If not specified, overall statistics will be returned.}
 
-\item{detailed}{A logical flag indicating whether to return additional statistics (25th and 75th percentiles).
+\item{detailed}{A logical flag indicating whether to return additional statistics (25th, 50th, and 75th percentiles).
 Default = FALSE.}
 
 \item{digits}{An integer specifying the number of decimal places for rounding statistics.
@@ -41,7 +41,6 @@ The returned data.frame contains the following columns:
 \item{\code{group}}{The grouping variable (present only when \code{group} is specified)}
 \item{\code{count}}{Number of non-NA observations}
 \item{\code{mean}}{Arithmetic mean}
-\item{\code{median}}{Median value}
 \item{\code{std}}{Standard deviation}
 \item{\code{min}}{Minimum value}
 \item{\code{max}}{Maximum value}
@@ -50,6 +49,7 @@ The returned data.frame contains the following columns:
 When \code{detailed = TRUE}, additional columns are included:
 \describe{
 \item{\code{p25}}{25th percentile (first quartile)}
+\item{\code{p50}}{50th percentile (median)}
 \item{\code{p75}}{75th percentile (third quartile)}
 }
 
