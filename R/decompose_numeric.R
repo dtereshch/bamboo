@@ -1,20 +1,21 @@
-#' Panel Data Summary Statistics
+#' Panel Data Numeric Variable Decomposition
 #'
-#' This function calculates summary statistics for panel data and decomposes
-#' variance into between and within components.
+#' This function decomposes variance of numeric panel data variables into
+#' between and within components.
 #'
 #' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param selection A character vector specifying which numeric variables to analyze.
 #'        If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #'        Not required if data has panel attributes.
-#' @param format A character string specifying the output format: "long" or "wide". Default = "long".
+#' @param format A character string specifying the output format: "long" or "wide".
+#'        Default = "long".
 #' @param detailed A logical flag indicating whether to return detailed Stata-like output.
 #'        Default = TRUE.
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'        Default = 3.
 #'
-#' @return A data.frame with panel data summary statistics. Format depends on
+#' @return A data.frame with panel data decomposition statistics. Format depends on
 #'         the combination of `format` and `detailed` arguments.
 #'
 #' @details
@@ -23,7 +24,7 @@
 #' When `format = "long"` and `detailed = TRUE` (default), returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
-#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
 #'   \item{\code{mean}}{Mean value (only for "overall" row)}
 #'   \item{\code{sd}}{Standard deviation}
 #'   \item{\code{min}}{Minimum value}
@@ -34,7 +35,7 @@
 #' When `format = "long"` and `detailed = FALSE`, returns a data.frame with:
 #' \describe{
 #'   \item{\code{variable}}{The name of the variable}
-#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
 #'   \item{\code{mean}}{Mean value}
 #'   \item{\code{sd}}{Standard deviation}
 #' }
@@ -79,41 +80,41 @@
 #' For Stata users: This corresponds to the `xtsum` command.
 #'
 #' @seealso
-#' [summarize_data()], [plot_heterogeneity()]
+#' [summarize_data()], [plot_heterogeneity()], [decompose_factor()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Basic usage with statistics for all numeric variables
-#' summarize_panel(production, group = "firm")
+#' decompose_numeric(production, group = "firm")
 #'
 #' # With panel attributes
 #' panel_data <- set_panel(production, group = "firm", time = "year")
-#' summarize_panel(panel_data)
+#' decompose_numeric(panel_data)
 #'
 #' # Simplified output
-#' summarize_panel(production, group = "firm", detailed = FALSE)
+#' decompose_numeric(production, group = "firm", detailed = FALSE)
 #'
 #' # Wide format with detailed statistics
-#' summarize_panel(production, group = "firm", format = "wide")
+#' decompose_numeric(production, group = "firm", format = "wide")
 #'
 #' # Wide format with simplified statistics
-#' summarize_panel(production, group = "firm", format = "wide", detailed = FALSE)
+#' decompose_numeric(production, group = "firm", format = "wide", detailed = FALSE)
 #'
 #' # Show statistics for a single variable
-#' summarize_panel(production, selection = "sales", group = "firm")
+#' decompose_numeric(production, selection = "sales", group = "firm")
 #'
 #' # Show statistics for multiple variables
-#' summarize_panel(production, selection = c("capital", "labor"), group = "firm")
+#' decompose_numeric(production, selection = c("capital", "labor"), group = "firm")
 #'
 #' # Show statistics with two digits rounding
-#' summarize_panel(production, group = "firm", digits = 2)
+#' decompose_numeric(production, group = "firm", digits = 2)
 #'
 #' # Effectively no rounding (use large digit value)
-#' summarize_panel(production, group = "firm", digits = 999999)
+#' decompose_numeric(production, group = "firm", digits = 999999)
 #'
 #' @export
-summarize_panel <- function(
+decompose_numeric <- function(
   data,
   selection = NULL,
   group = NULL,
@@ -260,7 +261,7 @@ summarize_panel <- function(
   }
 
   # Helper function to calculate panel statistics for one variable
-  summarize_panel_1 <- function(
+  decompose_numeric_1 <- function(
     data,
     varname,
     group,
@@ -276,7 +277,7 @@ summarize_panel <- function(
       if (format_output == "long" && detailed_output) {
         return(data.frame(
           variable = character(),
-          decomposition = character(),
+          dimension = character(),
           mean = numeric(),
           sd = numeric(),
           min = numeric(),
@@ -287,7 +288,7 @@ summarize_panel <- function(
       } else if (format_output == "long" && !detailed_output) {
         return(data.frame(
           variable = character(),
-          decomposition = character(),
+          dimension = character(),
           mean = numeric(),
           sd = numeric(),
           stringsAsFactors = FALSE
@@ -375,7 +376,7 @@ summarize_panel <- function(
         # Long format with detailed statistics
         result <- data.frame(
           variable = c(varname, varname, varname),
-          decomposition = c("overall", "between", "within"),
+          dimension = c("overall", "between", "within"),
           mean = c(overall_mean, NA, NA),
           sd = c(overall_sd, between_sd, within_sd),
           min = c(min_val, between_min, within_min),
@@ -387,7 +388,7 @@ summarize_panel <- function(
         # Long format with simplified statistics
         result <- data.frame(
           variable = c(varname, varname, varname),
-          decomposition = c("overall", "between", "within"),
+          dimension = c("overall", "between", "within"),
           mean = c(overall_mean, NA, NA),
           sd = c(overall_sd, between_sd, within_sd),
           stringsAsFactors = FALSE
@@ -432,7 +433,7 @@ summarize_panel <- function(
 
   # Calculate statistics for each variable
   results <- lapply(selection, function(varname) {
-    summarize_panel_1(data, varname, group, format, detailed, digits)
+    decompose_numeric_1(data, varname, group, format, detailed, digits)
   })
 
   # Combine all results

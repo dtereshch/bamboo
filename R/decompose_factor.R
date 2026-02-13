@@ -1,4 +1,4 @@
-#' Categorical Variable Summary for Panel Data
+#' Panel Data Factor Variable Decomposition
 #'
 #' This function performs one-way tabulations and decomposes counts into
 #' between and within components for categorical (factor) variables in panel data.
@@ -8,11 +8,12 @@
 #'        If not specified, all factor variables in the data.frame will be used.
 #' @param group A character string specifying the name of the entity/group variable.
 #'        Not required if data has panel attributes.
-#' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
+#' @param format A character string specifying the output format: "wide" or "long".
+#'        Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round shares.
 #'        Default = 3.
 #'
-#' @return A data.frame with categorical panel data summary statistics. Format depends on
+#' @return A data.frame with categorical panel data decomposition statistics. Format depends on
 #'         the `format` argument.
 #'
 #' @details
@@ -33,8 +34,8 @@
 #' \describe{
 #'   \item{\code{variable}}{The name of the analyzed variable}
 #'   \item{\code{category}}{The category level of the variable}
-#'   \item{\code{decomposition}}{Type of decomposition: "overall", "between", or "within"}
-#'   \item{\code{n}}{Frequency count}
+#'   \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
+#'   \item{\code{n}}{Frequency count (NA for within dimension)}
 #'   \item{\code{share}}{Share proportion (0 to 1)}
 #' }
 #'
@@ -56,35 +57,35 @@
 #' For Stata users: This corresponds to the `xttab` command.
 #'
 #' @seealso
-#' [summarize_panel()], [summarize_transition()], [summarize_data()]
+#' [decompose_numeric()], [summarize_transition()], [summarize_data()]
 #'
 #' @examples
 #' data(production)
 #'
 #' # Basic usage with statistics for all factor variables (wide format)
-#' summarize_categorical(production, group = "firm")
+#' decompose_factor(production, group = "firm")
 #'
 #' # Long format output
-#' summarize_categorical(production, group = "firm", format = "long")
+#' decompose_factor(production, group = "firm", format = "long")
 #'
 #' # With panel attributes
 #' panel_data <- set_panel(production, group = "firm", time = "year")
-#' summarize_categorical(panel_data)
+#' decompose_factor(panel_data)
 #'
 #' # Show statistics for a single categorical variable
-#' summarize_categorical(production, selection = "industry", group = "firm")
+#' decompose_factor(production, selection = "industry", group = "firm")
 #'
 #' # Show statistics for multiple categorical variables
-#' summarize_categorical(production, selection = c("industry", "year"), group = "firm")
+#' decompose_factor(production, selection = c("industry", "year"), group = "firm")
 #'
 #' # Show statistics with two digits rounding
-#' summarize_categorical(production, group = "firm", digits = 2)
+#' decompose_factor(production, group = "firm", digits = 2)
 #'
 #' # Effectively no rounding (use large digit value)
-#' summarize_categorical(production, group = "firm", digits = 999999)
+#' decompose_factor(production, group = "firm", digits = 999999)
 #'
 #' @export
-summarize_categorical <- function(
+decompose_factor <- function(
   data,
   selection = NULL,
   group = NULL,
@@ -225,13 +226,7 @@ summarize_categorical <- function(
   n_groups <- length(unique(data[[group]]))
 
   # Helper function to calculate categorical statistics for one variable
-  summarize_categorical_1 <- function(
-    df,
-    varname,
-    grp,
-    format_output,
-    digits_val
-  ) {
+  decompose_factor_1 <- function(df, varname, grp, format_output, digits_val) {
     # Remove rows with NA in the variable or group
     complete_cases <- complete.cases(df[[varname]], df[[grp]])
     df_clean <- df[complete_cases, , drop = FALSE]
@@ -253,7 +248,7 @@ summarize_categorical <- function(
         return(data.frame(
           variable = character(),
           category = character(),
-          decomposition = character(),
+          dimension = character(),
           n = integer(),
           share = numeric(),
           stringsAsFactors = FALSE
@@ -334,7 +329,7 @@ summarize_categorical <- function(
       overall_rows <- data.frame(
         variable = rep(varname, length(categories)),
         category = categories,
-        decomposition = rep("overall", length(categories)),
+        dimension = rep("overall", length(categories)),
         n = as.integer(overall_counts),
         share = share_overall,
         stringsAsFactors = FALSE
@@ -344,7 +339,7 @@ summarize_categorical <- function(
       between_rows <- data.frame(
         variable = rep(varname, length(categories)),
         category = categories,
-        decomposition = rep("between", length(categories)),
+        dimension = rep("between", length(categories)),
         n = as.integer(between_counts),
         share = share_between,
         stringsAsFactors = FALSE
@@ -354,7 +349,7 @@ summarize_categorical <- function(
       within_rows <- data.frame(
         variable = rep(varname, length(categories)),
         category = categories,
-        decomposition = rep("within", length(categories)),
+        dimension = rep("within", length(categories)),
         n = NA_integer_, # No direct n for within
         share = within_shares,
         stringsAsFactors = FALSE
@@ -369,7 +364,7 @@ summarize_categorical <- function(
 
   # Calculate statistics for each variable
   results <- lapply(selection, function(varname) {
-    summarize_categorical_1(data, varname, group, format, digits)
+    decompose_factor_1(data, varname, group, format, digits)
   })
 
   # Combine all results

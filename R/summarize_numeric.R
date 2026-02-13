@@ -1,4 +1,4 @@
-#' Data Summary Statistics
+#' Summary Statistics for Numeric Variables
 #'
 #' This function calculates summary statistics for numeric variables,
 #' either overall or grouped by a single grouping variable.
@@ -8,8 +8,8 @@
 #'        If not specified, all numeric variables in the data.frame will be used.
 #' @param group A character string specifying the grouping variable name.
 #'        If not specified, overall statistics will be returned.
-#' @param detailed A logical flag indicating whether to return additional statistics in
-#'        the style of pandas describe method. Default = FALSE.
+#' @param detailed A logical flag indicating whether to return additional statistics (25th and 75th percentiles).
+#'        Default = FALSE.
 #' @param digits An integer specifying the number of decimal places for rounding statistics.
 #'        Default = 3.
 #'
@@ -54,28 +54,28 @@
 #' data(production)
 #'
 #' # Basic usage with statistics for all numeric variables
-#' summarize_data(production)
+#' summarize_numeric(production)
 #'
 #' # Detailed output
-#' summarize_data(production, detailed = TRUE)
+#' summarize_numeric(production, detailed = TRUE)
 #'
 #' # Show statistics for a single variable
-#' summarize_data(production, selection = "sales")
+#' summarize_numeric(production, selection = "sales")
 #'
 #' # Show statistics for multiple variables
-#' summarize_data(production, selection = c("capital", "labor"))
+#' summarize_numeric(production, selection = c("capital", "labor"))
 #'
 #' # Show grouped statistics
-#' summarize_data(production, group = "year")
+#' summarize_numeric(production, group = "year")
 #'
 #' # Show statistics with two digits rounding
-#' summarize_data(production, digits = 2)
+#' summarize_numeric(production, digits = 2)
 #'
 #' # Effectively no rounding (use large digit value)
-#' summarize_data(production, digits = 999999)
+#' summarize_numeric(production, digits = 999999)
 #'
 #' @export
-summarize_data <- function(
+summarize_numeric <- function(
   data,
   selection = NULL,
   group = NULL,
