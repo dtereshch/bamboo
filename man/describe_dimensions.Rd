@@ -43,13 +43,33 @@ This function provides panel data structure information across three presence
 definitions:
 \itemize{
 \item{\bold{nominal:}}{ Entity/time is present if it has a row in the data (even with only panel ID variables)}
-\item{\bold{observed:}}{ Entity is present if it has at least one non-NA substantive variable}
-\item{\bold{complete:}}{ Entity/time is present only if it has no NA values in all substantive variables}
+\item{\bold{observed:}}{
+\itemize{
+\item{For rows: Row has at least one non-NA substantive variable}
+\item{For entities: Entity has at least one non-NA substantive variable at \bold{each} time period}
+\item{For periods: Period has at least one non-NA substantive variable for \bold{all} entities}
+}
+}
+\item{\bold{complete:}}{
+\itemize{
+\item{For rows: Row has no NA values in all substantive variables}
+\item{For entities: Entity has no NA values in all substantive variables at \bold{each} time period}
+\item{For periods: Period has no NA values in all substantive variables for \bold{all} entities}
+}
+}
 }
 
-For "entities", counts represent the number of unique entities present in the data.
-For "periods", counts represent the number of unique time periods present in the data.
-For "rows", counts represent the total number of rows meeting each presence criterion.
+Note the different interpretations for entities and periods:
+\itemize{
+\item An entity is considered "observed" only if it has observed data (at least one non-NA)
+in \bold{every} time period where it exists.
+\item An entity is considered "complete" only if it has complete data (no NAs)
+in \bold{every} time period where it exists.
+\item A period is considered "observed" only if \bold{all} entities have at least one
+non-NA substantive variable in that period.
+\item A period is considered "complete" only if \bold{all} entities have no NA values
+in that period.
+}
 
 When provided with a data.frame that has panel attributes (created by set_panel()),
 the function automatically extracts group and time variable names from the attributes.

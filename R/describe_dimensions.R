@@ -32,13 +32,33 @@
 #' definitions:
 #' \itemize{
 #'   \item{\bold{nominal:}}{ Entity/time is present if it has a row in the data (even with only panel ID variables)}
-#'   \item{\bold{observed:}}{ Entity is present if it has at least one non-NA substantive variable}
-#'   \item{\bold{complete:}}{ Entity/time is present only if it has no NA values in all substantive variables}
+#'   \item{\bold{observed:}}{
+#'     \itemize{
+#'       \item{For rows: Row has at least one non-NA substantive variable}
+#'       \item{For entities: Entity has at least one non-NA substantive variable at \bold{each} time period}
+#'       \item{For periods: Period has at least one non-NA substantive variable for \bold{all} entities}
+#'     }
+#'   }
+#'   \item{\bold{complete:}}{
+#'     \itemize{
+#'       \item{For rows: Row has no NA values in all substantive variables}
+#'       \item{For entities: Entity has no NA values in all substantive variables at \bold{each} time period}
+#'       \item{For periods: Period has no NA values in all substantive variables for \bold{all} entities}
+#'     }
+#'   }
 #' }
 #'
-#' For "entities", counts represent the number of unique entities present in the data.
-#' For "periods", counts represent the number of unique time periods present in the data.
-#' For "rows", counts represent the total number of rows meeting each presence criterion.
+#' Note the different interpretations for entities and periods:
+#' \itemize{
+#'   \item An entity is considered "observed" only if it has observed data (at least one non-NA)
+#'         in \bold{every} time period where it exists.
+#'   \item An entity is considered "complete" only if it has complete data (no NAs)
+#'         in \bold{every} time period where it exists.
+#'   \item A period is considered "observed" only if \bold{all} entities have at least one
+#'         non-NA substantive variable in that period.
+#'   \item A period is considered "complete" only if \bold{all} entities have no NA values
+#'         in that period.
+#' }
 #'
 #' When provided with a data.frame that has panel attributes (created by set_panel()),
 #' the function automatically extracts group and time variable names from the attributes.
@@ -121,88 +141,137 @@ describe_dimensions <- function(data, group = NULL, time = NULL) {
     period_values <- sort(period_values)
   }
 
+  # Convert to character for consistent handling
+  group_vec <- as.character(data[[group]])
+  time_vec <- as.character(data[[time]])
+
+  # Create presence matrices for different criteria
+  # Matrix dimensions: entities × periods
+  observed_matrix <- matrix(
+    FALSE,
+    nrow = length(entity_values),
+    ncol = length(period_values),
+    dimnames = list(entity_values, period_values)
+  )
+
+  complete_matrix <- matrix(
+    FALSE,
+    nrow = length(entity_values),
+    ncol = length(period_values),
+    dimnames = list(entity_values, period_values)
+  )
+
+  # Fill matrices based on data completeness
+  for (i in seq_len(nrow(data))) {
+    row_entity <- as.character(group_vec[i])
+    row_time <- as.character(time_vec[i])
+
+    row_idx <- which(entity_values == row_entity)
+    col_idx <- which(period_values == row_time)
+
+    # Check observed criteria (at least one non-NA)
+    if (any(!is.na(data[i, substantive_vars]))) {
+      observed_matrix[row_idx, col_idx] <- TRUE
+    }
+
+    # Check complete criteria (all non-NA)
+    if (all(!is.na(data[i, substantive_vars]))) {
+      complete_matrix[row_idx, col_idx] <- TRUE
+    }
+  }
+
   # Calculate counts for each presence type
 
   # 1. ROWS
-  # Nominal: all rows
   rows_nominal <- nrow(data)
-
-  # Observed: rows with at least one non-NA in substantive variables
   rows_observed <- sum(apply(data[substantive_vars], 1, function(x) {
     any(!is.na(x))
   }))
-
-  # Complete: rows with all substantive variables non-NA
   rows_complete <- sum(apply(data[substantive_vars], 1, function(x) {
     all(!is.na(x))
   }))
 
   # 2. ENTITIES
-  # Create entity-level presence indicators
-  entity_nominal <- length(entity_values)
+  entities_nominal <- length(entity_values)
 
-  # For observed and complete, we need to check per entity across all their rows
-  entity_observed_count <- 0
-  entity_complete_count <- 0
+  # For observed: entity must have observed data in ALL periods where it exists
+  # An entity "exists" in a period if it has a row (nominal presence)
+  entities_observed <- 0
+  entities_complete <- 0
 
-  for (ent in entity_values) {
-    ent_rows <- data[[group]] == ent
+  for (i in seq_along(entity_values)) {
+    # Get periods where this entity has any row
+    entity_rows <- group_vec == entity_values[i]
+    periods_for_entity <- unique(time_vec[entity_rows])
 
-    # Check if entity has any rows with observed data
-    if (
-      any(apply(data[ent_rows, substantive_vars, drop = FALSE], 1, function(x) {
-        any(!is.na(x))
-      }))
-    ) {
-      entity_observed_count <- entity_observed_count + 1
-    }
+    if (length(periods_for_entity) > 0) {
+      # Check observed: for all periods this entity appears, it must have observed data
+      observed_in_all_periods <- all(
+        sapply(periods_for_entity, function(p) {
+          col_idx <- which(period_values == p)
+          observed_matrix[i, col_idx]
+        })
+      )
+      if (observed_in_all_periods) {
+        entities_observed <- entities_observed + 1
+      }
 
-    # Check if entity has at least one complete row
-    if (
-      any(apply(data[ent_rows, substantive_vars, drop = FALSE], 1, function(x) {
-        all(!is.na(x))
-      }))
-    ) {
-      entity_complete_count <- entity_complete_count + 1
+      # Check complete: for all periods this entity appears, it must have complete data
+      complete_in_all_periods <- all(
+        sapply(periods_for_entity, function(p) {
+          col_idx <- which(period_values == p)
+          complete_matrix[i, col_idx]
+        })
+      )
+      if (complete_in_all_periods) {
+        entities_complete <- entities_complete + 1
+      }
     }
   }
 
   # 3. PERIODS
-  # Create period-level presence indicators
-  period_nominal <- length(period_values)
+  periods_nominal <- length(period_values)
 
-  # For observed and complete, we need to check per period across all their rows
-  period_observed_count <- 0
-  period_complete_count <- 0
+  # For observed: period must have observed data for ALL entities that exist in this period
+  periods_observed <- 0
+  periods_complete <- 0
 
-  for (per in period_values) {
-    per_rows <- data[[time]] == per
+  for (j in seq_along(period_values)) {
+    # Get entities that exist in this period (have any row)
+    period_rows <- time_vec == period_values[j]
+    entities_in_period <- unique(group_vec[period_rows])
 
-    # Check if period has any rows with observed data
-    if (
-      any(apply(data[per_rows, substantive_vars, drop = FALSE], 1, function(x) {
-        any(!is.na(x))
-      }))
-    ) {
-      period_observed_count <- period_observed_count + 1
-    }
+    if (length(entities_in_period) > 0) {
+      # Check observed: for all entities in this period, they must have observed data
+      observed_for_all_entities <- all(
+        sapply(entities_in_period, function(e) {
+          row_idx <- which(entity_values == e)
+          observed_matrix[row_idx, j]
+        })
+      )
+      if (observed_for_all_entities) {
+        periods_observed <- periods_observed + 1
+      }
 
-    # Check if period has at least one complete row
-    if (
-      any(apply(data[per_rows, substantive_vars, drop = FALSE], 1, function(x) {
-        all(!is.na(x))
-      }))
-    ) {
-      period_complete_count <- period_complete_count + 1
+      # Check complete: for all entities in this period, they must have complete data
+      complete_for_all_entities <- all(
+        sapply(entities_in_period, function(e) {
+          row_idx <- which(entity_values == e)
+          complete_matrix[row_idx, j]
+        })
+      )
+      if (complete_for_all_entities) {
+        periods_complete <- periods_complete + 1
+      }
     }
   }
 
   # Create result data.frame
   result <- data.frame(
     dimension = c("rows", "entities", "periods"),
-    nominal = c(rows_nominal, entity_nominal, period_nominal),
-    observed = c(rows_observed, entity_observed_count, period_observed_count),
-    complete = c(rows_complete, entity_complete_count, period_complete_count),
+    nominal = c(rows_nominal, entities_nominal, periods_nominal),
+    observed = c(rows_observed, entities_observed, periods_observed),
+    complete = c(rows_complete, entities_complete, periods_complete),
     stringsAsFactors = FALSE
   )
 
