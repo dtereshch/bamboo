@@ -31,7 +31,7 @@
 #' }
 #'
 #' @seealso
-#' [describe_balance()], [explore_balance()], [describe_participation()]
+#' [plot_periods()], [describe_balance()], [describe_patterns()]
 #'
 #' @examples
 #' data(production)

@@ -43,7 +43,7 @@
 #' }
 #'
 #' @seealso
-#' [explore_participation()], [describe_participation()], [explore_balance()], [describe_balance()]
+#' [summarize_missing()], [describe_patterns()], [describe_balance()]
 #'
 #' @examples
 #' data(production)

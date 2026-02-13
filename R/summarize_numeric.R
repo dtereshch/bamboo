@@ -48,7 +48,7 @@
 #' }
 #'
 #' @seealso
-#' [summarize_panel()], [summarize_transition()]
+#' [decompose_numeric()], [decompose_factor()], [summarize_transition()], [summarize_missing()]
 #'
 #' @examples
 #' data(production)

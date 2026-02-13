@@ -53,7 +53,7 @@
 #' For Stata users: This corresponds to the `xttab` command.
 #'
 #' @seealso
-#' [decompose_numeric()], [summarize_transition()], [summarize_data()]
+#' [decompose_numeric()], [summarize_transition()]
 #'
 #' @examples
 #' data(production)

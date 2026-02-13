@@ -52,7 +52,7 @@
 #' For Stata users: This corresponds to the `xttrans` command.
 #'
 #' @seealso
-#' [summarize_data()], [summarize_panel()], [describe_participation()]
+#' [decompose_factor()], [decompose_numeric()], [describe_patterns()]
 #'
 #' @examples
 #' data(production)

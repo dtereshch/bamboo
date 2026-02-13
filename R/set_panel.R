@@ -17,7 +17,7 @@
 #' The original data.frame structure is preserved.
 #'
 #' @seealso
-#' [check_panel()], [get_attributes()], [describe_panel()], [explore_panel()]
+#' [check_panel()], [describe_dimensions()]
 #'
 #' @examples
 #' data(production)

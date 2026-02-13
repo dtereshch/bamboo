@@ -41,7 +41,7 @@
 #' }
 #'
 #' @seealso
-#' [summarize_panel()], [plot_participation()], [describe_panel()]
+#' [decompose_numeric()], [summarize_numeric()]
 #'
 #' @examples
 #' data(production)

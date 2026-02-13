@@ -41,7 +41,7 @@
 #' print(panel_desc)
 #'
 #' @seealso
-#' [explore_panel()], [set_panel()]
+#' [check_panel()], [describe_balance()], [describe_periods()], [set_panel()]
 #'
 #' @export
 describe_dimensions <- function(data, group = NULL, time = NULL) {

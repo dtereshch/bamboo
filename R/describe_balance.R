@@ -65,7 +65,7 @@
 #' the function automatically extracts group and time variable names from the attributes.
 #'
 #' @seealso
-#' [explore_balance()], [describe_periods()], [describe_participation()]
+#' [describe_periods()], [describe_patterns()], [check_panel()]
 #'
 #' @examples
 #' data(production)

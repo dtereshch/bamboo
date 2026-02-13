@@ -80,7 +80,7 @@
 #' For Stata users: This corresponds to the `xtsum` command.
 #'
 #' @seealso
-#' [summarize_data()], [plot_heterogeneity()], [decompose_factor()]
+#' [summarize_numeric()], [plot_heterogeneity()], [decompose_factor()]
 #'
 #' @examples
 #' data(production)

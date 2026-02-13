@@ -62,7 +62,7 @@
 #' }
 #'
 #' @seealso
-#' [describe_patterns()], [explore_presence()], [plot_heterogeneity()]
+#' [describe_patterns()], [plot_periods()]
 #'
 #' @examples
 #' data(production)

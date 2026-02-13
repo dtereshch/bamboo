@@ -47,7 +47,7 @@
 #' }
 #'
 #' @seealso
-#' [explore_panel()], [explore_balance()], [explore_participation()]
+#' [set_panel()], [describe_dimensions()], [describe_balance()]
 #'
 #' @examples
 #' data(production)

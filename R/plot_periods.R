@@ -60,7 +60,7 @@
 #' }
 #'
 #' @seealso
-#' [describe_periods()], [plot_participation()], [describe_participation()]
+#' [describe_periods()], [plot_patterns()], [describe_patterns()]
 #'
 #' @examples
 #' data(production)

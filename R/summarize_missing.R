@@ -46,7 +46,7 @@
 #' }
 #'
 #' @seealso
-#' [describe_incomplete()], [describe_balance()], [summarize_data()], [summarize_panel()]
+#' [describe_incomplete()], [describe_balance()], [describe_periods()], [summarize_numeric()]
 #'
 #' @examples
 #' data(production)

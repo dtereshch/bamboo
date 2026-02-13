@@ -65,7 +65,7 @@
 #' }
 #'
 #' @seealso
-#' [plot_presence()], [explore_presence()], [describe_periods()], [describe_incomplete()], [describe_balance()]
+#' [plot_patterns()], [describe_periods()], [describe_incomplete()], [describe_balance()]
 #'
 #' @examples
 #' data(production)
