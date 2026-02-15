@@ -233,6 +233,24 @@ plot_heterogeneity <- function(
     # Add x-axis
     axis(1, at = seq_along(levels(x_var)), labels = levels(x_var))
 
+    # Generate reproducible jitter by setting a seed based on the data
+    # Save current seed to restore later
+    if (exists(".Random.seed", .GlobalEnv)) {
+      old_seed <- .GlobalEnv$.Random.seed
+      on.exit(.GlobalEnv$.Random.seed <- old_seed, add = TRUE)
+    } else {
+      on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
+    }
+
+    # Create a deterministic seed from the data
+    # Use a combination of the grouping variable name and the data itself
+    set.seed(
+      sum(as.integer(charToRaw(paste(group_var, selection)))) +
+        sum(data_sub[[selection]], na.rm = TRUE) +
+        nrow(data_sub) +
+        length(unique(x_var))
+    )
+
     # Add individual points with jitter
     x_jitter <- jitter(as.numeric(x_var), amount = 0.2)
     points(
