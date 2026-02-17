@@ -37,7 +37,9 @@
 #' The returned data.frame has class `"panel_summary"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `total_obs`, `n_entities`, `n_periods`.}
+#'   \item{`details`}{List containing additional information:
+#'         `n_variables_with_na`, `n_variables_without_na`, `n_variables` (total analyzed),
+#'         `variables_with_na`, and `variables_without_na`.}
 #' }
 #'
 #' @seealso
@@ -261,6 +263,10 @@ summarize_missing <- function(
   result_df <- do.call(rbind, results)
   rownames(result_df) <- NULL
 
+  # Identify variables with and without missing values
+  vars_with_na <- result_df$variable[result_df$na_count > 0]
+  vars_without_na <- result_df$variable[result_df$na_count == 0]
+
   # Build metadata
   call <- match.call()
   metadata <- list(
@@ -272,11 +278,13 @@ summarize_missing <- function(
     digits = digits
   )
 
-  # Build details list (only non-metadata info)
+  # Build details list with variable information
   details <- list(
-    total_obs = total_obs,
-    n_entities = total_entities,
-    n_periods = total_periods
+    n_variables_with_na = length(vars_with_na),
+    n_variables_without_na = length(vars_without_na),
+    n_variables = length(selection),
+    variables_with_na = vars_with_na,
+    variables_without_na = vars_without_na
   )
 
   # Set attributes in desired order

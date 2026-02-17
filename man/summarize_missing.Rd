@@ -58,7 +58,9 @@ When \code{detailed = TRUE}, additional columns are included:
 The returned data.frame has class \code{"panel_summary"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{total_obs}, \code{n_entities}, \code{n_periods}.}
+\item{\code{details}}{List containing additional information:
+\code{n_variables_with_na}, \code{n_variables_without_na}, \code{n_variables} (total analyzed),
+\code{variables_with_na}, and \code{variables_without_na}.}
 }
 }
 \examples{
