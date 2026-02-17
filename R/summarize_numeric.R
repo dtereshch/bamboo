@@ -40,7 +40,7 @@
 #' The returned data.frame has class `"panel_summary"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name, selection, group, detailed, digits.}
-#'   \item{`details`}{List containing additional information: `n_variables`, `n_groups` (if grouping provided), `total_obs`.}
+#'   \item{`details`}{List containing additional information: `n_variables`, `n_groups` (if grouping provided), `n_obs`.}
 #' }
 #' Note: This function does **not** use panel attributes; it is designed for general use.
 #'
@@ -190,7 +190,7 @@ summarize_numeric <- function(
 
   # Get group information for attributes
   n_groups <- if (!is.null(group)) length(unique(data[[group]])) else NULL
-  total_obs <- nrow(data)
+  n_obs <- nrow(data)
 
   # Helper function to count non-NA values
   count_non_na <- function(x) {
@@ -372,7 +372,7 @@ summarize_numeric <- function(
   details <- list(
     n_variables = length(selection),
     n_groups = n_groups,
-    total_obs = total_obs
+    n_obs = n_obs
   )
 
   # Set attributes in desired order
