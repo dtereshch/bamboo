@@ -54,8 +54,20 @@ The returned data.frame has 4 columns:
 The data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{entity_values}, \code{period_values},
-\code{total_rows}, \code{substantive_vars}.}
+\item{\code{details}}{List containing detailed information about which entities, periods,
+and entity-period combinations meet each presence criterion:
+\itemize{
+\item{\code{entities_nominal}: All entity values present in the data}
+\item{\code{entities_observed}: Entity values that have observed data in all periods where they appear}
+\item{\code{entities_complete}: Entity values that have complete data in all periods where they appear}
+\item{\code{periods_nominal}: All time period values present in the data}
+\item{\code{periods_observed}: Period values that have observed data for all entities that appear in that period}
+\item{\code{periods_complete}: Period values that have complete data for all entities that appear in that period}
+\item{\code{rows_nominal}: All entity-period combinations (as "entity_time" strings) present in the data}
+\item{\code{rows_observed}: Entity-period combinations that have at least one non-NA substantive variable}
+\item{\code{rows_complete}: Entity-period combinations that have no NA values in all substantive variables}
+}
+}
 }
 }
 \examples{
@@ -69,6 +81,10 @@ print(panel_desc)
 panel_data <- set_panel(production, group = "firm", time = "year")
 panel_desc <- describe_dimensions(panel_data)
 print(panel_desc)
+
+# Access detailed information
+attr(panel_desc, "details")$entities_observed
+attr(panel_desc, "details")$rows_complete
 
 }
 \seealso{

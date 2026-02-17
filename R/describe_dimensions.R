@@ -43,8 +43,20 @@
 #' The data.frame has class `"panel_description"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `entity_values`, `period_values`,
-#'         `total_rows`, `substantive_vars`.}
+#'   \item{`details`}{List containing detailed information about which entities, periods,
+#'         and entity-period combinations meet each presence criterion:
+#'         \itemize{
+#'           \item{\code{entities_nominal}: All entity values present in the data}
+#'           \item{\code{entities_observed}: Entity values that have observed data in all periods where they appear}
+#'           \item{\code{entities_complete}: Entity values that have complete data in all periods where they appear}
+#'           \item{\code{periods_nominal}: All time period values present in the data}
+#'           \item{\code{periods_observed}: Period values that have observed data for all entities that appear in that period}
+#'           \item{\code{periods_complete}: Period values that have complete data for all entities that appear in that period}
+#'           \item{\code{rows_nominal}: All entity-period combinations (as "entity_time" strings) present in the data}
+#'           \item{\code{rows_observed}: Entity-period combinations that have at least one non-NA substantive variable}
+#'           \item{\code{rows_complete}: Entity-period combinations that have no NA values in all substantive variables}
+#'         }
+#'       }
 #' }
 #'
 #' @examples
@@ -58,6 +70,10 @@
 #' panel_data <- set_panel(production, group = "firm", time = "year")
 #' panel_desc <- describe_dimensions(panel_data)
 #' print(panel_desc)
+#'
+#' # Access detailed information
+#' attr(panel_desc, "details")$entities_observed
+#' attr(panel_desc, "details")$rows_complete
 #'
 #' @seealso
 #' [check_panel()], [describe_balance()], [describe_periods()], [set_panel()]
@@ -270,12 +286,88 @@ describe_dimensions <- function(data, group = NULL, time = NULL) {
     time = time
   )
 
-  # Build details list
+  # Build details list with separate vectors for each presence type
   details <- list(
-    entity_values = entity_values,
-    period_values = period_values,
-    total_rows = nrow(data),
-    substantive_vars = substantive_vars
+    # Entity values by presence type
+    entities_nominal = entity_values,
+    entities_observed = entity_values[sapply(
+      seq_along(entity_values),
+      function(i) {
+        entity_rows <- group_vec == entity_values[i]
+        periods_for_entity <- unique(time_vec[entity_rows])
+        if (length(periods_for_entity) > 0) {
+          all(sapply(periods_for_entity, function(p) {
+            col_idx <- which(period_values == p)
+            observed_matrix[i, col_idx]
+          }))
+        } else {
+          FALSE
+        }
+      }
+    )],
+
+    entities_complete = entity_values[sapply(
+      seq_along(entity_values),
+      function(i) {
+        entity_rows <- group_vec == entity_values[i]
+        periods_for_entity <- unique(time_vec[entity_rows])
+        if (length(periods_for_entity) > 0) {
+          all(sapply(periods_for_entity, function(p) {
+            col_idx <- which(period_values == p)
+            complete_matrix[i, col_idx]
+          }))
+        } else {
+          FALSE
+        }
+      }
+    )],
+
+    # Period values by presence type
+    periods_nominal = period_values,
+    periods_observed = period_values[sapply(
+      seq_along(period_values),
+      function(j) {
+        period_rows <- time_vec == period_values[j]
+        entities_in_period <- unique(group_vec[period_rows])
+        if (length(entities_in_period) > 0) {
+          all(sapply(entities_in_period, function(e) {
+            row_idx <- which(entity_values == e)
+            observed_matrix[row_idx, j]
+          }))
+        } else {
+          FALSE
+        }
+      }
+    )],
+
+    periods_complete = period_values[sapply(
+      seq_along(period_values),
+      function(j) {
+        period_rows <- time_vec == period_values[j]
+        entities_in_period <- unique(group_vec[period_rows])
+        if (length(entities_in_period) > 0) {
+          all(sapply(entities_in_period, function(e) {
+            row_idx <- which(entity_values == e)
+            complete_matrix[row_idx, j]
+          }))
+        } else {
+          FALSE
+        }
+      }
+    )],
+
+    # Entity-period combinations (rows) by presence type
+    rows_nominal = paste(group_vec, time_vec, sep = "_"),
+    rows_observed = paste(group_vec, time_vec, sep = "_")[apply(
+      data[substantive_vars],
+      1,
+      function(x) any(!is.na(x))
+    )],
+    rows_complete = paste(group_vec, time_vec, sep = "_")[apply(
+      data[substantive_vars],
+      1,
+      function(x) all(!is.na(x))
+    )]
   )
 
   # Set attributes in desired order
