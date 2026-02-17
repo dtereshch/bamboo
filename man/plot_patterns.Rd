@@ -35,7 +35,7 @@ Default = c("#1E4A3B", "white").}
 Invisibly returns a list with the following components:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing the sorted presence matrix (as element \code{matrix}).}
+\item{\code{details}}{List containing the sorted presence matrix.}
 }
 }
 \description{

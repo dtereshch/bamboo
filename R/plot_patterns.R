@@ -17,7 +17,7 @@
 #' @return Invisibly returns a list with the following components:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing the sorted presence matrix (as element `matrix`).}
+#'   \item{`details`}{List containing the sorted presence matrix.}
 #' }
 #'
 #' @details
@@ -282,9 +282,9 @@ plot_patterns <- function(
     colors = colors
   )
 
-  # Build details list (includes the sorted matrix)
+  # Build details list (includes the sorted matrix) - UPDATED: renamed matrix to presence_matrix
   details <- list(
-    matrix = presence_binary_sorted
+    presence_matrix = presence_binary_sorted
   )
 
   # Return invisible list with metadata and details
