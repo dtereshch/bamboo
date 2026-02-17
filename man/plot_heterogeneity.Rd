@@ -27,15 +27,9 @@ second for individual points. Default = c("#1E4A3B", "#EADCA0").}
 \value{
 Invisibly returns a list with the following components:
 \describe{
-\item{\code{metadata}}{List containing the function name, selection, group, colors, and
-whether panel attributes were used.}
-\item{\code{details}}{List containing overall and group-level statistics:
-\describe{
-\item{\code{overall}}{List with overall mean, sd, and number of observations.}
-\item{\code{groups}}{List with statistics for each grouping variable, each containing
-means, sd, and n per group.}
-}
-}
+\item{\code{metadata}}{List containing the function name, selection, group, and colors.}
+\item{\code{details}}{List containing group-level statistics for each grouping variable,
+each containing means, sd, and n per group.}
 }
 }
 \description{

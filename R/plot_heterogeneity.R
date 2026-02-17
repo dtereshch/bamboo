@@ -13,15 +13,9 @@
 #'
 #' @return Invisibly returns a list with the following components:
 #' \describe{
-#'   \item{`metadata`}{List containing the function name, selection, group, colors, and
-#'         whether panel attributes were used.}
-#'   \item{`details`}{List containing overall and group-level statistics:
-#'         \describe{
-#'           \item{`overall`}{List with overall mean, sd, and number of observations.}
-#'           \item{`groups`}{List with statistics for each grouping variable, each containing
-#'                 means, sd, and n per group.}
-#'         }
-#'   }
+#'   \item{`metadata`}{List containing the function name, selection, group, and colors.}
+#'   \item{`details`}{List containing group-level statistics for each grouping variable,
+#'         each containing means, sd, and n per group.}
 #' }
 #'
 #' @details
@@ -79,9 +73,6 @@ plot_heterogeneity <- function(
     }
     # Extract group and time from attributes and use both as group variables
     group <- c(metadata$group, metadata$time)
-    used_panel_attrs <- TRUE
-  } else {
-    used_panel_attrs <- FALSE
   }
 
   # Input validation for data
@@ -157,9 +148,6 @@ plot_heterogeneity <- function(
   plot <- TRUE
   ncol <- NULL
   nrow <- NULL
-
-  # Extract the main variable
-  y_var <- data[[selection]]
 
   # Function to create single plot
   create_single_plot <- function(
@@ -272,15 +260,8 @@ plot_heterogeneity <- function(
     )
   }
 
-  # Calculate overall summary statistics
-  summary_stats <- list(
-    overall = list(
-      mean = mean(y_var, na.rm = TRUE),
-      sd = sd(y_var, na.rm = TRUE),
-      n_observations = nrow(data)
-    ),
-    groups = list() # will be filled with group_stats
-  )
+  # Initialize group statistics list
+  group_stats_list <- list()
 
   if (plot) {
     # Set up plotting layout for multiple groups
@@ -318,7 +299,7 @@ plot_heterogeneity <- function(
     for (i in seq_along(group)) {
       group_var <- group[i]
       group_stats <- create_single_plot(data, group_var)
-      summary_stats$groups[[group_var]] <- group_stats
+      group_stats_list[[group_var]] <- group_stats
     }
   } else {
     # Calculate statistics without plotting
@@ -328,7 +309,7 @@ plot_heterogeneity <- function(
         x_var <- as.factor(x_var)
       }
 
-      summary_stats$groups[[group_var]] <- list(
+      group_stats_list[[group_var]] <- list(
         means = tapply(data[[selection]], x_var, mean, na.rm = TRUE),
         sd = tapply(data[[selection]], x_var, sd, na.rm = TRUE),
         n = tapply(data[[selection]], x_var, function(x) sum(!is.na(x)))
@@ -342,16 +323,12 @@ plot_heterogeneity <- function(
     function_name = as.character(call[[1]]),
     selection = selection,
     group = group,
-    colors = colors,
-    used_panel_attrs = used_panel_attrs
+    colors = colors
   )
-
-  # Build details list (merge overall and groups)
-  details <- summary_stats
 
   # Return list with metadata and details
   invisible(list(
     metadata = metadata,
-    details = details
+    details = group_stats_list
   ))
 }
