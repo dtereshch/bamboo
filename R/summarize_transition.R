@@ -3,8 +3,7 @@
 #' Calculates transition counts and shares between states of a categorical (factor) variable
 #' across consecutive time periods within groups (e.g., firms, individuals) for panel data.
 #'
-#' @param data A data.frame containing panel data, or a data.frame with panel attributes
-#'        (see [set_panel()]).
+#' @param data A data.frame containing panel data, or a data.frame with panel attributes.
 #' @param selection A character string specifying the factor variable to analyze transitions for.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
 #'        Not required if data has panel attributes.
@@ -38,6 +37,13 @@
 #'   }
 #' }
 #'
+#' #' The returned data.frame has class `"panel_summary"` and the following attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List containing additional information: `categories` (vector of levels
+#'         of the analyzed variable).}
+#' }
+#'
 #' @note
 #' \itemize{
 #'   \item The shares are **empirical transition proportions** based on observed consecutive
@@ -50,12 +56,6 @@
 #'         so transitions from nonmissing to missing (or vice versa) are **excluded**.
 #'   \item The variable of interest is coerced to a factor if it is not already one.
 #'   \item At least two distinct levels are required in the factor to compute transitions.
-#' }
-#'
-#' The returned data.frame has class `"panel_summary"` and the following attributes:
-#' \describe{
-#'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `variable`.}
 #' }
 #'
 #' @references
@@ -338,9 +338,9 @@ summarize_transition <- function(
     digits = digits
   )
 
-  # Build details list (only non-metadata info)
+  # Build details list (with categories instead of variable)
   details <- list(
-    variable = selection
+    categories = all_levels
   )
 
   # Set attributes in desired order

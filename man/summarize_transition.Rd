@@ -14,8 +14,7 @@ summarize_transition(
 )
 }
 \arguments{
-\item{data}{A data.frame containing panel data, or a data.frame with panel attributes
-(see \code{\link[=set_panel]{set_panel()}}).}
+\item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
 
 \item{selection}{A character string specifying the factor variable to analyze transitions for.}
 
@@ -58,6 +57,13 @@ row state to the column state (rounded to \code{digits}).
 All possible state combinations are included, even those with zero transitions.
 }
 }
+
+#' The returned data.frame has class \code{"panel_summary"} and the following attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List containing additional information: \code{categories} (vector of levels
+of the analyzed variable).}
+}
 }
 \note{
 \itemize{
@@ -71,12 +77,6 @@ observations are simply skipped.
 so transitions from nonmissing to missing (or vice versa) are \strong{excluded}.
 \item The variable of interest is coerced to a factor if it is not already one.
 \item At least two distinct levels are required in the factor to compute transitions.
-}
-
-The returned data.frame has class \code{"panel_summary"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{variable}.}
 }
 }
 \examples{
