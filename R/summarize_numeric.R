@@ -42,7 +42,9 @@
 #'   \item{`metadata`}{List containing the function name, selection, group, detailed, digits.}
 #'   \item{`details`}{List containing additional information: `n_variables`, `n_groups` (if grouping provided), `n_obs`.}
 #' }
-#' Note: This function does **not** use panel attributes; it is designed for general use.
+#'
+#' @note
+#' This function does **not** use panel attributes; it is designed for general use.
 #'
 #' @seealso
 #' [decompose_numeric()], [decompose_factor()], [summarize_transition()], [summarize_missing()]

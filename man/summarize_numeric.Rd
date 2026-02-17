@@ -61,7 +61,9 @@ The returned data.frame has class \code{"panel_summary"} and the following attri
 \item{\code{metadata}}{List containing the function name, selection, group, detailed, digits.}
 \item{\code{details}}{List containing additional information: \code{n_variables}, \code{n_groups} (if grouping provided), \code{n_obs}.}
 }
-Note: This function does \strong{not} use panel attributes; it is designed for general use.
+}
+\note{
+This function does \strong{not} use panel attributes; it is designed for general use.
 }
 \examples{
 data(production)
