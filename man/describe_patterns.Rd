@@ -75,8 +75,9 @@ Patterns are sorted by frequency (most common first).
 The returned data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{n_entities}, \code{n_periods}, \code{n_patterns},
-\code{matrix}, \code{pattern_groups}.}
+\item{\code{details}}{List containing additional information: \code{n_patterns}, \code{presence_matrix},
+\code{pattern_groups}. The \code{pattern_groups} element is a list where each element corresponds
+to a pattern rank and contains the entity IDs that follow that pattern.}
 }
 }
 \examples{
@@ -97,13 +98,18 @@ describe_patterns(production, group = "firm", time = "year", presence = "complet
 describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
 
 # Simplified version in long format
-describe_patterns(production, group = "firm", time = "year", detailed = FALSE, format = "long")
+describe_patterns(production, group = "firm", time = "year", format = "long", detailed = FALSE)
 
 # With custom rounding
 describe_patterns(production, group = "firm", time = "year", digits = 4)
 
 # Effectively no rounding (use large digit value)
 describe_patterns(production, group = "firm", time = "year", digits = 999999)
+
+# Using pattern_groups to extract entities with specific patterns
+patterns <- describe_patterns(production, group = "firm", time = "year")
+pattern_groups <- attr(patterns, "details")$pattern_groups
+most_common_pattern_entities <- pattern_groups[["1"]]
 
 }
 \seealso{

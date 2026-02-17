@@ -52,8 +52,9 @@
 #' The returned data.frame has class `"panel_description"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `n_entities`, `n_periods`, `n_patterns`,
-#'         `matrix`, `pattern_groups`.}
+#'   \item{`details`}{List containing additional information: `n_patterns`, `presence_matrix`,
+#'         `pattern_groups`. The `pattern_groups` element is a list where each element corresponds
+#'         to a pattern rank and contains the entity IDs that follow that pattern.}
 #' }
 #'
 #' @seealso
@@ -77,13 +78,18 @@
 #' describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
 #'
 #' # Simplified version in long format
-#' describe_patterns(production, group = "firm", time = "year", detailed = FALSE, format = "long")
+#' describe_patterns(production, group = "firm", time = "year", format = "long", detailed = FALSE)
 #'
 #' # With custom rounding
 #' describe_patterns(production, group = "firm", time = "year", digits = 4)
 #'
 #' # Effectively no rounding (use large digit value)
 #' describe_patterns(production, group = "firm", time = "year", digits = 999999)
+#'
+#' # Using pattern_groups to extract entities with specific patterns
+#' patterns <- describe_patterns(production, group = "firm", time = "year")
+#' pattern_groups <- attr(patterns, "details")$pattern_groups
+#' most_common_pattern_entities <- pattern_groups[["1"]]
 #'
 #' @export
 describe_patterns <- function(
@@ -340,10 +346,8 @@ describe_patterns <- function(
 
   # Build base details list (will be extended depending on format)
   details_base <- list(
-    n_entities = length(unique_groups),
-    n_periods = length(unique_periods),
     n_patterns = nrow(result),
-    matrix = presence_binary,
+    presence_matrix = presence_binary,
     pattern_groups = pattern_groups
   )
 
