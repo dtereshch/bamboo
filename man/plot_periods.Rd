@@ -9,7 +9,7 @@ plot_periods(
   group = NULL,
   time = NULL,
   presence = "observed",
-  colors = c("#1E4A3B", "#1E4A3B")
+  colors = c("#1E4A3B", "white")
 )
 }
 \arguments{
@@ -24,8 +24,8 @@ Not required if data has panel attributes.}
 \item{presence}{A character string specifying how to define entity presence: "observed", "nominal", or "complete".
 Default = "observed".}
 
-\item{colors}{A character vector of length 2 specifying the line color and fill color for the histogram.
-Default = c("#1E4A3B", "#1E4A3B").}
+\item{colors}{A character vector of length 2 specifying the fill color and line color for the histogram.
+First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").}
 }
 \value{
 Invisibly returns a list with the following components:
@@ -69,11 +69,11 @@ plot_periods(panel_data)
 plot_periods(production, group = "firm", time = "year", presence = "nominal")
 plot_periods(production, group = "firm", time = "year", presence = "complete")
 
-# Custom colors - black line with gray fill
-plot_periods(production, group = "firm", time = "year", colors = c("black", "gray"))
+# Custom colors - gray fill with black line
+plot_periods(production, group = "firm", time = "year", colors = c("gray", "black"))
 
-# Custom colors - blue line with light blue fill
-plot_periods(production, group = "firm", time = "year", colors = c("blue", "lightblue"))
+# Custom colors - light blue fill with blue line
+plot_periods(production, group = "firm", time = "year", colors = c("lightblue", "blue"))
 
 }
 \seealso{

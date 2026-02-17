@@ -11,8 +11,8 @@
 #'        Not required if data has panel attributes.
 #' @param presence A character string specifying how to define entity presence: "observed", "nominal", or "complete".
 #'        Default = "observed".
-#' @param colors A character vector of length 2 specifying the line color and fill color for the histogram.
-#'        Default = c("#1E4A3B", "#1E4A3B").
+#' @param colors A character vector of length 2 specifying the fill color and line color for the histogram.
+#'        First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").
 #'
 #' @return Invisibly returns a list with the following components:
 #' \describe{
@@ -53,11 +53,11 @@
 #' plot_periods(production, group = "firm", time = "year", presence = "nominal")
 #' plot_periods(production, group = "firm", time = "year", presence = "complete")
 #'
-#' # Custom colors - black line with gray fill
-#' plot_periods(production, group = "firm", time = "year", colors = c("black", "gray"))
+#' # Custom colors - gray fill with black line
+#' plot_periods(production, group = "firm", time = "year", colors = c("gray", "black"))
 #'
-#' # Custom colors - blue line with light blue fill
-#' plot_periods(production, group = "firm", time = "year", colors = c("blue", "lightblue"))
+#' # Custom colors - light blue fill with blue line
+#' plot_periods(production, group = "firm", time = "year", colors = c("lightblue", "blue"))
 #'
 #' @export
 plot_periods <- function(
@@ -65,7 +65,7 @@ plot_periods <- function(
   group = NULL,
   time = NULL,
   presence = "observed",
-  colors = c("#1E4A3B", "#1E4A3B")
+  colors = c("#1E4A3B", "white") # Swapped: first is fill, second is line
 ) {
   # Check for panel_data class and extract info from metadata
   if (inherits(data, "panel_data")) {
@@ -128,9 +128,9 @@ plot_periods <- function(
     stop('variable "', time, '" not found in data')
   }
 
-  # Extract colors
-  line_color <- colors[1]
-  fill_color <- colors[2]
+  # Extract colors - now first is fill, second is line
+  fill_color <- colors[1]
+  line_color <- colors[2]
 
   # Get substantive variables
   substantive_vars <- setdiff(names(data), c(group, time))
@@ -357,8 +357,8 @@ plot_periods <- function(
         ybottom = 0,
         xright = bar_right,
         ytop = hist_data$counts[i],
-        col = fill_color, # FILL with second color
-        border = line_color, # Line with first color
+        col = fill_color, # FILL with first color
+        border = line_color, # Line with second color
         lwd = 1
       )
     }
