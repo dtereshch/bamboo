@@ -28,16 +28,8 @@ Default = "observed".}
 First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").}
 }
 \value{
-Invisibly returns a list with the following components:
-\describe{
-\item{\code{metadata}}{List containing the function name, group, time, presence, colors.}
-\item{\code{details}}{List containing:
-\itemize{
-\item \code{coverage_by_entity}: Named vector with number of periods covered per entity.
-\item \code{histogram_data}: Data used for histogram plotting.
-}
-}
-}
+Invisibly returns a list with summary statistics and metadata.
+Creates a histogram showing the distribution of time coverage across entities.
 }
 \description{
 This function calculates summary statistics and creates a histogram showing
@@ -54,6 +46,17 @@ based on the specified presence definition.
 
 The x-axis shows the number of time periods covered by each entity, and the
 y-axis shows the count/frequency of entities with that coverage.
+
+The returned list contains the following components:
+\describe{
+\item{\code{metadata}}{List containing the function name, group, time, presence, colors.}
+\item{\code{details}}{List containing:
+\itemize{
+\item \code{coverage_by_entity}: Named vector with number of periods covered per entity.
+\item \code{histogram_data}: Data used for histogram plotting.
+}
+}
+}
 }
 \examples{
 data(production)

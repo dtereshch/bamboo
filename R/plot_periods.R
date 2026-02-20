@@ -14,16 +14,8 @@
 #' @param colors A character vector of length 2 specifying the fill color and line color for the histogram.
 #'        First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").
 #'
-#' @return Invisibly returns a list with the following components:
-#' \describe{
-#'   \item{`metadata`}{List containing the function name, group, time, presence, colors.}
-#'   \item{`details`}{List containing:
-#'         \itemize{
-#'           \item `coverage_by_entity`: Named vector with number of periods covered per entity.
-#'           \item `histogram_data`: Data used for histogram plotting.
-#'         }
-#'   }
-#' }
+#' @return Invisibly returns a list with summary statistics and metadata.
+#' Creates a histogram showing the distribution of time coverage across entities.
 #'
 #' @details
 #' \strong{Presence} parameter definitions:
@@ -35,6 +27,17 @@
 #'
 #' The x-axis shows the number of time periods covered by each entity, and the
 #' y-axis shows the count/frequency of entities with that coverage.
+#'
+#' The returned list contains the following components:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name, group, time, presence, colors.}
+#'   \item{`details`}{List containing:
+#'         \itemize{
+#'           \item `coverage_by_entity`: Named vector with number of periods covered per entity.
+#'           \item `histogram_data`: Data used for histogram plotting.
+#'         }
+#'   }
+#' }
 #'
 #' @seealso
 #' [describe_periods()], [plot_patterns()], [describe_patterns()]

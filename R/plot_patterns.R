@@ -14,12 +14,8 @@
 #' @param colors A character vector of two colors for present and missing observations.
 #'        Default = c("#1E4A3B", "white").
 #'
-#' @return Invisibly returns a list with the following components:
-#' \describe{
-#'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `n_patterns`, `presence_matrix`,
-#'         `pattern_groups`. The `pattern_groups` element is a list where each element corresponds
-#'         to a pattern rank and contains the entity IDs that follow that pattern.}
+#' @return Invisibly returns a list with summary statistics and metadata.
+#' Creates a heatmap showing presence/absence patterns.
 #'
 #' @details
 #' \strong{Presence} parameter definitions:
@@ -38,6 +34,14 @@
 #' Rows are ordered by pattern frequency: the most frequent pattern is at the **top**.
 #' Within each pattern block, entities appear in their original order (as they first occur in the data).
 #' If `max_patterns` is given, only the most frequent patterns are retained.
+#'
+#' The returned list contains the following components:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List containing additional information: `n_patterns`, `presence_matrix`,
+#'         `pattern_groups`. The `pattern_groups` element is a list where each element corresponds
+#'         to a pattern rank and contains the entity IDs that follow that pattern.}
+#' }
 #'
 #' @seealso
 #' [describe_patterns()], [plot_periods()]

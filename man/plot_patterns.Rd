@@ -32,12 +32,8 @@ If not specified, all patterns are shown.}
 Default = c("#1E4A3B", "white").}
 }
 \value{
-Invisibly returns a list with the following components:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{n_patterns}, \code{presence_matrix},
-\code{pattern_groups}. The \code{pattern_groups} element is a list where each element corresponds
-to a pattern rank and contains the entity IDs that follow that pattern.}
+Invisibly returns a list with summary statistics and metadata.
+Creates a heatmap showing presence/absence patterns.
 }
 \description{
 This function creates a heatmap showing the presence/absence pattern of each entity over time.
@@ -59,6 +55,14 @@ The heatmap shows:
 Rows are ordered by pattern frequency: the most frequent pattern is at the \strong{top}.
 Within each pattern block, entities appear in their original order (as they first occur in the data).
 If \code{max_patterns} is given, only the most frequent patterns are retained.
+
+The returned list contains the following components:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List containing additional information: \code{n_patterns}, \code{presence_matrix},
+\code{pattern_groups}. The \code{pattern_groups} element is a list where each element corresponds
+to a pattern rank and contains the entity IDs that follow that pattern.}
+}
 }
 \examples{
 data(production)

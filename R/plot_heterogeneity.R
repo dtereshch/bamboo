@@ -11,17 +11,20 @@
 #' @param colors A character vector of two colors: first for mean line and points,
 #'        second for individual points. Default = c("#1E4A3B", "#EADCA0").
 #'
-#' @return Invisibly returns a list with the following components:
-#' \describe{
-#'   \item{`metadata`}{List containing the function name, selection, group, and colors.}
-#'   \item{`details`}{List containing group-level statistics for each grouping variable,
-#'         each containing means, sd, and n per group.}
-#' }
+#' @return Invisibly returns a list with summary statistics and metadata.
+#' Creates a plot with individual observations and group means.
 #'
 #' @details
 #' This function creates one or more plots (depending on the number of grouping variables)
 #' showing the heterogeneity among groups. Each plot displays individual observations
 #' (jittered points) and group means (connected line).
+#'
+#' The returned list contains the following components:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name, selection, group, and colors.}
+#'   \item{`details`}{List containing group-level statistics for each grouping variable,
+#'         each containing means, sd, and n per group.}
+#' }
 #'
 #' @seealso
 #' [decompose_numeric()], [summarize_numeric()]
