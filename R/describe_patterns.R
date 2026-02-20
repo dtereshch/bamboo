@@ -52,7 +52,7 @@
 #' The returned data.frame has class `"panel_description"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `n_patterns`, `presence_matrix`,
+#'   \item{`details`}{List containing additional information: `count_patterns`, `presence_matrix`,
 #'         `pattern_groups`. The `pattern_groups` element is a list where each element corresponds
 #'         to a pattern rank and contains the entity IDs that follow that pattern.}
 #' }
@@ -346,7 +346,7 @@ describe_patterns <- function(
 
   # Build base details list (will be extended depending on format)
   details_base <- list(
-    n_patterns = nrow(result),
+    count_patterns = nrow(result),
     presence_matrix = presence_binary,
     pattern_groups = pattern_groups
   )

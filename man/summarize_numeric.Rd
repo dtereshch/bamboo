@@ -59,7 +59,7 @@ When a grouping variable is specified, statistics are calculated for each group.
 The returned data.frame has class \code{"panel_summary"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name, selection, group, detailed, digits.}
-\item{\code{details}}{List containing additional information: \code{n_variables}, \code{n_groups} (if grouping provided), \code{n_obs}.}
+\item{\code{details}}{List containing additional information: \code{count_variables}, \code{count_groups} (if grouping provided), \code{count_obs}.}
 }
 }
 \note{

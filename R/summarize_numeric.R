@@ -40,7 +40,7 @@
 #' The returned data.frame has class `"panel_summary"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name, selection, group, detailed, digits.}
-#'   \item{`details`}{List containing additional information: `n_variables`, `n_groups` (if grouping provided), `n_obs`.}
+#'   \item{`details`}{List containing additional information: `count_variables`, `count_groups` (if grouping provided), `count_obs`.}
 #' }
 #'
 #' @note
@@ -372,9 +372,9 @@ summarize_numeric <- function(
 
   # Build details list (only non-metadata info)
   details <- list(
-    n_variables = length(selection),
-    n_groups = n_groups,
-    n_obs = n_obs
+    count_variables = length(selection),
+    count_groups = n_groups,
+    count_obs = n_obs
   )
 
   # Set attributes in desired order

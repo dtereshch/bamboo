@@ -75,7 +75,7 @@ Patterns are sorted by frequency (most common first).
 The returned data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{n_patterns}, \code{presence_matrix},
+\item{\code{details}}{List containing additional information: \code{count_patterns}, \code{presence_matrix},
 \code{pattern_groups}. The \code{pattern_groups} element is a list where each element corresponds
 to a pattern rank and contains the entity IDs that follow that pattern.}
 }

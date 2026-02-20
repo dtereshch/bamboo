@@ -37,7 +37,7 @@
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
 #'   \item{`details`}{List containing additional information:
-#'         `n_entities_total`, `n_entities_incomplete`, and `entities_incomplete`
+#'         `count_entities_total`, `count_entities_incomplete`, and `entities_incomplete`
 #'         (vector of incomplete entity IDs).}
 #' }
 #'
@@ -68,7 +68,7 @@
 #'
 #' # Calculate share of incomplete entities
 #' details <- attr(result, "details")
-#' share_incomplete <- details$n_entities_incomplete / details$n_entities_total
+#' share_incomplete <- details$count_entities_incomplete / details$count_entities_total
 #'
 #' @export
 describe_incomplete <- function(
@@ -241,8 +241,8 @@ describe_incomplete <- function(
 
   # Build details list with incomplete entities IDs
   details <- list(
-    n_entities_total = length(unique_groups),
-    n_entities_incomplete = nrow(incomplete_result),
+    count_entities_total = length(unique_groups),
+    count_entities_incomplete = nrow(incomplete_result),
     entities_incomplete = incomplete_ids
   )
 

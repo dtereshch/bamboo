@@ -38,7 +38,7 @@
 #' The returned list contains the following components:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `n_patterns`, `presence_matrix`,
+#'   \item{`details`}{List containing additional information: `count_patterns`, `presence_matrix`,
 #'         `pattern_groups`. The `pattern_groups` element is a list where each element corresponds
 #'         to a pattern rank and contains the entity IDs that follow that pattern.}
 #' }
@@ -324,7 +324,7 @@ plot_patterns <- function(
   details <- list(
     presence_matrix = presence_binary_sorted,
     pattern_groups = pattern_groups_sorted,
-    n_patterns = length(pattern_groups_sorted)
+    count_patterns = length(pattern_groups_sorted)
   )
 
   # Return invisible list with metadata and details

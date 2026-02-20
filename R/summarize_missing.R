@@ -38,7 +38,7 @@
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
 #'   \item{`details`}{List containing additional information:
-#'         `n_variables_with_na`, `n_variables_without_na`, `n_variables` (total analyzed),
+#'         `count_variables_with_na`, `count_variables_without_na`, `count_variables` (total analyzed),
 #'         `variables_with_na`, and `variables_without_na`.}
 #' }
 #'
@@ -280,9 +280,9 @@ summarize_missing <- function(
 
   # Build details list with variable information
   details <- list(
-    n_variables_with_na = length(vars_with_na),
-    n_variables_without_na = length(vars_without_na),
-    n_variables = length(selection),
+    count_variables_with_na = length(vars_with_na),
+    count_variables_without_na = length(vars_without_na),
+    count_variables = length(selection),
     variables_with_na = vars_with_na,
     variables_without_na = vars_without_na
   )

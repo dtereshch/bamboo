@@ -59,7 +59,7 @@ The returned data.frame has class \code{"panel_summary"} and the following attri
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information:
-\code{n_variables_with_na}, \code{n_variables_without_na}, \code{n_variables} (total analyzed),
+\code{count_variables_with_na}, \code{count_variables_without_na}, \code{count_variables} (total analyzed),
 \code{variables_with_na}, and \code{variables_without_na}.}
 }
 }

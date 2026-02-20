@@ -51,7 +51,7 @@ The returned data.frame (if any) has class \code{"panel_description"} and the fo
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information:
-\code{n_entities_total}, \code{n_entities_incomplete}, and \code{entities_incomplete}
+\code{count_entities_total}, \code{count_entities_incomplete}, and \code{entities_incomplete}
 (vector of incomplete entity IDs).}
 }
 }
@@ -79,7 +79,7 @@ incomplete_ids <- attr(result, "details")$entities_incomplete
 
 # Calculate share of incomplete entities
 details <- attr(result, "details")
-share_incomplete <- details$n_entities_incomplete / details$n_entities_total
+share_incomplete <- details$count_entities_incomplete / details$count_entities_total
 
 }
 \seealso{
