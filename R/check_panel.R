@@ -69,6 +69,23 @@
 #'
 #' @export
 check_panel <- function(data, group = NULL, time = NULL) {
+  # Helper to sort unique values preserving original class
+  sort_unique_preserve <- function(x) {
+    ux <- unique(x)
+    if (is.numeric(ux)) {
+      sort(ux)
+    } else if (inherits(ux, "Date") || inherits(ux, "POSIXt")) {
+      sort(ux)
+    } else if (is.factor(ux)) {
+      # Convert to character, sort, then rebuild factor with sorted levels
+      char_lev <- as.character(ux)
+      sorted_char <- sort(char_lev)
+      factor(sorted_char, levels = sorted_char, ordered = is.ordered(ux))
+    } else {
+      sort(ux) # character, logical, etc.
+    }
+  }
+
   # Check for panel_data class and extract info from metadata
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -115,12 +132,24 @@ check_panel <- function(data, group = NULL, time = NULL) {
     stop("'time' and 'group' cannot be the same variable")
   }
 
+  # Original vectors (preserve class)
+  group_orig <- data[[group]]
+  time_orig <- data[[time]]
+
+  # Character versions for internal matching
+  group_char <- as.character(group_orig)
+  time_char <- as.character(time_orig)
+
+  # Sorted unique values in original class (for storage)
+  unique_groups_orig <- sort_unique_preserve(group_orig)
+  unique_times_orig <- sort_unique_preserve(time_orig)
+
   # Check for missing values
-  if (any(is.na(data[[group]]))) {
+  if (any(is.na(group_orig))) {
     warning("group variable '", group, "' contains missing values")
   }
 
-  if (any(is.na(data[[time]]))) {
+  if (any(is.na(time_orig))) {
     warning("time variable '", time, "' contains missing values")
   }
 
@@ -133,16 +162,12 @@ check_panel <- function(data, group = NULL, time = NULL) {
   )
 
   # Panel structure
-  n_groups <- length(unique(data[[group]]))
-  n_periods <- length(unique(data[[time]]))
+  n_groups <- length(unique_groups_orig)
+  n_periods <- length(unique_times_orig)
   n_obs <- nrow(data)
 
-  # Get group and time vectors
-  group_vector <- data[[group]]
-  time_vector <- data[[time]]
-
-  # Create combo identifier
-  combos <- paste(group_vector, time_vector, sep = "|")
+  # Create combo identifier (character)
+  combos <- paste(group_char, time_char, sep = "|")
 
   # Check for duplicate group-time combinations
   has_duplicates <- any(duplicated(combos))
@@ -169,7 +194,7 @@ check_panel <- function(data, group = NULL, time = NULL) {
   }
 
   # Check for balanced panel
-  time_by_group <- split(time_vector, group_vector)
+  time_by_group <- split(time_orig, group_orig) # keep original for internal use
   unique_time_sets <- lapply(time_by_group, unique)
   time_set_lengths <- sapply(unique_time_sets, length)
 
@@ -181,21 +206,25 @@ check_panel <- function(data, group = NULL, time = NULL) {
   }
 
   # Identify groups with missing time points (if unbalanced)
+  missing_time_info <- list()
   if (!is_balanced) {
-    # Find all unique time points across all groups
-    all_times <- sort(unique(time_vector))
+    # All unique time points (character for easy comparison)
+    all_times_char <- sort(unique(time_char))
 
-    # For each group, identify missing time points
-    missing_time_info <- list()
-    for (grp in names(time_by_group)) {
-      group_times <- unique(time_by_group[[grp]])
-      missing_times <- setdiff(all_times, group_times)
-      if (length(missing_times) > 0) {
-        missing_time_info[[grp]] <- missing_times
+    # For each group (original class), find missing time points
+    for (grp_val in unique_groups_orig) {
+      grp_char <- as.character(grp_val)
+      group_times_char <- unique(time_char[group_char == grp_char])
+      missing_times_char <- setdiff(all_times_char, group_times_char)
+      if (length(missing_times_char) > 0) {
+        # Convert back to original class by matching
+        missing_times_orig <- unique_times_orig[match(
+          missing_times_char,
+          as.character(unique_times_orig)
+        )]
+        missing_time_info[[grp_char]] <- missing_times_orig
       }
     }
-  } else {
-    missing_time_info <- list()
   }
 
   # Check for irregular time sequence in entire panel
@@ -203,13 +232,11 @@ check_panel <- function(data, group = NULL, time = NULL) {
   time_sequence_regular <- TRUE
 
   if (
-    is.numeric(time_vector) ||
-      inherits(time_vector, "Date") ||
-      inherits(time_vector, "POSIXt")
+    is.numeric(time_orig) ||
+      inherits(time_orig, "Date") ||
+      inherits(time_orig, "POSIXt")
   ) {
-    # Check entire time sequence (across all groups)
-    all_unique_times <- sort(unique(time_vector))
-
+    all_unique_times <- sort(unique(time_orig)) # preserves class
     if (length(all_unique_times) > 1) {
       global_intervals <- diff(all_unique_times)
       if (length(unique(global_intervals)) > 1) {
@@ -221,36 +248,37 @@ check_panel <- function(data, group = NULL, time = NULL) {
 
   # Check for irregular time intervals within groups
   has_irregular_intervals <- FALSE
-  irregular_groups <- character()
+  irregular_groups_orig <- vector("list", 0) # will store original class values
   interval_details <- list()
 
   if (
-    is.numeric(time_vector) ||
-      inherits(time_vector, "Date") ||
-      inherits(time_vector, "POSIXt")
+    is.numeric(time_orig) ||
+      inherits(time_orig, "Date") ||
+      inherits(time_orig, "POSIXt")
   ) {
-    for (grp in names(time_by_group)) {
-      times <- time_by_group[[grp]]
+    for (grp_val in unique_groups_orig) {
+      grp_char <- as.character(grp_val)
+      times <- time_orig[group_char == grp_char] # original class
       unique_times <- sort(unique(times))
       if (length(unique_times) > 1) {
         intervals <- diff(unique_times)
         if (length(unique(intervals)) > 1) {
           has_irregular_intervals <- TRUE
-          irregular_groups <- c(irregular_groups, grp)
-          interval_details[[grp]] <- list(
+          irregular_groups_orig <- c(irregular_groups_orig, grp_val)
+          interval_details[[grp_char]] <- list(
             times = unique_times,
             intervals = intervals,
             is_regular = FALSE
           )
         } else {
-          interval_details[[grp]] <- list(
+          interval_details[[grp_char]] <- list(
             times = unique_times,
             intervals = intervals,
             is_regular = TRUE
           )
         }
       } else {
-        interval_details[[grp]] <- list(
+        interval_details[[grp_char]] <- list(
           times = unique_times,
           intervals = numeric(0),
           is_regular = TRUE
@@ -260,7 +288,7 @@ check_panel <- function(data, group = NULL, time = NULL) {
   }
 
   # Calculate observations per group
-  group_table <- table(data[[group]])
+  group_table <- table(group_orig)
   avg_obs_per_group <- mean(group_table)
 
   # Get groups with minimum and maximum observations
@@ -269,7 +297,7 @@ check_panel <- function(data, group = NULL, time = NULL) {
   groups_with_min_obs <- names(group_table)[group_table == min_obs]
   groups_with_max_obs <- names(group_table)[group_table == max_obs]
 
-  # Build exploration results with human-readable test names
+  # Build exploration results with human-readable test names (unchanged)
   exploration_results <- rbind(
     exploration_results,
     data.frame(
@@ -294,12 +322,12 @@ check_panel <- function(data, group = NULL, time = NULL) {
     exploration_results,
     data.frame(
       variable = "Group completeness",
-      status = ifelse(any(is.na(data[[group]])), "WARNING", "PASS"),
+      status = ifelse(any(is.na(group_orig)), "WARNING", "PASS"),
       message = ifelse(
-        any(is.na(data[[group]])),
+        any(is.na(group_orig)),
         paste(
           "Group variable has",
-          sum(is.na(data[[group]])),
+          sum(is.na(group_orig)),
           "missing values"
         ),
         "No missing values in group variable"
@@ -322,10 +350,10 @@ check_panel <- function(data, group = NULL, time = NULL) {
     exploration_results,
     data.frame(
       variable = "Time completeness",
-      status = ifelse(any(is.na(data[[time]])), "WARNING", "PASS"),
+      status = ifelse(any(is.na(time_orig)), "WARNING", "PASS"),
       message = ifelse(
-        any(is.na(data[[time]])),
-        paste("Time variable has", sum(is.na(data[[time]])), "missing values"),
+        any(is.na(time_orig)),
+        paste("Time variable has", sum(is.na(time_orig)), "missing values"),
         "No missing values in time variable"
       ),
       stringsAsFactors = FALSE
@@ -368,9 +396,9 @@ check_panel <- function(data, group = NULL, time = NULL) {
 
   # Check time sequence regularity (entire panel)
   if (
-    is.numeric(time_vector) ||
-      inherits(time_vector, "Date") ||
-      inherits(time_vector, "POSIXt")
+    is.numeric(time_orig) ||
+      inherits(time_orig, "Date") ||
+      inherits(time_orig, "POSIXt")
   ) {
     exploration_results <- rbind(
       exploration_results,
@@ -399,9 +427,9 @@ check_panel <- function(data, group = NULL, time = NULL) {
 
   # Check interval regularity within groups
   if (
-    is.numeric(time_vector) ||
-      inherits(time_vector, "Date") ||
-      inherits(time_vector, "POSIXt")
+    is.numeric(time_orig) ||
+      inherits(time_orig, "Date") ||
+      inherits(time_orig, "POSIXt")
   ) {
     exploration_results <- rbind(
       exploration_results,
@@ -435,43 +463,53 @@ check_panel <- function(data, group = NULL, time = NULL) {
     "PASS"
   )
 
-  # Create simplified details list with problematic observations only
+  # Create simplified details list with problematic observations only,
+  # now using original class for group/time identifiers.
   details_list <- list()
 
-  # Add problematic observations for each test with descriptive names
-  if (any(is.na(data[[group]]))) {
-    details_list$missing_group_values <- which(is.na(data[[group]]))
+  if (any(is.na(group_orig))) {
+    details_list$missing_group_values <- which(is.na(group_orig))
   }
 
-  if (any(is.na(data[[time]]))) {
-    details_list$missing_time_values <- which(is.na(data[[time]]))
+  if (any(is.na(time_orig))) {
+    details_list$missing_time_values <- which(is.na(time_orig))
   }
 
   if (has_duplicates) {
     details_list$duplicate_observations <- duplicate_indices
-    details_list$duplicate_combinations <- duplicate_combos
+    details_list$duplicate_combinations <- duplicate_combos # character combos – fine
   }
 
   if (!is_balanced) {
-    details_list$unbalanced_groups <- names(missing_time_info)
+    # unbalanced_groups: original class
+    details_list$unbalanced_groups <- unique_groups_orig[sapply(
+      unique_groups_orig,
+      function(g) {
+        grp_char <- as.character(g)
+        !is.null(missing_time_info[[grp_char]])
+      }
+    )]
     if (length(details_list$unbalanced_groups) > 0) {
+      # missing_time_points already stored with original class times
       details_list$missing_time_points <- missing_time_info
     }
   }
 
   if (has_irregular_time_sequence) {
-    details_list$irregular_time_intervals <- diff(sort(unique(time_vector)))
-    details_list$all_time_points <- sort(unique(time_vector))
+    details_list$irregular_time_intervals <- diff(sort(unique(time_orig)))
+    details_list$all_time_points <- sort(unique(time_orig)) # original class
   }
 
   if (has_irregular_intervals) {
-    details_list$irregular_interval_groups <- irregular_groups
-    details_list$group_interval_details <- interval_details[irregular_groups]
+    # irregular_interval_groups: original class
+    details_list$irregular_interval_groups <- irregular_groups_orig
+    # group_interval_details already contains original class times
+    details_list$group_interval_details <- interval_details
   }
 
-  # Create logical summary for key tests (TRUE = passed, FALSE = failed/warning)
-  details_list$group_completeness <- !any(is.na(data[[group]]))
-  details_list$time_completeness <- !any(is.na(data[[time]]))
+  # Logical summaries (unchanged)
+  details_list$group_completeness <- !any(is.na(group_orig))
+  details_list$time_completeness <- !any(is.na(time_orig))
   details_list$no_duplicates <- !has_duplicates
   details_list$balance <- is_balanced
   details_list$time_sequence <- !has_irregular_time_sequence

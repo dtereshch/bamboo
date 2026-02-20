@@ -46,6 +46,23 @@
 #'
 #' @export
 describe_periods <- function(data, group = NULL, time = NULL) {
+  # Helper to sort unique values preserving original class
+  sort_unique_preserve <- function(x) {
+    ux <- unique(x)
+    if (is.numeric(ux)) {
+      sort(ux)
+    } else if (inherits(ux, "Date") || inherits(ux, "POSIXt")) {
+      sort(ux)
+    } else if (is.factor(ux)) {
+      # Convert to character, sort, then rebuild factor with sorted levels
+      char_lev <- as.character(ux)
+      sorted_char <- sort(char_lev)
+      factor(sorted_char, levels = sorted_char, ordered = is.ordered(ux))
+    } else {
+      sort(ux) # character, logical, etc.
+    }
+  }
+
   # Check for panel_data class and extract info from metadata
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -88,21 +105,17 @@ describe_periods <- function(data, group = NULL, time = NULL) {
     stop('variable "', time, '" not found in data')
   }
 
-  # Extract variables
-  group_var <- as.character(data[[group]])
-  time_var <- as.character(data[[time]])
+  # Original vectors
+  group_orig <- data[[group]]
+  time_orig <- data[[time]]
 
-  # Get unique values
-  unique_times <- unique(time_var)
-  unique_groups <- unique(group_var)
+  # Character versions for internal matching
+  time_char <- as.character(time_orig)
 
-  # Order time periods
-  if (all(grepl("^-?\\d+\\.?\\d*$", unique_times))) {
-    time_order <- order(as.numeric(unique_times))
-  } else {
-    time_order <- order(unique_times)
-  }
-  ordered_times <- unique_times[time_order]
+  # Get unique time periods in original class, sorted appropriately
+  unique_times_orig <- sort_unique_preserve(time_orig)
+  # Character version for ordering and indexing
+  unique_times_char <- as.character(unique_times_orig)
 
   # Identify substantive variables (excluding group and time)
   substantive_vars <- setdiff(names(data), c(group, time))
@@ -112,72 +125,72 @@ describe_periods <- function(data, group = NULL, time = NULL) {
   }
 
   # Initialize result vectors and entity lists
-  nominal_counts <- integer(length(ordered_times))
-  observed_counts <- integer(length(ordered_times))
-  complete_counts <- integer(length(ordered_times))
+  nominal_counts <- integer(length(unique_times_orig))
+  observed_counts <- integer(length(unique_times_orig))
+  complete_counts <- integer(length(unique_times_orig))
 
-  entities_nominal <- vector("list", length(ordered_times))
-  entities_observed <- vector("list", length(ordered_times))
-  entities_complete <- vector("list", length(ordered_times))
+  entities_nominal <- vector("list", length(unique_times_orig))
+  entities_observed <- vector("list", length(unique_times_orig))
+  entities_complete <- vector("list", length(unique_times_orig))
 
-  names(entities_nominal) <- ordered_times
-  names(entities_observed) <- ordered_times
-  names(entities_complete) <- ordered_times
+  names(entities_nominal) <- unique_times_char
+  names(entities_observed) <- unique_times_char
+  names(entities_complete) <- unique_times_char
 
   # Calculate statistics for each time period
-  for (i in seq_along(ordered_times)) {
-    current_time <- ordered_times[i]
+  for (i in seq_along(unique_times_orig)) {
+    current_time_char <- unique_times_char[i]
 
-    # Get indices for current time period
-    time_indices <- which(time_var == current_time)
+    # Get indices for current time period (using character)
+    time_indices <- which(time_char == current_time_char)
 
     # Nominal count (all rows in this period)
     nominal_counts[i] <- length(time_indices)
 
-    # Get all entities in this period (nominal)
+    # Get all entities in this period (nominal) – original class
     if (length(time_indices) > 0) {
-      entities_nominal[[i]] <- unique(group_var[time_indices])
+      entities_nominal[[i]] <- unique(group_orig[time_indices])
     } else {
-      entities_nominal[[i]] <- character(0)
+      entities_nominal[[i]] <- vector(class(group_orig), 0)
     }
 
     if (length(time_indices) > 0) {
       # Extract data for current time period
       period_data <- data[time_indices, substantive_vars, drop = FALSE]
-      period_groups <- group_var[time_indices]
+      period_groups_orig <- group_orig[time_indices]
 
       # Observed: at least one non-NA value in substantive variables
       has_some_data <- apply(period_data, 1, function(x) any(!is.na(x)))
       observed_counts[i] <- sum(has_some_data)
 
-      # Get entities with observed data
+      # Get entities with observed data (original class)
       if (any(has_some_data)) {
-        entities_observed[[i]] <- unique(period_groups[has_some_data])
+        entities_observed[[i]] <- unique(period_groups_orig[has_some_data])
       } else {
-        entities_observed[[i]] <- character(0)
+        entities_observed[[i]] <- vector(class(group_orig), 0)
       }
 
       # Complete: no NA values in substantive variables
       has_all_data <- apply(period_data, 1, function(x) all(!is.na(x)))
       complete_counts[i] <- sum(has_all_data)
 
-      # Get entities with complete data
+      # Get entities with complete data (original class)
       if (any(has_all_data)) {
-        entities_complete[[i]] <- unique(period_groups[has_all_data])
+        entities_complete[[i]] <- unique(period_groups_orig[has_all_data])
       } else {
-        entities_complete[[i]] <- character(0)
+        entities_complete[[i]] <- vector(class(group_orig), 0)
       }
     } else {
       observed_counts[i] <- 0
       complete_counts[i] <- 0
-      entities_observed[[i]] <- character(0)
-      entities_complete[[i]] <- character(0)
+      entities_observed[[i]] <- vector(class(group_orig), 0)
+      entities_complete[[i]] <- vector(class(group_orig), 0)
     }
   }
 
-  # Create result data.frame
+  # Create result data.frame – first column uses original class time values
   result_df <- data.frame(
-    time_period = ordered_times,
+    time_period = unique_times_orig,
     nominal = nominal_counts,
     observed = observed_counts,
     complete = complete_counts,
@@ -195,7 +208,7 @@ describe_periods <- function(data, group = NULL, time = NULL) {
     time = time
   )
 
-  # Build details list with entity lists
+  # Build details list with entity lists (original class)
   details <- list(
     entities_nominal = entities_nominal,
     entities_observed = entities_observed,

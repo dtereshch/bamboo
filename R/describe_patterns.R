@@ -101,6 +101,23 @@ describe_patterns <- function(
   detailed = TRUE,
   digits = 3
 ) {
+  # Helper to sort unique values preserving original class
+  sort_unique_preserve <- function(x) {
+    ux <- unique(x)
+    if (is.numeric(ux)) {
+      sort(ux)
+    } else if (inherits(ux, "Date") || inherits(ux, "POSIXt")) {
+      sort(ux)
+    } else if (is.factor(ux)) {
+      # Convert to character, sort, then rebuild factor with sorted levels
+      char_lev <- as.character(ux)
+      sorted_char <- sort(char_lev)
+      factor(sorted_char, levels = sorted_char, ordered = is.ordered(ux))
+    } else {
+      sort(ux) # character, logical, etc.
+    }
+  }
+
   # Check for panel_data class and extract info from metadata
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -184,6 +201,22 @@ describe_patterns <- function(
     }
   }
 
+  # Original vectors
+  group_orig <- data[[group]]
+  time_orig <- data[[time]]
+
+  # Character versions for internal use
+  group_char <- as.character(group_orig)
+  time_char <- as.character(time_orig)
+
+  # Sorted unique values in original class (for storage)
+  unique_groups_orig <- sort_unique_preserve(group_orig)
+  unique_periods_orig <- sort_unique_preserve(time_orig)
+
+  # Character versions for dimnames etc.
+  unique_groups_char <- as.character(unique_groups_orig)
+  unique_periods_char <- as.character(unique_periods_orig)
+
   # Identify data columns (excluding group and time)
   data_cols <- setdiff(names(data), c(group, time))
 
@@ -191,33 +224,18 @@ describe_patterns <- function(
     stop("no data columns found (excluding group and time variables)")
   }
 
-  # Get unique groups and periods for attributes
-  unique_groups <- unique(as.character(data[[group]]))
-  unique_periods <- unique(as.character(data[[time]]))
-
-  # Sort time periods if they appear numeric
-  if (all(grepl("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$", unique_periods))) {
-    unique_periods <- as.character(sort(as.numeric(unique_periods)))
-  } else {
-    unique_periods <- sort(unique_periods)
-  }
-
   # Filter data based on presence
   if (presence == "nominal") {
-    # Keep all rows (no filtering)
     data_filtered <- data
+    # For nominal, we will later mark presence for all rows
   } else if (presence == "observed") {
-    # Keep rows where at least one data column is not NA
     if (nrow(data) > 0) {
-      has_data <- apply(data[data_cols], 1, function(row) {
-        !all(is.na(row))
-      })
+      has_data <- apply(data[data_cols], 1, function(row) !all(is.na(row)))
       data_filtered <- data[has_data, ]
     } else {
       data_filtered <- data
     }
   } else if (presence == "complete") {
-    # Keep rows where all data columns are not NA
     if (nrow(data) > 0) {
       complete_rows <- complete.cases(data[data_cols])
       data_filtered <- data[complete_rows, ]
@@ -226,86 +244,57 @@ describe_patterns <- function(
     }
   }
 
-  # Convert group and time to character to handle different classes
-  group_vec <- as.character(data_filtered[[group]])
-  time_vec <- as.character(data_filtered[[time]])
-
-  # Get all entities and time periods
-  all_groups <- unique(as.character(data[[group]]))
-  all_times <- sort(unique_periods)
+  # Character vectors for filtered data (if any)
+  if (nrow(data_filtered) > 0) {
+    group_filt_char <- as.character(data_filtered[[group]])
+    time_filt_char <- as.character(data_filtered[[time]])
+  } else {
+    group_filt_char <- character(0)
+    time_filt_char <- character(0)
+  }
 
   # Create a matrix of all possible combinations (initialize with 0)
   presence_binary <- matrix(
     0,
-    nrow = length(all_groups),
-    ncol = length(all_times),
-    dimnames = list(all_groups, all_times)
+    nrow = length(unique_groups_orig),
+    ncol = length(unique_periods_orig),
+    dimnames = list(unique_groups_char, unique_periods_char)
   )
-
-  time_cols <- all_times
 
   # Fill the binary matrix based on presence
   if (presence == "nominal") {
-    # For nominal type, mark 1 for all rows in filtered data
-    for (i in seq_along(group_vec)) {
-      row_group <- as.character(group_vec[i])
-      row_time <- as.character(time_vec[i])
-      presence_binary[row_group, row_time] <- 1
+    # Mark 1 for all rows in filtered data (which is all rows)
+    for (i in seq_along(group_filt_char)) {
+      presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
     }
   } else if (presence == "observed") {
-    # For observed type, mark 1 for rows with at least one non-NA
-    # The data_filtered already contains only rows with at least one non-NA
-    for (i in seq_along(group_vec)) {
-      row_group <- as.character(group_vec[i])
-      row_time <- as.character(time_vec[i])
-      presence_binary[row_group, row_time] <- 1
+    # Mark 1 for rows with at least one non-NA
+    for (i in seq_along(group_filt_char)) {
+      presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
     }
   } else if (presence == "complete") {
-    # For complete type, mark 1 for complete rows only
-    # Need to check all rows in original data
-    complete_rows <- complete.cases(data[data_cols])
-    all_group_vec <- as.character(data[[group]])
-    all_time_vec <- as.character(data[[time]])
-
-    for (i in seq_along(all_group_vec)) {
-      if (complete_rows[i]) {
-        row_group <- as.character(all_group_vec[i])
-        row_time <- as.character(all_time_vec[i])
-        if (row_time %in% time_cols) {
-          presence_binary[row_group, row_time] <- 1
-        }
-      }
+    # Mark 1 for complete rows only (data_filtered already contains only complete rows)
+    for (i in seq_along(group_filt_char)) {
+      presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
     }
   }
 
-  # Convert to data frame for pattern analysis
-  presence_df <- as.data.frame(presence_binary)
-  presence_df$group <- rownames(presence_df)
-  presence_df <- presence_df[c("group", time_cols)]
-
-  # Count patterns and create pattern groups
-  pattern_cols <- setdiff(names(presence_df), "group")
-  pattern_strings <- apply(presence_df[pattern_cols], 1, function(x) {
+  # Count patterns and create pattern groups (store original class group values)
+  pattern_strings <- apply(presence_binary, 1, function(x) {
     paste(x, collapse = "")
   })
-
   pattern_counts <- table(pattern_strings)
 
-  # Create pattern_groups list
+  # Create pattern_groups list with original class group identifiers
   pattern_groups <- list()
-
-  # Create pattern groups from the binary matrix
-  for (entity in all_groups) {
-    pattern_vec <- presence_binary[entity, ]
-    pattern_string <- paste(pattern_vec, collapse = "")
-
-    if (!pattern_string %in% names(pattern_groups)) {
-      pattern_groups[[pattern_string]] <- character(0)
+  for (i in seq_along(unique_groups_orig)) {
+    grp_orig <- unique_groups_orig[i]
+    grp_char <- unique_groups_char[i]
+    pat_str <- pattern_strings[i]
+    if (!pat_str %in% names(pattern_groups)) {
+      pattern_groups[[pat_str]] <- vector(class(grp_orig), 0) # preserve class
     }
-    pattern_groups[[pattern_string]] <- c(
-      pattern_groups[[pattern_string]],
-      entity
-    )
+    pattern_groups[[pat_str]] <- c(pattern_groups[[pat_str]], grp_orig)
   }
 
   # Create result data frame
@@ -314,37 +303,37 @@ describe_patterns <- function(
     stringsAsFactors = FALSE
   )
 
-  # Add time period columns
-  for (i in seq_along(time_cols)) {
-    result[[time_cols[i]]] <- as.numeric(substr(names(pattern_counts), i, i))
+  # Add time period columns (preserve original class for column names? column names must be character)
+  time_cols_char <- unique_periods_char
+  for (i in seq_along(time_cols_char)) {
+    result[[time_cols_char[i]]] <- as.numeric(substr(
+      names(pattern_counts),
+      i,
+      i
+    ))
   }
 
   # Add count and share columns
   result$count <- as.numeric(pattern_counts)
   result$share <- round_if_needed(result$count / sum(result$count), digits)
 
-  # Sort by count (descending) FIRST
+  # Sort by count (descending)
   result <- result[order(-result$count), ]
-
-  # Reset rank numbers to follow the new sorted order
   result$rank <- seq_len(nrow(result))
   rownames(result) <- NULL
 
-  # Reorder pattern_groups to match the sorted patterns in result
-  # First, get the pattern strings in the sorted order
-  sorted_pattern_strings <- apply(result[time_cols], 1, function(x) {
+  # Reorder pattern_groups to match sorted patterns
+  sorted_pattern_strings <- apply(result[time_cols_char], 1, function(x) {
     paste(x, collapse = "")
   })
-
-  # Create a reordered pattern_groups list
   pattern_groups_sorted <- list()
   for (i in seq_along(sorted_pattern_strings)) {
-    pattern_string <- sorted_pattern_strings[i]
-    pattern_groups_sorted[[as.character(i)]] <- pattern_groups[[pattern_string]]
+    pat_str <- sorted_pattern_strings[i]
+    pattern_groups_sorted[[as.character(i)]] <- pattern_groups[[pat_str]]
   }
   pattern_groups <- pattern_groups_sorted
 
-  # Build base details list (will be extended depending on format)
+  # Build base details list
   details_base <- list(
     count_patterns = nrow(result),
     presence_matrix = presence_binary,
@@ -353,13 +342,12 @@ describe_patterns <- function(
 
   # Convert to long format if requested
   if (format == "long") {
-    # Reshape from wide to long format
     long_result <- data.frame()
 
     for (i in seq_len(nrow(result))) {
       pattern_row <- result[i, ]
 
-      for (t in time_cols) {
+      for (t in time_cols_char) {
         long_result <- rbind(
           long_result,
           data.frame(
@@ -374,17 +362,13 @@ describe_patterns <- function(
       }
     }
 
-    # Rename the "time" column to match the original time variable name
+    # Rename the "time" column to match original time variable name
     names(long_result)[names(long_result) == "time"] <- time
 
     if (!detailed) {
-      # Return simplified version with only rank, time, and presence columns
       simplified_result <- long_result[c("rank", time, "presence")]
-
-      # Build metadata
-      call <- match.call()
-      metadata <- list(
-        function_name = as.character(call[[1]]),
+      attr(simplified_result, "metadata") <- list(
+        function_name = as.character(match.call()[[1]]),
         group = group,
         time = time,
         presence = presence,
@@ -392,19 +376,13 @@ describe_patterns <- function(
         detailed = detailed,
         digits = digits
       )
-
-      # Set attributes
-      attr(simplified_result, "metadata") <- metadata
       attr(simplified_result, "details") <- details_base
-
       class(simplified_result) <- c("panel_description", "data.frame")
       return(simplified_result)
     }
 
-    # Build metadata for long result
-    call <- match.call()
-    metadata <- list(
-      function_name = as.character(call[[1]]),
+    attr(long_result, "metadata") <- list(
+      function_name = as.character(match.call()[[1]]),
       group = group,
       time = time,
       presence = presence,
@@ -412,24 +390,16 @@ describe_patterns <- function(
       detailed = detailed,
       digits = digits
     )
-
-    # Set attributes
-    attr(long_result, "metadata") <- metadata
     attr(long_result, "details") <- details_base
-
     class(long_result) <- c("panel_description", "data.frame")
     return(long_result)
   }
 
   # Wide format handling
   if (!detailed) {
-    # Return simplified version with only rank and time period columns
-    simplified_result <- result[c("rank", time_cols)]
-
-    # Build metadata
-    call <- match.call()
-    metadata <- list(
-      function_name = as.character(call[[1]]),
+    simplified_result <- result[c("rank", time_cols_char)]
+    attr(simplified_result, "metadata") <- list(
+      function_name = as.character(match.call()[[1]]),
       group = group,
       time = time,
       presence = presence,
@@ -437,19 +407,14 @@ describe_patterns <- function(
       detailed = detailed,
       digits = digits
     )
-
-    # Set attributes
-    attr(simplified_result, "metadata") <- metadata
     attr(simplified_result, "details") <- details_base
-
     class(simplified_result) <- c("panel_description", "data.frame")
     return(simplified_result)
   }
 
-  # Build metadata for full wide result
-  call <- match.call()
-  metadata <- list(
-    function_name = as.character(call[[1]]),
+  # Full wide result
+  attr(result, "metadata") <- list(
+    function_name = as.character(match.call()[[1]]),
     group = group,
     time = time,
     presence = presence,
@@ -457,12 +422,7 @@ describe_patterns <- function(
     detailed = detailed,
     digits = digits
   )
-
-  # Set attributes
-  attr(result, "metadata") <- metadata
   attr(result, "details") <- details_base
-
-  # Set class
   class(result) <- c("panel_description", "data.frame")
 
   return(result)
