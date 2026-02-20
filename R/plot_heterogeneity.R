@@ -237,9 +237,6 @@ plot_heterogeneity <- function(
       cex = 1.5 * cex
     )
 
-    # Add grid
-    grid()
-
     # Add legend to every plot
     legend(
       "topright",

@@ -341,9 +341,6 @@ plot_periods <- function(
     xaxt = "n" # Suppress default x-axis
   )
 
-  # Add grid FIRST (behind the histogram)
-  grid()
-
   # Add histogram bars WITH FILL - properly aligned to integer positions
   # Bars should go from integer-0.5 to integer+0.5
   for (i in seq_along(hist_data$counts)) {
