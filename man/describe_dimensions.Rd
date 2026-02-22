@@ -16,56 +16,35 @@ Not required if data has panel attributes.}
 Not required if data has panel attributes.}
 }
 \value{
-A data.frame with panel dimension counts.
+A data.frame with panel dimension counts. Contains two columns:
+\describe{
+\item{\code{dimension}}{Dimension name: "observations", "entities", "periods", "variables"}
+\item{\code{count}}{Corresponding count (integer).}
+}
 }
 \description{
-This function calculates number of rows, entities/groups, and time periods for panel data.
-The function uses different ways to define the completeness of each row, entity/group, and period.
+This function provides basic dimension counts for panel data:
+number of observations (rows with data), unique entities, unique time periods,
+and substantive variables.
 }
 \details{
-This function provides panel data structure information across three presence
-definitions:
+The counts are defined as follows:
 \itemize{
-\item{\bold{nominal:}}{ Entity/time is present if it has a row in the data (even with only panel ID variables)}
-\item{\bold{observed:}}{
-\itemize{
-\item{For rows: Row has at least one non-NA substantive variable}
-\item{For entities: Entity has at least one non-NA substantive variable at \bold{each} time period}
-\item{For periods: Period has at least one non-NA substantive variable for \bold{all} entities}
-}
-}
-\item{\bold{complete:}}{
-\itemize{
-\item{For rows: Row has no NA values in all substantive variables}
-\item{For entities: Entity has no NA values in all substantive variables at \bold{each} time period}
-\item{For periods: Period has no NA values in all substantive variables for \bold{all} entities}
-}
-}
+\item{\bold{observations}}{ Number of rows that contain at least one non‑missing value
+in any substantive variable (i.e., columns other than the group and time identifiers).}
+\item{\bold{entities}}{ Number of distinct values in the group variable.}
+\item{\bold{periods}}{ Number of distinct values in the time variable.}
+\item{\bold{variables}}{ Number of substantive variables (all columns except group and time).}
 }
 
-The returned data.frame has 4 columns:
-\describe{
-\item{\code{dimension}}{Dimension name: "rows", "entities", or "periods"}
-\item{\code{nominal}}{Count based on presence of any row (even with only panel ID variables)}
-\item{\code{observed}}{Count based on presence of at least one non-NA substantive variable}
-\item{\code{complete}}{Count based on presence of no NA values in all substantive variables}
-}
-
-The data.frame has class \code{"panel_description"} and the following attributes:
+The returned data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing detailed information about which entities, periods,
-and entity-period combinations meet each presence criterion:
+\item{\code{details}}{List containing:
 \itemize{
-\item{\code{entities_nominal}: All entity values present in the data}
-\item{\code{entities_observed}: Entity values that have observed data in all periods where they appear}
-\item{\code{entities_complete}: Entity values that have complete data in all periods where they appear}
-\item{\code{periods_nominal}: All time period values present in the data}
-\item{\code{periods_observed}: Period values that have observed data for all entities that appear in that period}
-\item{\code{periods_complete}: Period values that have complete data for all entities that appear in that period}
-\item{\code{rows_nominal}: All entity-period combinations (as "entity_time" strings) present in the data}
-\item{\code{rows_observed}: Entity-period combinations that have at least one non-NA substantive variable}
-\item{\code{rows_complete}: Entity-period combinations that have no NA values in all substantive variables}
+\item{\code{entities}: Vector of unique entity identifiers (original class).}
+\item{\code{periods}: Vector of unique time period identifiers (original class).}
+\item{\code{variables}: Character vector of substantive variable names.}
 }
 }
 }
@@ -73,20 +52,19 @@ and entity-period combinations meet each presence criterion:
 \examples{
 data(production)
 
-# Method 1: With regular data.frame
-panel_desc <- describe_dimensions(production, group = "firm", time = "year")
-print(panel_desc)
+# Basic usage
+describe_dimensions(production, group = "firm", time = "year")
 
-# Method 2: With data.frame with panel attributes
+# With panel attributes
 panel_data <- set_panel(production, group = "firm", time = "year")
-panel_desc <- describe_dimensions(panel_data)
-print(panel_desc)
+describe_dimensions(panel_data)
 
 # Access detailed information
-attr(panel_desc, "details")$entities_observed
-attr(panel_desc, "details")$rows_complete
+dims <- describe_dimensions(production, group = "firm", time = "year")
+attr(dims, "details")$entities
+attr(dims, "details")$variables
 
 }
 \seealso{
-\code{\link[=check_panel]{check_panel()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=set_panel]{set_panel()}}
+\code{\link[=check_panel]{check_panel()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=set_panel]{set_panel()}}
 }
