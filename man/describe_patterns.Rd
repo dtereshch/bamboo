@@ -8,7 +8,6 @@ describe_patterns(
   data,
   group = NULL,
   time = NULL,
-  presence = "observed",
   format = "wide",
   detailed = TRUE,
   digits = 3
@@ -22,9 +21,6 @@ Not required if data has panel attributes.}
 
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
-
-\item{presence}{A character string specifying how to define entity presence: "nominal", "observed", or "complete".
-Default = "observed".}
 
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
@@ -40,12 +36,8 @@ A data.frame with presence patterns.
 This function describes entities presence patterns in panel data over time.
 }
 \details{
-\strong{Presence} parameter definitions:
-\describe{
-\item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
-\item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-\item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
-}
+An entity/time combination is considered \strong{present} if the corresponding row contains at least
+one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 
 The output format depends on the \code{format} and \code{detailed} parameters:
 
@@ -89,10 +81,6 @@ describe_patterns(production, group = "firm", time = "year")
 # With panel attributes
 panel_data <- set_panel(production, group = "firm", time = "year")
 describe_patterns(panel_data)
-
-# Use different presence types
-describe_patterns(production, group = "firm", time = "year", presence = "nominal")
-describe_patterns(production, group = "firm", time = "year", presence = "complete")
 
 # Simplified version
 describe_patterns(production, group = "firm", time = "year", detailed = FALSE)

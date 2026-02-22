@@ -4,13 +4,7 @@
 \alias{plot_periods}
 \title{Time Coverage Distribution Visualization}
 \usage{
-plot_periods(
-  data,
-  group = NULL,
-  time = NULL,
-  presence = "observed",
-  colors = c("#1E4A3B", "white")
-)
+plot_periods(data, group = NULL, time = NULL, colors = c("#1E4A3B", "white"))
 }
 \arguments{
 \item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
@@ -21,9 +15,6 @@ Not required if data has panel attributes.}
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
 
-\item{presence}{A character string specifying how to define entity presence: "observed", "nominal", or "complete".
-Default = "observed".}
-
 \item{colors}{A character vector of length 2 specifying the fill color and line color for the histogram.
 First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").}
 }
@@ -33,23 +24,18 @@ Creates a histogram showing the distribution of time coverage across entities.
 }
 \description{
 This function calculates summary statistics and creates a histogram showing
-the distribution of time periods covered by each entity in panel data,
-based on the specified presence definition.
+the distribution of time periods covered by each entity in panel data.
 }
 \details{
-\strong{Presence} parameter definitions:
-\describe{
-\item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
-\item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-\item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
-}
+An entity/time combination is considered \strong{present} if the corresponding row contains at least
+one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 
 The x-axis shows the number of time periods covered by each entity, and the
 y-axis shows the count/frequency of entities with that coverage.
 
 The returned list contains the following components:
 \describe{
-\item{\code{metadata}}{List containing the function name, group, time, presence, colors.}
+\item{\code{metadata}}{List containing the function name, group, time, colors.}
 \item{\code{details}}{List containing:
 \itemize{
 \item \code{coverage_by_entity}: Named vector with number of periods covered per entity.
@@ -67,10 +53,6 @@ plot_periods(production, group = "firm", time = "year")
 # With panel attributes
 panel_data <- set_panel(production, group = "firm", time = "year")
 plot_periods(panel_data)
-
-# Use different presence types
-plot_periods(production, group = "firm", time = "year", presence = "nominal")
-plot_periods(production, group = "firm", time = "year", presence = "complete")
 
 # Custom colors - gray fill with black line
 plot_periods(production, group = "firm", time = "year", colors = c("gray", "black"))

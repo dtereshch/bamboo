@@ -7,8 +7,6 @@
 #'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
 #'        Not required if data has panel attributes.
-#' @param presence A character string specifying how to define entity presence: "nominal", "observed", or "complete".
-#'        Default = "observed".
 #' @param max_patterns An integer specifying the maximum number of distinct patterns to display.
 #'        If not specified, all patterns are shown.
 #' @param colors A character vector of two colors for present and missing observations.
@@ -18,16 +16,12 @@
 #' Creates a heatmap showing presence/absence patterns.
 #'
 #' @details
-#' \strong{Presence} parameter definitions:
-#' \describe{
-#'   \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
-#'   \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-#'   \item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
-#' }
+#' An entity/time combination is considered **present** if the corresponding row contains at least
+#' one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 #'
 #' The heatmap shows:
 #' \itemize{
-#'   \item \strong{Present}: Entity is present in the time period (based on the specified presence type)
+#'   \item \strong{Present}: Entity is present in the time period
 #'   \item \strong{Missing}: Entity is absent in the time period
 #' }
 #'
@@ -63,7 +57,6 @@ plot_patterns <- function(
   data,
   group = NULL,
   time = NULL,
-  presence = "observed",
   max_patterns = NULL,
   colors = c("#1E4A3B", "white")
 ) {
@@ -96,15 +89,6 @@ plot_patterns <- function(
   }
   if (!is.character(time) || length(time) != 1) {
     stop("'time' must be a single character string, not ", class(time)[1])
-  }
-  if (!is.character(presence) || length(presence) != 1) {
-    stop(
-      "'presence' must be a single character string, not ",
-      class(presence)[1]
-    )
-  }
-  if (!presence %in% c("observed", "nominal", "complete")) {
-    stop('presence must be one of: "observed", "nominal", "complete"')
   }
   if (!group %in% names(data)) {
     stop('variable "', group, '" not found in data')
@@ -144,7 +128,7 @@ plot_patterns <- function(
   }
   time_cols <- all_times
 
-  # --- Create binary presence matrix ---
+  # --- Create binary presence matrix using "observed" definition ---
   presence_binary <- matrix(
     0,
     nrow = length(all_groups),
@@ -155,26 +139,12 @@ plot_patterns <- function(
   group_vec <- as.character(data[[group]])
   time_vec <- as.character(data[[time]])
 
-  if (presence == "nominal") {
-    for (i in seq_along(group_vec)) {
+  has_at_least_one_non_na <- apply(data[data_cols], 1, function(row) {
+    !all(is.na(row))
+  })
+  for (i in seq_along(group_vec)) {
+    if (has_at_least_one_non_na[i]) {
       presence_binary[group_vec[i], time_vec[i]] <- 1
-    }
-  } else if (presence == "observed") {
-    has_at_least_one_non_na <- apply(data[data_cols], 1, function(row) {
-      !all(is.na(row))
-    })
-    for (i in seq_along(group_vec)) {
-      if (has_at_least_one_non_na[i]) {
-        presence_binary[group_vec[i], time_vec[i]] <- 1
-      }
-    }
-  } else {
-    # complete
-    complete_rows <- complete.cases(data[data_cols])
-    for (i in seq_along(group_vec)) {
-      if (complete_rows[i]) {
-        presence_binary[group_vec[i], time_vec[i]] <- 1
-      }
     }
   }
 
@@ -315,7 +285,6 @@ plot_patterns <- function(
     function_name = as.character(call[[1]]),
     group = group,
     time = time,
-    presence = presence,
     max_patterns = max_patterns,
     colors = colors
   )

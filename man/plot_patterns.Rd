@@ -8,7 +8,6 @@ plot_patterns(
   data,
   group = NULL,
   time = NULL,
-  presence = "observed",
   max_patterns = NULL,
   colors = c("#1E4A3B", "white")
 )
@@ -21,9 +20,6 @@ Not required if data has panel attributes.}
 
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
-
-\item{presence}{A character string specifying how to define entity presence: "nominal", "observed", or "complete".
-Default = "observed".}
 
 \item{max_patterns}{An integer specifying the maximum number of distinct patterns to display.
 If not specified, all patterns are shown.}
@@ -39,16 +35,12 @@ Creates a heatmap showing presence/absence patterns.
 This function creates a heatmap showing the presence/absence pattern of each entity over time.
 }
 \details{
-\strong{Presence} parameter definitions:
-\describe{
-\item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
-\item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-\item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
-}
+An entity/time combination is considered \strong{present} if the corresponding row contains at least
+one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 
 The heatmap shows:
 \itemize{
-\item \strong{Present}: Entity is present in the time period (based on the specified presence type)
+\item \strong{Present}: Entity is present in the time period
 \item \strong{Missing}: Entity is absent in the time period
 }
 

@@ -8,8 +8,6 @@
 #'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
 #'        Not required if data has panel attributes.
-#' @param presence A character string specifying how to define entity presence: "nominal", "observed", or "complete".
-#'        Default = "observed".
 #' @param detailed A logical flag indicating whether to return additional statistics (p5, p25, p50, p75, p95).
 #'        Default = FALSE.
 #' @param digits An integer specifying the number of decimal places for rounding mean values.
@@ -21,6 +19,9 @@
 #' The statistics for entities describe the distribution of entities observed per time period
 #' (i.e., cross-sectional size per period), while statistics for periods describe the distribution
 #' of time periods observed per entity (i.e., temporal length per entity).
+#'
+#' An entity/time combination is considered **present** if the corresponding row contains at least
+#' one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 #'
 #' The returned data.frame contains the following columns:
 #' \describe{
@@ -49,13 +50,6 @@
 #'   \item{\code{p95}}{95th percentile}
 #' }
 #'
-#' \strong{Presence parameter definitions:}
-#' \describe{
-#'   \item{\code{"nominal"}}{Entity/time is present if it has a row in the data (even with only panel ID variables)}
-#'   \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-#'   \item{\code{"complete"}}{Entity/time is present only if it has no NA values in all substantive variables}
-#' }
-#'
 #' The returned data.frame has class `"panel_description"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
@@ -76,10 +70,6 @@
 #' panel_data <- set_panel(production, group = "firm", time = "year")
 #' describe_balance(panel_data)
 #'
-#' # Use different presence types
-#' describe_balance(production, group = "firm", time = "year", presence = "nominal")
-#' describe_balance(production, group = "firm", time = "year", presence = "complete")
-#'
 #' # With custom rounding
 #' describe_balance(production, group = "firm", time = "year", digits = 4)
 #'
@@ -91,7 +81,6 @@ describe_balance <- function(
   data,
   group = NULL,
   time = NULL,
-  presence = "observed",
   detailed = FALSE,
   digits = 3
 ) {
@@ -135,14 +124,6 @@ describe_balance <- function(
 
   if (!time %in% names(data)) {
     stop('variable "', time, '" not found in data')
-  }
-
-  if (!is.character(presence) || length(presence) != 1) {
-    stop("'presence' must be a single character string")
-  }
-
-  if (!presence %in% c("nominal", "observed", "complete")) {
-    stop('presence must be one of: "nominal", "observed", "complete"')
   }
 
   # Validate detailed parameter
@@ -193,43 +174,21 @@ describe_balance <- function(
   group_vec <- as.character(data[[group]])
   time_vec <- as.character(data[[time]])
 
-  # Fill presence matrix based on presence
-  if (presence == "nominal") {
-    # For nominal type, any row presence counts
-    for (i in seq_along(group_vec)) {
+  # Fill presence matrix based on "observed" definition:
+  # entity/time is present if it has at least one non-NA substantive variable.
+  has_at_least_one_non_na <- apply(
+    data[substantive_vars],
+    1,
+    function(x) {
+      any(!is.na(x))
+    }
+  )
+
+  for (i in seq_along(group_vec)) {
+    if (has_at_least_one_non_na[i]) {
       row_idx <- which(all_groups == group_vec[i])
       col_idx <- which(all_times == time_vec[i])
       presence_matrix[row_idx, col_idx] <- 1
-    }
-  } else if (presence == "observed") {
-    # For observed type, need to check if at least one substantive variable is non-NA
-    has_at_least_one_non_na <- apply(
-      data[substantive_vars],
-      1,
-      function(x) {
-        any(!is.na(x))
-      }
-    )
-
-    for (i in seq_along(group_vec)) {
-      if (has_at_least_one_non_na[i]) {
-        row_idx <- which(all_groups == group_vec[i])
-        col_idx <- which(all_times == time_vec[i])
-        presence_matrix[row_idx, col_idx] <- 1
-      }
-    }
-  } else if (presence == "complete") {
-    # For complete type, need to check if all substantive variables are non-NA
-    has_no_na <- apply(data[substantive_vars], 1, function(x) {
-      all(!is.na(x))
-    })
-
-    for (i in seq_along(group_vec)) {
-      if (has_no_na[i]) {
-        row_idx <- which(all_groups == group_vec[i])
-        col_idx <- which(all_times == time_vec[i])
-        presence_matrix[row_idx, col_idx] <- 1
-      }
     }
   }
 
@@ -427,7 +386,6 @@ describe_balance <- function(
     function_name = as.character(call[[1]]),
     group = group,
     time = time,
-    presence = presence,
     detailed = detailed,
     digits = digits
   )

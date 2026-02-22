@@ -4,14 +4,7 @@
 \alias{describe_balance}
 \title{Panel Data Balance Description}
 \usage{
-describe_balance(
-  data,
-  group = NULL,
-  time = NULL,
-  presence = "observed",
-  detailed = FALSE,
-  digits = 3
-)
+describe_balance(data, group = NULL, time = NULL, detailed = FALSE, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
@@ -21,9 +14,6 @@ Not required if data has panel attributes.}
 
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
-
-\item{presence}{A character string specifying how to define entity presence: "nominal", "observed", or "complete".
-Default = "observed".}
 
 \item{detailed}{A logical flag indicating whether to return additional statistics (p5, p25, p50, p75, p95).
 Default = FALSE.}
@@ -42,6 +32,9 @@ and data completeness.
 The statistics for entities describe the distribution of entities observed per time period
 (i.e., cross-sectional size per period), while statistics for periods describe the distribution
 of time periods observed per entity (i.e., temporal length per entity).
+
+An entity/time combination is considered \strong{present} if the corresponding row contains at least
+one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 
 The returned data.frame contains the following columns:
 \describe{
@@ -70,13 +63,6 @@ When \code{detailed = TRUE}, additional columns are included:
 \item{\code{p95}}{95th percentile}
 }
 
-\strong{Presence parameter definitions:}
-\describe{
-\item{\code{"nominal"}}{Entity/time is present if it has a row in the data (even with only panel ID variables)}
-\item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-\item{\code{"complete"}}{Entity/time is present only if it has no NA values in all substantive variables}
-}
-
 The returned data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
@@ -93,10 +79,6 @@ describe_balance(production, group = "firm", time = "year", detailed = TRUE)
 # With panel attributes
 panel_data <- set_panel(production, group = "firm", time = "year")
 describe_balance(panel_data)
-
-# Use different presence types
-describe_balance(production, group = "firm", time = "year", presence = "nominal")
-describe_balance(production, group = "firm", time = "year", presence = "complete")
 
 # With custom rounding
 describe_balance(production, group = "firm", time = "year", digits = 4)

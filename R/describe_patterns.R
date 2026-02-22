@@ -7,8 +7,6 @@
 #'        Not required if data has panel attributes.
 #' @param time A character string specifying the name of the time variable.
 #'        Not required if data has panel attributes.
-#' @param presence A character string specifying how to define entity presence: "nominal", "observed", or "complete".
-#'        Default = "observed".
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param detailed A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param digits An integer specifying the number of decimal places for rounding share column.
@@ -17,12 +15,8 @@
 #' @return A data.frame with presence patterns.
 #'
 #' @details
-#' \strong{Presence} parameter definitions:
-#' \describe{
-#'   \item{\code{"nominal"}}{Entity is present if it has a row in the data (even with only panel ID variables)}
-#'   \item{\code{"observed"}}{Entity is present if it has at least one non-NA substantive variable (default)}
-#'   \item{\code{"complete"}}{Entity is present only if it has no NA values in all substantive variables}
-#' }
+#' An entity/time combination is considered **present** if the corresponding row contains at least
+#' one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 #'
 #' The output format depends on the `format` and `detailed` parameters:
 #'
@@ -70,10 +64,6 @@
 #' panel_data <- set_panel(production, group = "firm", time = "year")
 #' describe_patterns(panel_data)
 #'
-#' # Use different presence types
-#' describe_patterns(production, group = "firm", time = "year", presence = "nominal")
-#' describe_patterns(production, group = "firm", time = "year", presence = "complete")
-#'
 #' # Simplified version
 #' describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
 #'
@@ -96,7 +86,6 @@ describe_patterns <- function(
   data,
   group = NULL,
   time = NULL,
-  presence = "observed",
   format = "wide",
   detailed = TRUE,
   digits = 3
@@ -150,17 +139,6 @@ describe_patterns <- function(
 
   if (!is.character(time) || length(time) != 1) {
     stop("'time' must be a single character string, not ", class(time)[1])
-  }
-
-  if (!is.character(presence) || length(presence) != 1) {
-    stop(
-      "'presence' must be a single character string, not ",
-      class(presence)[1]
-    )
-  }
-
-  if (!presence %in% c("observed", "nominal", "complete")) {
-    stop('presence must be one of: "observed", "nominal", "complete"')
   }
 
   if (!group %in% names(data)) {
@@ -224,24 +202,13 @@ describe_patterns <- function(
     stop("no data columns found (excluding group and time variables)")
   }
 
-  # Filter data based on presence
-  if (presence == "nominal") {
+  # Filter data based on "observed" definition:
+  # rows with at least one non-NA in substantive variables.
+  if (nrow(data) > 0) {
+    has_data <- apply(data[data_cols], 1, function(row) !all(is.na(row)))
+    data_filtered <- data[has_data, ]
+  } else {
     data_filtered <- data
-    # For nominal, we will later mark presence for all rows
-  } else if (presence == "observed") {
-    if (nrow(data) > 0) {
-      has_data <- apply(data[data_cols], 1, function(row) !all(is.na(row)))
-      data_filtered <- data[has_data, ]
-    } else {
-      data_filtered <- data
-    }
-  } else if (presence == "complete") {
-    if (nrow(data) > 0) {
-      complete_rows <- complete.cases(data[data_cols])
-      data_filtered <- data[complete_rows, ]
-    } else {
-      data_filtered <- data
-    }
   }
 
   # Character vectors for filtered data (if any)
@@ -261,22 +228,9 @@ describe_patterns <- function(
     dimnames = list(unique_groups_char, unique_periods_char)
   )
 
-  # Fill the binary matrix based on presence
-  if (presence == "nominal") {
-    # Mark 1 for all rows in filtered data (which is all rows)
-    for (i in seq_along(group_filt_char)) {
-      presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
-    }
-  } else if (presence == "observed") {
-    # Mark 1 for rows with at least one non-NA
-    for (i in seq_along(group_filt_char)) {
-      presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
-    }
-  } else if (presence == "complete") {
-    # Mark 1 for complete rows only (data_filtered already contains only complete rows)
-    for (i in seq_along(group_filt_char)) {
-      presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
-    }
+  # Fill the binary matrix: mark 1 for all rows in filtered data
+  for (i in seq_along(group_filt_char)) {
+    presence_binary[group_filt_char[i], time_filt_char[i]] <- 1
   }
 
   # Count patterns and create pattern groups (store original class group values)
@@ -371,7 +325,6 @@ describe_patterns <- function(
         function_name = as.character(match.call()[[1]]),
         group = group,
         time = time,
-        presence = presence,
         format = format,
         detailed = detailed,
         digits = digits
@@ -385,7 +338,6 @@ describe_patterns <- function(
       function_name = as.character(match.call()[[1]]),
       group = group,
       time = time,
-      presence = presence,
       format = format,
       detailed = detailed,
       digits = digits
@@ -402,7 +354,6 @@ describe_patterns <- function(
       function_name = as.character(match.call()[[1]]),
       group = group,
       time = time,
-      presence = presence,
       format = format,
       detailed = detailed,
       digits = digits
@@ -417,7 +368,6 @@ describe_patterns <- function(
     function_name = as.character(match.call()[[1]]),
     group = group,
     time = time,
-    presence = presence,
     format = format,
     detailed = detailed,
     digits = digits
