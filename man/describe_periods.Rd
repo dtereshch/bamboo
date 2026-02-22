@@ -4,7 +4,7 @@
 \alias{describe_periods}
 \title{Time Periods Completeness Description}
 \usage{
-describe_periods(data, group = NULL, time = NULL)
+describe_periods(data, group = NULL, time = NULL, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data, or a data.frame with panel attributes.}
@@ -14,43 +14,53 @@ Not required if data has panel attributes.}
 
 \item{time}{A character string specifying the name of the time variable.
 Not required if data has panel attributes.}
+
+\item{digits}{An integer specifying the number of decimal places for rounding the share column.
+Default = 3.}
 }
 \value{
-A data.frame with entities/groups presence summary by time period.
+A data.frame with entities presence summary by time period.
 }
 \description{
-This function caluclates number of enitities/groups for each time period in panel data.
-The function uses different ways to detect entity/group presence in each period.
+This function calculates, for each time period, the number of entities (groups)
+that have at least one non‑missing value in any substantive variable,
+and the corresponding share of all entities.
 }
 \details{
-The data.frame contains the following columns:
+The returned data.frame contains the following columns:
 \describe{
 \item{\code{[time]}}{Time period identifier (name matches the input \code{time} argument)}
-\item{\code{nominal}}{Number of rows in each period (all rows, regardless of data completeness)}
-\item{\code{observed}}{Number of rows with at least one non-NA value in substantive variables}
-\item{\code{complete}}{Number of rows without any NA values in substantive variables}
+\item{\code{count}}{Number of entities (groups) observed in that period,
+i.e., rows with at least one non‑NA value in substantive variables}
+\item{\code{share}}{Proportion of entities observed in that period,
+relative to the total number of unique entities in the data (0 to 1),
+rounded to \code{digits} decimal places.}
 }
 
 Time periods are sorted naturally (numeric values as numbers, others alphabetically).
 
 The returned data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{entities_nominal}, \code{entities_observed}, and \code{entities_complete}.
-Each is a named list where names are time periods and values are vectors of entity identifiers present in that period.}
+\item{\code{metadata}}{List containing the function name, group, time, and digits.}
+\item{\code{details}}{List containing additional information: \code{entities}.
+This is a named list where names are time periods and values are vectors of
+entity identifiers that are observed (have at least one non‑NA) in that period.}
 }
 }
 \examples{
 data(production)
 describe_periods(production, group = "firm", time = "year")
 
+# With custom rounding
+describe_periods(production, group = "firm", time = "year", digits = 4)
+
 # With panel attributes
 panel_data <- set_panel(production, group = "firm", time = "year")
 describe_periods(panel_data)
 
-# Get entities with complete data in the 6th period
+# Get entities observed in the 6th period
 result <- describe_periods(production, group = "firm", time = "year")
-attr(result, "details")$entities_complete[["6"]]
+attr(result, "details")$entities[["6"]]
 
 }
 \seealso{
