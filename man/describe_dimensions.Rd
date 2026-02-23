@@ -18,20 +18,18 @@ Not required if data has panel attributes.}
 \value{
 A data.frame with panel dimension counts. Contains two columns:
 \describe{
-\item{\code{dimension}}{Dimension name: "observations", "entities", "periods", "variables"}
+\item{\code{dimension}}{Dimension name: "rows", "entities", "periods", "variables"}
 \item{\code{count}}{Corresponding count (integer).}
 }
 }
 \description{
 This function provides basic dimension counts for panel data:
-number of observations (rows with data), unique entities, unique time periods,
-and substantive variables.
+number of rows, unique entities, unique time periods, and substantive variables.
 }
 \details{
 The counts are defined as follows:
 \itemize{
-\item{\bold{observations}}{ Number of rows that contain at least one non‑missing value
-in any substantive variable (i.e., columns other than the group and time identifiers).}
+\item{\bold{rows}}{ Total number of rows in the data frame.}
 \item{\bold{entities}}{ Number of distinct values in the group variable.}
 \item{\bold{periods}}{ Number of distinct values in the time variable.}
 \item{\bold{variables}}{ Number of substantive variables (all columns except group and time).}

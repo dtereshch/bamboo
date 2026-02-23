@@ -1,8 +1,7 @@
 #' Panel Data Dimensions Description
 #'
 #' This function provides basic dimension counts for panel data:
-#' number of observations (rows with data), unique entities, unique time periods,
-#' and substantive variables.
+#' number of rows, unique entities, unique time periods, and substantive variables.
 #'
 #' @param data A data.frame containing panel data in a long format.
 #' @param group A character string specifying the name of the entity/group variable in panel data.
@@ -12,15 +11,14 @@
 #'
 #' @return A data.frame with panel dimension counts. Contains two columns:
 #'   \describe{
-#'     \item{\code{dimension}}{Dimension name: "observations", "entities", "periods", "variables"}
+#'     \item{\code{dimension}}{Dimension name: "rows", "entities", "periods", "variables"}
 #'     \item{\code{count}}{Corresponding count (integer).}
 #'   }
 #'
 #' @details
 #' The counts are defined as follows:
 #' \itemize{
-#'   \item{\bold{observations}}{ Number of rows that contain at least one non‑missing value
-#'         in any substantive variable (i.e., columns other than the group and time identifiers).}
+#'   \item{\bold{rows}}{ Total number of rows in the data frame.}
 #'   \item{\bold{entities}}{ Number of distinct values in the group variable.}
 #'   \item{\bold{periods}}{ Number of distinct values in the time variable.}
 #'   \item{\bold{variables}}{ Number of substantive variables (all columns except group and time).}
@@ -131,16 +129,9 @@ describe_dimensions <- function(data, group = NULL, time = NULL) {
   # Substantive variables (all except group and time)
   substantive_vars <- setdiff(names(data), c(group, time))
 
-  if (length(substantive_vars) == 0) {
-    stop("no substantive variables found (besides group and time variables)")
-  }
-
-  # Number of observations (rows with at least one non-NA in substantive variables)
-  obs_count <- sum(apply(data[substantive_vars], 1, function(x) any(!is.na(x))))
-
   # Counts
   counts <- c(
-    observations = obs_count,
+    rows = nrow(data),
     entities = length(entities_vals),
     periods = length(periods_vals),
     variables = length(substantive_vars)
