@@ -132,7 +132,10 @@ plot_patterns <- function(
   }
   if (!is.null(max_patterns)) {
     if (
-      !is.numeric(max_patterns) || length(max_patterns) != 1 || max_patterns < 1
+      !is.numeric(max_patterns) ||
+        length(max_patterns) != 1 ||
+        max_patterns < 1 ||
+        max_patterns != round(max_patterns) # explicit integer check
     ) {
       stop("'max_patterns' must be a single positive integer or NULL")
     }
