@@ -136,6 +136,10 @@ describe_balance <- function(
     stop('variable "', time, '" not found in data')
   }
 
+  if (time == group) {
+    stop("'time' and 'group' cannot be the same variable")
+  }
+
   # --- Remove rows with NA in group or time ---
   excluded_rows <- NULL
   na_group <- is.na(data[[group]])

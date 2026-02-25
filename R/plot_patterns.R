@@ -130,6 +130,9 @@ plot_patterns <- function(
   if (!time %in% names(data)) {
     stop('variable "', time, '" not found in data')
   }
+  if (time == group) {
+    stop("'time' and 'group' cannot be the same variable")
+  }
   if (!is.null(max_patterns)) {
     if (
       !is.numeric(max_patterns) ||

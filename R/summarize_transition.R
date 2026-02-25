@@ -178,6 +178,10 @@ summarize_transition <- function(
     stop('variable "', time, '" not found in data')
   }
 
+  if (time == group) {
+    stop("'time' and 'group' cannot be the same variable")
+  }
+
   if (!is.character(format) || length(format) != 1) {
     stop("'format' must be a single character string, not ", class(format)[1])
   }

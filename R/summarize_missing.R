@@ -129,6 +129,10 @@ summarize_missing <- function(
     stop('variable "', time, '" not found in data')
   }
 
+  if (time == group) {
+    stop("'time' and 'group' cannot be the same variable")
+  }
+
   if (!is.logical(detailed) || length(detailed) != 1) {
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }

@@ -162,6 +162,9 @@ decompose_numeric <- function(
     if (!time %in% names(data)) {
       stop('variable "', time, '" not found in data')
     }
+    if (time == group) {
+      stop("'time' and 'group' must be different variables")
+    }
   }
 
   # --- Remove rows with NA in group or time (if time provided) ---

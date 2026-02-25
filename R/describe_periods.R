@@ -152,6 +152,9 @@ describe_periods <- function(
   if (!time %in% names(data)) {
     stop('variable "', time, '" not found in data')
   }
+  if (time == group) {
+    stop("'time' and 'group' cannot be the same variable")
+  }
 
   # Harmonized digits validation
   if (!is.numeric(digits) || length(digits) != 1) {
