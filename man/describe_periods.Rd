@@ -39,6 +39,10 @@ relative to the total number of unique entities in the data (0 to 1),
 rounded to \code{digits} decimal places.}
 }
 
+Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
+Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+\code{details$excluded_rows} for further inspection.
+
 If \code{interval} is supplied, the time variable is coerced to numeric (if possible).
 The function then checks that all observed time points are compatible with a regular spacing
 of that interval. If gaps are detected, a message lists the missing periods (unless the interval
@@ -48,8 +52,8 @@ for those missing periods.
 
 The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
 each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the group and time
-variables were explicitly provided (i.e., not taken from \code{panel_data} attributes).
+they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
+were explicitly provided (i.e., not taken from \code{panel_data} attributes).
 
 Time periods are sorted naturally (numeric order).
 
@@ -57,8 +61,8 @@ The returned data.frame has class \code{"panel_description"} and the following a
 \describe{
 \item{\code{metadata}}{List containing the function name, group, time, interval, and digits.}
 \item{\code{details}}{List containing additional information: \code{entities} (a named list where
-names are time periods and values are vectors of entity identifiers observed in that period)
-and, if duplicates were found, \code{entity_time_duplicates}.}
+names are time periods and values are vectors of entity identifiers observed in that period),
+\code{excluded_rows} (if any), and, if duplicates were found, \code{entity_time_duplicates}.}
 }
 }
 \examples{
@@ -74,10 +78,6 @@ describe_periods(panel_data)
 
 # Specify interval to fill gaps (if any)
 describe_periods(production, group = "firm", time = "year", interval = 1)
-
-# Get entities observed in the 6th period
-result <- describe_periods(production, group = "firm", time = "year")
-attr(result, "details")$entities[["6"]]
 
 }
 \seealso{

@@ -46,6 +46,10 @@ The data.frame is sorted by:
 \item Total number of NAs (descending)
 }
 
+Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} (if provided)
+variables are removed. Messages indicate how many rows were excluded due to each variable.
+The excluded rows are stored in \code{details$excluded_rows} for further inspection.
+
 If no entities have incomplete data, returns the character message:
 "There are no incomplete groups/entities in the data."
 
@@ -60,8 +64,9 @@ The returned data.frame (if any) has class \code{"panel_description"} and the fo
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information:
-\code{count_entities_total}, \code{count_entities_incomplete}, \code{entities_incomplete}, and
-(if time was supplied and duplicates exist) \code{entity_time_duplicates}.}
+\code{count_entities_total}, \code{count_entities_incomplete}, \code{entities_incomplete},
+\code{excluded_rows} (if any), and (if time was supplied and duplicates exist)
+\code{entity_time_duplicates}.}
 }
 }
 \examples{

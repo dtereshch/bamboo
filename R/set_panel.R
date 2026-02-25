@@ -23,6 +23,11 @@
 #'           \item{`entities`}{Unique values of the group variable.}
 #'           \item{`periods`}{Sorted unique values of the time variable.}
 #'         }
+#'         If any rows were removed due to missing values in `group` or `time`, an additional component is included:
+#'         \describe{
+#'           \item{`excluded_rows`}{A data frame containing the rows that were removed because they
+#'                 contained `NA` in either the group or time variable.}
+#'         }
 #'         If duplicates of the group-time combination are found, an additional vector is included:
 #'         \describe{
 #'           \item{`entity_time_duplicates`}{A data frame containing the distinct duplicate
@@ -35,7 +40,11 @@
 #'         }}
 #' }
 #'
-#' The function checks for duplicate group-time combinations. In a properly structured panel dataset,
+#' The function first checks for missing values in the `group` and `time` variables.
+#' Rows containing `NA` in either variable are removed, and messages report how many rows were excluded
+#' due to each variable. The removed rows are stored in `details$excluded_rows`.
+#'
+#' It then checks for duplicate group-time combinations. In a properly structured panel dataset,
 #' each entity (group) should have at most one observation per time period. If duplicates are found,
 #' a one‑line message is printed with the number of distinct duplicate combinations and up to five examples.
 #' The duplicate combinations are stored in `details$entity_time_duplicates` for further inspection.
@@ -94,15 +103,49 @@ set_panel <- function(data, group, time, interval = NULL) {
     stop("'time' and 'group' cannot be the same variable")
   }
 
-  # --- Check for duplicate group-time combinations (before any time conversion) ---
+  # --- Check for missing values in group and time ---
+  na_group <- is.na(data[[group]])
+  na_time <- is.na(data[[time]])
+  excluded_rows <- NULL
+
+  if (any(na_group)) {
+    n_na_group <- sum(na_group)
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      n_na_group,
+      " rows."
+    )
+  }
+  if (any(na_time)) {
+    n_na_time <- sum(na_time)
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      n_na_time,
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    # Save excluded rows (all columns) before removal
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    # Remove rows with NA in group or time
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    # Reset row names for cleanliness
+    rownames(data) <- NULL
+  }
+  # ------------------------------------------------------------------
+
+  # --- Check for duplicate group-time combinations (after NA removal) ---
   dup_combinations <- NULL
   dup_rows <- duplicated(data[c(group, time)]) |
     duplicated(data[c(group, time)], fromLast = TRUE)
   if (any(dup_rows)) {
-    # Extract the duplicate combinations (unique ones) for reporting
     dup_combinations <- unique(data[dup_rows, c(group, time), drop = FALSE])
     n_dup <- nrow(dup_combinations)
-    # Prepare up to five examples as a single string
     examples <- utils::head(dup_combinations, 5)
     example_strings <- paste0(examples[[group]], "-", examples[[time]])
     example_str <- paste(example_strings, collapse = ", ")
@@ -112,7 +155,7 @@ set_panel <- function(data, group, time, interval = NULL) {
       example_str
     )
   }
-  # --------------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
 
   # Validate interval if provided
   if (!is.null(interval)) {
@@ -125,7 +168,7 @@ set_panel <- function(data, group, time, interval = NULL) {
       stop("'interval' must be a positive integer")
     }
 
-    # Attempt to coerce time variable to numeric
+    # Attempt to coerce time variable to numeric (NA values already removed)
     time_vals_orig <- data[[time]]
     if (!is.numeric(time_vals_orig)) {
       time_numeric <- suppressWarnings(as.numeric(as.character(time_vals_orig)))
@@ -150,7 +193,7 @@ set_panel <- function(data, group, time, interval = NULL) {
     interval = interval
   )
 
-  # Base details: entities and periods
+  # Base details: entities and periods (from cleaned data)
   entities <- unique(data[[group]])
   periods <- sort(unique(data[[time]]))
 
@@ -158,6 +201,11 @@ set_panel <- function(data, group, time, interval = NULL) {
     entities = entities,
     periods = periods
   )
+
+  # Add excluded rows if any
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
 
   # Add duplicate combinations if any were found
   if (!is.null(dup_combinations)) {

@@ -69,6 +69,11 @@
 #'   \item{\code{std_within}}{Within-group standard deviation}
 #' }
 #'
+#' Before any analysis, rows with missing values (`NA`) in the `group` or `time`
+#' (if provided) variables are removed. Messages indicate how many rows were
+#' excluded due to each variable. The excluded rows are stored in
+#' `details$excluded_rows` for further inspection.
+#'
 #' If a time variable is supplied (either by the user or from `panel_data` metadata),
 #' the function checks for duplicate group-time combinations. In a properly structured
 #' panel dataset, each entity (group) should have at most one observation per time period.
@@ -79,8 +84,9 @@
 #' The returned data.frame has class `"panel_summary"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `count_groups` and,
-#'         if time was supplied and duplicates exist, `entity_time_duplicates`.}
+#'   \item{`details`}{List containing additional information: `count_groups`,
+#'         `excluded_rows` (if any), and, if time was supplied and duplicates exist,
+#'         `entity_time_duplicates`.}
 #' }
 #'
 #' @references
@@ -107,7 +113,7 @@ decompose_numeric <- function(
   data,
   selection = NULL,
   group = NULL,
-  time = NULL, # <-- new optional parameter
+  time = NULL,
   format = "long",
   detailed = TRUE,
   digits = 3
@@ -158,6 +164,37 @@ decompose_numeric <- function(
     }
   }
 
+  # --- Remove rows with NA in group or time (if time provided) ---
+  excluded_rows <- NULL
+  na_group <- is.na(data[[group]])
+  na_time <- if (!is.null(time)) is.na(data[[time]]) else rep(FALSE, nrow(data))
+
+  if (any(na_group)) {
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      sum(na_group),
+      " rows."
+    )
+  }
+  if (!is.null(time) && any(na_time)) {
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      sum(na_time),
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    rownames(data) <- NULL
+  }
+  # ----------------------------------------------------------------
+
   # --- Check for duplicate group-time combinations (only if time is provided) ---
   dup_combinations <- NULL
   if (!is.null(time)) {
@@ -178,7 +215,7 @@ decompose_numeric <- function(
       }
     }
   }
-  # -------------------------------------------------------------
+  # ----------------------------------------------------------------
 
   # Validate selection, format, detailed, digits (unchanged) ...
   if (!is.null(selection) && !is.character(selection)) {
@@ -448,7 +485,7 @@ decompose_numeric <- function(
     function_name = as.character(call[[1]]),
     selection = selection,
     group = group,
-    time = time, # <-- store time even if NULL
+    time = time,
     format = format,
     detailed = detailed,
     digits = digits
@@ -459,7 +496,10 @@ decompose_numeric <- function(
     count_groups = count_groups
   )
 
-  # Add duplicate combinations if any were found
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
+
   if (!is.null(dup_combinations)) {
     details$entity_time_duplicates <- dup_combinations
   }
@@ -470,7 +510,9 @@ decompose_numeric <- function(
   class(result_df) <- c("panel_summary", "data.frame")
 
   # Add empty line before returning if messages were printed
-  if (messages_printed) {
+  if (
+    messages_printed || !is.null(excluded_rows) || !is.null(dup_combinations)
+  ) {
     cat("\n")
   }
 

@@ -18,14 +18,17 @@
 #' An entity/time combination is considered **present** if the corresponding row contains at least
 #' one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 #'
+#' Before plotting, rows with missing values (`NA`) in the `group` or `time` variables are removed.
+#' Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+#' the returned list under `details$excluded_rows` for further inspection.
+#'
 #' The x-axis shows the number of time periods covered by each entity, and the
 #' y-axis shows the count/frequency of entities with that coverage.
 #'
 #' The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
 #' each entity (group) should have at most one observation per time period. If duplicates are found,
 #' they are stored in the returned list under `details$entity_time_duplicates`. A message is printed
-#' only when the group and time variables were explicitly provided (i.e., not taken from `panel_data`
-#' attributes).
+#' only when the identifiers were explicitly provided (i.e., not taken from `panel_data` attributes).
 #'
 #' The returned list contains the following components:
 #' \describe{
@@ -34,6 +37,7 @@
 #'         \itemize{
 #'           \item `coverage_by_entity`: Named vector with number of periods covered per entity.
 #'           \item `histogram_data`: Data used for histogram plotting.
+#'           \item `excluded_rows`: Data frame of rows removed due to missing group/time.
 #'           \item `entity_time_duplicates`: If duplicates were found, a data frame
 #'                 containing the distinct duplicate combinations.
 #'         }
@@ -83,7 +87,6 @@ plot_periods <- function(
     time <- metadata$time
     group_time_from_metadata <- TRUE
   } else {
-    # Handle regular data.frame
     if (!is.data.frame(data)) {
       stop("'data' must be a data.frame, not ", class(data)[1])
     }
@@ -119,6 +122,37 @@ plot_periods <- function(
   if (!time %in% names(data)) {
     stop('variable "', time, '" not found in data')
   }
+
+  # --- Remove rows with NA in group or time ---
+  excluded_rows <- NULL
+  na_group <- is.na(data[[group]])
+  na_time <- is.na(data[[time]])
+
+  if (any(na_group)) {
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      sum(na_group),
+      " rows."
+    )
+  }
+  if (any(na_time)) {
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      sum(na_time),
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    rownames(data) <- NULL
+  }
+  # ----------------------------------------------------------------
 
   # --- Check for duplicate group-time combinations ---
   dup_combinations <- NULL
@@ -282,7 +316,10 @@ plot_periods <- function(
     histogram_data = hist_data
   )
 
-  # Add duplicate combinations if any were found
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
+
   if (!is.null(dup_combinations)) {
     details$entity_time_duplicates <- dup_combinations
   }

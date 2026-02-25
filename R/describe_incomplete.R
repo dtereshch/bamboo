@@ -32,6 +32,10 @@
 #' 1. Number of variables with NAs (descending)
 #' 2. Total number of NAs (descending)
 #'
+#' Before analysis, rows with missing values (`NA`) in the `group` or `time` (if provided)
+#' variables are removed. Messages indicate how many rows were excluded due to each variable.
+#' The excluded rows are stored in `details$excluded_rows` for further inspection.
+#'
 #' If no entities have incomplete data, returns the character message:
 #' "There are no incomplete groups/entities in the data."
 #'
@@ -46,8 +50,9 @@
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
 #'   \item{`details`}{List containing additional information:
-#'         `count_entities_total`, `count_entities_incomplete`, `entities_incomplete`, and
-#'         (if time was supplied and duplicates exist) `entity_time_duplicates`.}
+#'         `count_entities_total`, `count_entities_incomplete`, `entities_incomplete`,
+#'         `excluded_rows` (if any), and (if time was supplied and duplicates exist)
+#'         `entity_time_duplicates`.}
 #' }
 #'
 #' @seealso
@@ -126,6 +131,37 @@ describe_incomplete <- function(
       stop('variable "', time, '" not found in data')
     }
   }
+
+  # --- Remove rows with NA in group or time (if time provided) ---
+  excluded_rows <- NULL
+  na_group <- is.na(data[[group]])
+  na_time <- if (!is.null(time)) is.na(data[[time]]) else rep(FALSE, nrow(data))
+
+  if (any(na_group)) {
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      sum(na_group),
+      " rows."
+    )
+  }
+  if (!is.null(time) && any(na_time)) {
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      sum(na_time),
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    rownames(data) <- NULL
+  }
+  # ----------------------------------------------------------------
 
   # --- Check for duplicate group-time combinations (only if time is provided) ---
   dup_combinations <- NULL
@@ -254,7 +290,10 @@ describe_incomplete <- function(
     entities_incomplete = incomplete_ids
   )
 
-  # Add duplicate combinations if any were found
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
+
   if (!is.null(dup_combinations)) {
     details$entity_time_duplicates <- dup_combinations
   }

@@ -23,10 +23,14 @@
 #' An entity/time combination is considered **present** if the corresponding row contains at least
 #' one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 #'
+#' Before analysis, rows with missing values (`NA`) in the `group` or `time` variables are removed.
+#' Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+#' `details$excluded_rows` for further inspection.
+#'
 #' The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
 #' each entity (group) should have at most one observation per time period. If duplicates are found,
-#' they are stored in `details$entity_time_duplicates`. A message is printed only when the group and time
-#' variables were explicitly provided (i.e., not taken from `panel_data` attributes).
+#' they are stored in `details$entity_time_duplicates`. A message is printed only when the identifiers
+#' were explicitly provided (i.e., not taken from `panel_data` attributes).
 #'
 #' The returned data.frame contains the following columns:
 #' \describe{
@@ -58,8 +62,8 @@
 #' The returned data.frame has class `"panel_description"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `presence_matrix` and,
-#'         if duplicates were found, `entity_time_duplicates`.}
+#'   \item{`details`}{List containing additional information: `presence_matrix`,
+#'         `excluded_rows` (if any), and, if duplicates were found, `entity_time_duplicates`.}
 #' }
 #'
 #' @seealso
@@ -78,9 +82,6 @@
 #'
 #' # With custom rounding
 #' describe_balance(production, group = "firm", time = "year", digits = 4)
-#'
-#' # Effectively no rounding (use large digit value)
-#' describe_balance(production, group = "firm", time = "year", digits = 999999)
 #'
 #' @export
 describe_balance <- function(
@@ -107,7 +108,6 @@ describe_balance <- function(
     time <- metadata$time
     group_time_from_metadata <- TRUE
   } else {
-    # Handle regular data.frame
     if (!is.data.frame(data)) {
       stop("'data' must be a data.frame, not ", class(data)[1])
     }
@@ -136,6 +136,37 @@ describe_balance <- function(
     stop('variable "', time, '" not found in data')
   }
 
+  # --- Remove rows with NA in group or time ---
+  excluded_rows <- NULL
+  na_group <- is.na(data[[group]])
+  na_time <- is.na(data[[time]])
+
+  if (any(na_group)) {
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      sum(na_group),
+      " rows."
+    )
+  }
+  if (any(na_time)) {
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      sum(na_time),
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    rownames(data) <- NULL
+  }
+  # ----------------------------------------------------------------
+
   # --- Check for duplicate group-time combinations ---
   dup_combinations <- NULL
   dup_rows <- duplicated(data[c(group, time)]) |
@@ -144,7 +175,6 @@ describe_balance <- function(
     dup_combinations <- unique(data[dup_rows, c(group, time), drop = FALSE])
     n_dup <- nrow(dup_combinations)
     if (!group_time_from_metadata) {
-      # Prepare up to five examples
       examples <- utils::head(dup_combinations, 5)
       example_strings <- paste0(examples[[group]], "-", examples[[time]])
       example_str <- paste(example_strings, collapse = ", ")
@@ -425,7 +455,10 @@ describe_balance <- function(
     presence_matrix = presence_matrix
   )
 
-  # Add duplicate combinations if any were found
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
+
   if (!is.null(dup_combinations)) {
     details$entity_time_duplicates <- dup_combinations
   }
@@ -433,8 +466,6 @@ describe_balance <- function(
   # Set attributes
   attr(result_df, "metadata") <- metadata
   attr(result_df, "details") <- details
-
-  # Set class
   class(result_df) <- c("panel_description", "data.frame")
 
   return(result_df)

@@ -41,6 +41,10 @@ This function creates a heatmap showing the presence/absence pattern of each ent
 An entity/time combination is considered \strong{present} if the corresponding row contains at least
 one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 
+Before plotting, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
+Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+the returned list under \code{details$excluded_rows} for further inspection.
+
 If \code{interval} is supplied, the time variable is coerced to numeric (if possible).
 The function then checks that all observed time points are compatible with a regular spacing
 of that interval. If gaps are detected, a message lists the missing periods (unless the interval
@@ -51,8 +55,7 @@ and all entities will appear as missing (color for 0) in those columns.
 The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
 each entity (group) should have at most one observation per time period. If duplicates are found,
 they are stored in the returned list under \code{details$entity_time_duplicates}. A message is printed
-only when the group and time variables were explicitly provided (i.e., not taken from \code{panel_data}
-attributes).
+only when the identifiers were explicitly provided (i.e., not taken from \code{panel_data} attributes).
 
 The heatmap shows:
 \itemize{
@@ -68,7 +71,8 @@ The returned list contains the following components:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information: \code{count_patterns}, \code{presence_matrix},
-\code{patterns_groups}, \code{patterns_matrix}, and, if duplicates were found, \code{entity_time_duplicates}.}
+\code{patterns_groups}, \code{patterns_matrix}, \code{excluded_rows} (if any), and, if duplicates were found,
+\code{entity_time_duplicates}.}
 }
 }
 \examples{

@@ -19,6 +19,10 @@
 #' An entity/time combination is considered **present** if the corresponding row contains at least
 #' one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
 #'
+#' Before analysis, rows with missing values (`NA`) in the `group` or `time` variables are removed.
+#' Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+#' `details$excluded_rows` for further inspection.
+#'
 #' If `interval` is supplied, the time variable is coerced to numeric (if possible).
 #' The function then checks that all observed time points are compatible with a regular spacing
 #' of that interval. If gaps are detected, a message lists the missing periods (unless the interval
@@ -29,8 +33,8 @@
 #'
 #' The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
 #' each entity (group) should have at most one observation per time period. If duplicates are found,
-#' they are stored in `details$entity_time_duplicates`. A message is printed only when the group and time
-#' variables were explicitly provided (i.e., not taken from `panel_data` attributes).
+#' they are stored in `details$entity_time_duplicates`. A message is printed only when the identifiers
+#' were explicitly provided (i.e., not taken from `panel_data` attributes).
 #'
 #' The output format depends on the `format` and `detailed` parameters:
 #' \describe{
@@ -45,7 +49,8 @@
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
 #'   \item{`details`}{List containing additional information: `count_patterns`, `presence_matrix`,
-#'         `patterns_groups`, `patterns_matrix`, and, if duplicates were found, `entity_time_duplicates`.}
+#'         `patterns_groups`, `patterns_matrix`, `excluded_rows` (if any), and, if duplicates were found,
+#'         `entity_time_duplicates`.}
 #' }
 #'
 #' @seealso
@@ -66,11 +71,6 @@
 #'
 #' # Simplified version
 #' describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
-#'
-#' # Using patterns_groups to extract entities with specific patterns
-#' patterns <- describe_patterns(production, group = "firm", time = "year")
-#' patterns_groups <- attr(patterns, "details")$patterns_groups
-#' most_common_pattern_entities <- patterns_groups[["1"]]
 #'
 #' @export
 describe_patterns <- function(
@@ -172,6 +172,37 @@ describe_patterns <- function(
     stop("'digits' must be a non-negative integer")
   }
   digits <- as.integer(digits)
+
+  # --- Remove rows with NA in group or time ---
+  excluded_rows <- NULL
+  na_group <- is.na(data[[group]])
+  na_time <- is.na(data[[time]])
+
+  if (any(na_group)) {
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      sum(na_group),
+      " rows."
+    )
+  }
+  if (any(na_time)) {
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      sum(na_time),
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    rownames(data) <- NULL
+  }
+  # ----------------------------------------------------------------
 
   # --- Check for duplicate group-time combinations ---
   dup_combinations <- NULL
@@ -380,7 +411,10 @@ describe_patterns <- function(
     patterns_matrix = patterns_matrix
   )
 
-  # Add duplicate combinations if any were found
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
+
   if (!is.null(dup_combinations)) {
     details$entity_time_duplicates <- dup_combinations
   }

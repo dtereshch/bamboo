@@ -55,6 +55,10 @@ When \code{detailed = TRUE}, additional columns are included:
 \item{...}{Additional columns for each unique time period in the data}
 }
 
+Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
+Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+\code{details$excluded_rows} for further inspection.
+
 The function checks for duplicate group-time combinations. In a properly structured panel dataset,
 each entity (group) should have at most one observation per time period. If duplicates are found,
 they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
@@ -65,7 +69,8 @@ The returned data.frame has class \code{"panel_summary"} and the following attri
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information:
 \code{count_variables_with_na}, \code{count_variables_without_na}, \code{count_variables} (total analyzed),
-\code{variables_with_na}, \code{variables_without_na}, and (if duplicates exist) \code{entity_time_duplicates}.}
+\code{variables_with_na}, \code{variables_without_na}, \code{excluded_rows} (if any), and, if duplicates exist,
+\code{entity_time_duplicates}.}
 }
 }
 \examples{

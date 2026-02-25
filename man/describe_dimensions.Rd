@@ -35,10 +35,14 @@ The counts are defined as follows:
 \item{\bold{variables}}{ Number of substantive variables (all columns except group and time).}
 }
 
+Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
+Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+\code{details$excluded_rows} for further inspection.
+
 The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
 each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the group and time
-variables were explicitly provided (i.e., not taken from \code{panel_data} attributes).
+they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
+were explicitly provided (i.e., not taken from \code{panel_data} attributes).
 
 The returned data.frame has class \code{"panel_description"} and the following attributes:
 \describe{
@@ -48,6 +52,7 @@ The returned data.frame has class \code{"panel_description"} and the following a
 \item{\code{entities}: Vector of unique entity identifiers (original class).}
 \item{\code{periods}: Vector of unique time period identifiers (original class).}
 \item{\code{variables}: Character vector of substantive variable names.}
+\item{\code{excluded_rows}: Data frame of rows removed due to missing group/time.}
 \item{\code{entity_time_duplicates}: If duplicates were found, a data frame
 containing the distinct duplicate combinations.}
 }

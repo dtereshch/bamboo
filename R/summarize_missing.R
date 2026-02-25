@@ -34,6 +34,10 @@
 #'   \item{...}{Additional columns for each unique time period in the data}
 #' }
 #'
+#' Before analysis, rows with missing values (`NA`) in the `group` or `time` variables are removed.
+#' Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+#' `details$excluded_rows` for further inspection.
+#'
 #' The function checks for duplicate group-time combinations. In a properly structured panel dataset,
 #' each entity (group) should have at most one observation per time period. If duplicates are found,
 #' they are stored in `details$entity_time_duplicates`. A message is printed only when the identifiers
@@ -44,7 +48,8 @@
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
 #'   \item{`details`}{List containing additional information:
 #'         `count_variables_with_na`, `count_variables_without_na`, `count_variables` (total analyzed),
-#'         `variables_with_na`, `variables_without_na`, and (if duplicates exist) `entity_time_duplicates`.}
+#'         `variables_with_na`, `variables_without_na`, `excluded_rows` (if any), and, if duplicates exist,
+#'         `entity_time_duplicates`.}
 #' }
 #'
 #' @seealso
@@ -89,7 +94,6 @@ summarize_missing <- function(
     time <- metadata$time
     group_time_from_metadata <- TRUE
   } else {
-    # Handle regular data.frame
     if (!is.data.frame(data)) {
       stop("'data' must be a data.frame, not ", class(data)[1])
     }
@@ -128,6 +132,37 @@ summarize_missing <- function(
   if (!is.logical(detailed) || length(detailed) != 1) {
     stop("'detailed' must be a single logical value, not ", class(detailed)[1])
   }
+
+  # --- Remove rows with NA in group or time ---
+  excluded_rows <- NULL
+  na_group <- is.na(data[[group]])
+  na_time <- is.na(data[[time]])
+
+  if (any(na_group)) {
+    message(
+      "Missing values in ",
+      group,
+      " variable found. Excluding ",
+      sum(na_group),
+      " rows."
+    )
+  }
+  if (any(na_time)) {
+    message(
+      "Missing values in ",
+      time,
+      " variable found. Excluding ",
+      sum(na_time),
+      " rows."
+    )
+  }
+
+  if (any(na_group | na_time)) {
+    excluded_rows <- data[na_group | na_time, , drop = FALSE]
+    data <- data[!(na_group | na_time), , drop = FALSE]
+    rownames(data) <- NULL
+  }
+  # ----------------------------------------------------------------
 
   # --- Check for duplicate group-time combinations ---
   dup_combinations <- NULL
@@ -300,7 +335,10 @@ summarize_missing <- function(
     variables_without_na = vars_without_na
   )
 
-  # Add duplicate combinations if any were found
+  if (!is.null(excluded_rows)) {
+    details$excluded_rows <- excluded_rows
+  }
+
   if (!is.null(dup_combinations)) {
     details$entity_time_duplicates <- dup_combinations
   }
@@ -311,7 +349,9 @@ summarize_missing <- function(
   class(result_df) <- c("panel_summary", "data.frame")
 
   # Add empty line before returning if messages were printed
-  if (messages_printed) {
+  if (
+    messages_printed || !is.null(excluded_rows) || !is.null(dup_combinations)
+  ) {
     cat("\n")
   }
 

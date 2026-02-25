@@ -35,6 +35,11 @@ It includes the following attributes:
 \item{\code{entities}}{Unique values of the group variable.}
 \item{\code{periods}}{Sorted unique values of the time variable.}
 }
+If any rows were removed due to missing values in \code{group} or \code{time}, an additional component is included:
+\describe{
+\item{\code{excluded_rows}}{A data frame containing the rows that were removed because they
+contained \code{NA} in either the group or time variable.}
+}
 If duplicates of the group-time combination are found, an additional vector is included:
 \describe{
 \item{\code{entity_time_duplicates}}{A data frame containing the distinct duplicate
@@ -47,7 +52,11 @@ If \code{interval} is supplied and missing periods are detected, two additional 
 }}
 }
 
-The function checks for duplicate group-time combinations. In a properly structured panel dataset,
+The function first checks for missing values in the \code{group} and \code{time} variables.
+Rows containing \code{NA} in either variable are removed, and messages report how many rows were excluded
+due to each variable. The removed rows are stored in \code{details$excluded_rows}.
+
+It then checks for duplicate group-time combinations. In a properly structured panel dataset,
 each entity (group) should have at most one observation per time period. If duplicates are found,
 a one‑line message is printed with the number of distinct duplicate combinations and up to five examples.
 The duplicate combinations are stored in \code{details$entity_time_duplicates} for further inspection.

@@ -61,6 +61,11 @@ When \code{format = "long"}, returns a data.frame with columns:
 \item{\code{share}}{Share proportion (0 to 1)}
 }
 
+Before any analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time}
+(if provided) variables are removed. Messages indicate how many rows were
+excluded due to each variable. The excluded rows are stored in
+\code{details$excluded_rows} for further inspection.
+
 If a time variable is supplied (either by the user or from \code{panel_data} metadata),
 the function checks for duplicate group-time combinations. In a properly structured
 panel dataset, each entity (group) should have at most one observation per time period.
@@ -71,8 +76,9 @@ from \code{panel_data} attributes).
 The returned data.frame has class \code{"panel_summary"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_groups} and,
-if time was supplied and duplicates exist, \code{entity_time_duplicates}.}
+\item{\code{details}}{List containing additional information: \code{count_groups},
+\code{excluded_rows} (if any), and, if time was supplied and duplicates exist,
+\code{entity_time_duplicates}.}
 }
 }
 \examples{

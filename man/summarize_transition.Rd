@@ -58,6 +58,10 @@ All possible state combinations are included, even those with zero transitions.
 }
 }
 
+Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
+Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
+\code{details$excluded_rows} for further inspection.
+
 The function checks for duplicate group-time combinations. In a properly structured panel dataset,
 each entity (group) should have at most one observation per time period. If duplicates are found:
 \itemize{
@@ -84,7 +88,8 @@ The returned data.frame has class \code{"panel_summary"} and the following attri
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information: \code{categories} (vector of levels
-of the analyzed variable) and, if duplicates were found, \code{entity_time_duplicates}.}
+of the analyzed variable), \code{excluded_rows} (if any), and, if duplicates were found,
+\code{entity_time_duplicates}.}
 }
 }
 \examples{
