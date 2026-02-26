@@ -147,7 +147,9 @@ summarize_numeric <- function(
     }
 
     if (length(selection) == 0) {
-      stop("no numeric variables remaining after removing ID-like variables")
+      stop(
+        "after removing the grouping variable, there are no numeric variables to analyze"
+      )
     }
 
     message(
