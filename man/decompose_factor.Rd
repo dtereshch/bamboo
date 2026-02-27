@@ -6,9 +6,8 @@
 \usage{
 decompose_factor(
   data,
-  selection = NULL,
-  group = NULL,
-  time = NULL,
+  select = NULL,
+  index = NULL,
   format = "wide",
   digits = 3
 )
@@ -16,14 +15,12 @@ decompose_factor(
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{selection}{A character vector specifying which categorical (factor) variables to analyze.
+\item{select}{A character vector specifying which categorical (factor) variables to analyze.
 If not specified, all factor variables in the data.frame will be used.}
 
-\item{group}{A character string specifying the name of the entity/group variable.
-Not required if data has panel attributes.}
-
-\item{time}{An optional character string specifying the name of the time variable.
-If provided, the function checks for duplicate group-time combinations.
+\item{index}{A character vector of length 1 or 2 specifying the names of the
+entity and (optionally) time variables. The first element is the entity
+variable; if a second element is provided, it is used as the time variable.
 Not required if data has panel attributes.}
 
 \item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
@@ -32,7 +29,7 @@ Not required if data has panel attributes.}
 Default = 3.}
 }
 \value{
-A data.frame with categorical panel data decomposition statistics.
+A data.frame with categorical panel data decomposition statistics, class \code{"panel_summary"}.
 }
 \description{
 This function performs one-way tabulations and decomposes counts into
@@ -47,9 +44,9 @@ When \code{format = "wide"} (default), returns a data.frame with columns:
 \item{\code{category}}{The category level of the variable}
 \item{\code{count_overall}}{Overall frequency (person-time observations)}
 \item{\code{share_overall}}{Overall share (count_overall / total_obs)}
-\item{\code{count_between}}{Between-group frequency (number of groups ever having this category)}
-\item{\code{share_between}}{Between-group share (count_between / total_groups)}
-\item{\code{share_within}}{Within-group share (average share of time groups have this category)}
+\item{\code{count_between}}{Between-entity frequency (number of entities ever having this category)}
+\item{\code{share_between}}{Between-entity share (count_between / total_entities)}
+\item{\code{share_within}}{Within-entity share (average share of time entities have this category)}
 }
 
 When \code{format = "long"}, returns a data.frame with columns:
@@ -61,49 +58,34 @@ When \code{format = "long"}, returns a data.frame with columns:
 \item{\code{share}}{Share proportion (0 to 1)}
 }
 
-Before any analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time}
-(if provided) variables are removed. Messages indicate how many rows were
-excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
+Before any analysis, rows with missing values (\code{NA}) in the entity or (if provided)
+time variables are removed. Messages indicate how many rows were excluded due to each variable.
+The excluded rows are stored in \code{details$excluded_rows} for further inspection.
 
-If a time variable is supplied (either by the user or from \code{panel_data} metadata),
-the function checks for duplicate group-time combinations. In a properly structured
-panel dataset, each entity (group) should have at most one observation per time period.
+If a time variable is supplied (either via \code{index} or from panel metadata),
+the function checks for duplicate entity-time combinations. In a properly structured
+panel dataset, each entity should have at most one observation per time period.
 If duplicates are found, they are stored in \code{details$entity_time_duplicates}.
 A message is printed only when the identifiers were explicitly provided (i.e., not taken
-from \code{panel_data} attributes).
+from panel attributes).
 
 The returned data.frame has class \code{"panel_summary"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_groups},
+\item{\code{details}}{List containing additional information: \code{count_entities},
 \code{excluded_rows} (if any), and, if time was supplied and duplicates exist,
 \code{entity_time_duplicates}.}
 }
 }
 \examples{
 data(production)
-
-# Basic usage with statistics for all factor variables (wide format)
-decompose_factor(production, group = "firm")
-
-# Long format output
-decompose_factor(production, group = "firm", format = "long")
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-decompose_factor(panel_data)
-
-# Show statistics for a single categorical variable
-decompose_factor(production, selection = "industry", group = "firm")
-
-# Show statistics with time variable to check duplicates
-decompose_factor(production, group = "firm", time = "year")
+decompose_factor(production, select = "industry", index = "firm")
+decompose_factor(production, index = c("firm", "year"))
 
 }
 \references{
 For Stata users: This corresponds to the \code{xttab} command.
 }
 \seealso{
-\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_transition]{summarize_transition()}}, \code{\link[=summarize_numeric]{summarize_numeric()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_transition]{summarize_transition()}}
 }

@@ -4,23 +4,16 @@
 \alias{describe_dimensions}
 \title{Panel Data Dimensions Description}
 \usage{
-describe_dimensions(data, group = NULL, time = NULL)
+describe_dimensions(data, index = NULL)
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
-Not required if data has panel attributes.}
-
-\item{time}{A character string specifying the name of the time variable in panel data.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 }
 \value{
-A data.frame with panel dimension counts. Contains two columns:
-\describe{
-\item{\code{dimension}}{Dimension name: "rows", "entities", "periods", "variables"}
-\item{\code{count}}{Corresponding count (integer).}
-}
+A data.frame with panel dimension counts, class \code{"panel_description"}.
 }
 \description{
 This function provides basic dimension counts for panel data:
@@ -30,51 +23,26 @@ number of rows, unique entities, unique time periods, and substantive variables.
 The counts are defined as follows:
 \itemize{
 \item{\bold{rows}}{ Total number of rows in the data frame.}
-\item{\bold{entities}}{ Number of distinct values in the group variable.}
+\item{\bold{entities}}{ Number of distinct values in the entity variable.}
 \item{\bold{periods}}{ Number of distinct values in the time variable.}
-\item{\bold{variables}}{ Number of substantive variables (all columns except group and time).}
+\item{\bold{variables}}{ Number of substantive variables (all columns except entity and time).}
 }
 
-Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
+Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
 
-The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
-were explicitly provided (i.e., not taken from \code{panel_data} attributes).
-
-The returned data.frame has class \code{"panel_description"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing:
-\itemize{
-\item{\code{entities}: Vector of unique entity identifiers (original class).}
-\item{\code{periods}: Vector of unique time period identifiers (original class).}
-\item{\code{variables}: Character vector of substantive variable names.}
-\item{\code{excluded_rows}: Data frame of rows removed due to missing group/time.}
-\item{\code{entity_time_duplicates}: If duplicates were found, a data frame
-containing the distinct duplicate combinations.}
-}
-}
-}
+Duplicate entity-time combinations are checked; if found, they are stored in \code{details$entity_time_duplicates}
+and a message is printed (unless identifiers came from panel attributes).
 }
 \examples{
 data(production)
-
-# Basic usage
-describe_dimensions(production, group = "firm", time = "year")
+describe_dimensions(production, index = c("firm", "year"))
 
 # With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
+panel_data <- make_panel(production, index = c("firm", "year"))
 describe_dimensions(panel_data)
-
-# Access detailed information
-dims <- describe_dimensions(production, group = "firm", time = "year")
-attr(dims, "details")$entities
-attr(dims, "details")$variables
 
 }
 \seealso{
-\code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=set_panel]{set_panel()}}
+\code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{describe_patterns}}, \code{\link{make_panel}}
 }

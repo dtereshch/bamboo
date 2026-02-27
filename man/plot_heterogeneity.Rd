@@ -6,7 +6,7 @@
 \usage{
 plot_heterogeneity(
   data,
-  selection,
+  select,
   group = NULL,
   colors = c("#1E4A3B", "#D4B87A")
 )
@@ -14,11 +14,11 @@ plot_heterogeneity(
 \arguments{
 \item{data}{A data.frame containing variables for analysis.}
 
-\item{selection}{A character string specifying the numeric variable of interest.}
+\item{select}{A character string specifying the numeric variable of interest.}
 
 \item{group}{A character string or vector of character strings specifying the grouping variable(s).
 If data has panel attributes and group is not specified,
-both panel_group and panel_time will be used as group variables.}
+both the entity and time variables will be used as grouping variables.}
 
 \item{colors}{A character vector of two colors: first for mean line and points, second for individual points.
 Default = c("#1E4A3B", "#D4B87A").}
@@ -46,26 +46,26 @@ each containing means, sd, and n per group.}
 data(production)
 
 # Method 1: With regular data.frame
-plot_heterogeneity(production, selection = "labor", group = "year")
+plot_heterogeneity(production, select = "labor", group = "year")
 
 # Method 2: With data.frame with panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-plot_heterogeneity(panel_data, selection = "labor")
+panel_data <- make_panel(production, index = c("firm", "year"))
+plot_heterogeneity(panel_data, select = "labor")
 
 # Method 3: Explicit grouping even with panel data
-plot_heterogeneity(panel_data, selection = "capital", group = "year")
+plot_heterogeneity(panel_data, select = "capital", group = "year")
 
 # Plot labor by year
-plot_heterogeneity(production, selection = "labor", group = "year")
+plot_heterogeneity(production, select = "labor", group = "year")
 
 # Plot capital by firm
-plot_heterogeneity(production, selection = "capital", group = "firm")
+plot_heterogeneity(production, select = "capital", group = "firm")
 
 # Plot sales with multiple grouping variables
-plot_heterogeneity(production, selection = "sales", group = c("firm", "year"))
+plot_heterogeneity(production, select = "sales", group = c("firm", "year"))
 
 # Customize colors
-plot_heterogeneity(production, selection = "sales", group = "year", colors = c("black", "gray"))
+plot_heterogeneity(production, select = "sales", group = "year", colors = c("black", "gray"))
 
 }
 \seealso{

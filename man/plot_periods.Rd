@@ -4,23 +4,19 @@
 \alias{plot_periods}
 \title{Time Coverage Distribution Visualization}
 \usage{
-plot_periods(data, group = NULL, time = NULL, colors = c("#1E4A3B", "white"))
+plot_periods(data, index = NULL, colors = c("#1E4A3B", "white"))
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
-Not required if data has panel attributes.}
-
-\item{time}{A character string specifying the name of the time variable.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
 \item{colors}{A character vector of length 2 specifying the fill color and line color for the histogram.
 First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").}
 }
 \value{
-Invisibly returns a list with summary statistics and metadata.
-Creates a histogram showing the distribution of time coverage across entities.
+Invisibly returns a list with summary statistics and metadata. Creates a histogram.
 }
 \description{
 This function calculates summary statistics and creates a histogram showing
@@ -28,51 +24,23 @@ the distribution of time periods covered by each entity in panel data.
 }
 \details{
 An entity/time combination is considered \strong{present} if the corresponding row contains at least
-one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
+one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
-Before plotting, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-the returned list under \code{details$excluded_rows} for further inspection.
+Before plotting, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in the returned list.
 
-The x-axis shows the number of time periods covered by each entity, and the
-y-axis shows the count/frequency of entities with that coverage.
+The function also checks for duplicate entity-time combinations. If found, they are stored and a message
+is printed (unless the identifiers came from panel attributes).
 
-The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in the returned list under \code{details$entity_time_duplicates}. A message is printed
-only when the identifiers were explicitly provided (i.e., not taken from \code{panel_data} attributes).
-
-The returned list contains the following components:
-\describe{
-\item{\code{metadata}}{List containing the function name, group, time, colors.}
-\item{\code{details}}{List containing:
-\itemize{
-\item \code{coverage_by_entity}: Named vector with number of periods covered per entity.
-\item \code{histogram_data}: Data used for histogram plotting.
-\item \code{excluded_rows}: Data frame of rows removed due to missing group/time.
-\item \code{entity_time_duplicates}: If duplicates were found, a data frame
-containing the distinct duplicate combinations.
-}
-}
-}
+The histogram shows the number of time periods covered by each entity (x-axis) and the frequency of
+entities with that coverage (y-axis).
 }
 \examples{
 data(production)
-
-# Basic usage with regular data.frame
-plot_periods(production, group = "firm", time = "year")
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-plot_periods(panel_data)
-
-# Custom colors - gray fill with black line
-plot_periods(production, group = "firm", time = "year", colors = c("gray", "black"))
-
-# Custom colors - light blue fill with blue line
-plot_periods(production, group = "firm", time = "year", colors = c("lightblue", "blue"))
+plot_periods(production, index = c("firm", "year"))
+plot_periods(production, index = c("firm", "year"), colors = c("gray", "black"))
 
 }
 \seealso{
-\code{\link[=describe_periods]{describe_periods()}}, \code{\link[=plot_patterns]{plot_patterns()}}, \code{\link[=describe_patterns]{describe_patterns()}}
+\code{\link{describe_periods}}, \code{\link{plot_patterns}}
 }

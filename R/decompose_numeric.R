@@ -4,16 +4,16 @@
 #' in panel data.
 #'
 #' @param data A data.frame containing panel data in a long format.
+#' @param select A character vector specifying which numeric variables to analyze.
+#'        If not specified, all numeric variables in the data.frame will be used.
 #' @param index A character vector of length 1 or 2 specifying the names of the
 #'        entity and (optionally) time variables. The first element is the entity
 #'        variable; if a second element is provided, it is used as the time variable.
 #'        Not required if data has panel attributes.
-#' @param select A character vector specifying which numeric variables to analyze.
-#'        If not specified, all numeric variables in the data.frame will be used.
-#' @param format A character string specifying the output format: "long" or "wide".
-#'        Default = "long".
 #' @param detail A logical flag indicating whether to return detailed Stata-like output.
 #'        Default = TRUE.
+#' @param format A character string specifying the output format: "long" or "wide".
+#'        Default = "long".
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'        Default = 3.
 #'
@@ -93,16 +93,16 @@
 #'
 #' @examples
 #' data(production)
-#' decompose_numeric(production, index = "firm")
+#' decompose_numeric(production, select = c("sales", "labor"), index = "firm")
 #' decompose_numeric(production, index = c("firm", "year"))
 #'
 #' @export
 decompose_numeric <- function(
   data,
-  index = NULL,
   select = NULL,
-  format = "long",
+  index = NULL,
   detail = TRUE,
+  format = "long",
   digits = 3
 ) {
   # --- Initialisation: entity and time from index or metadata ---
@@ -468,8 +468,8 @@ decompose_numeric <- function(
     select = select,
     entity = entity_var,
     time = time_var,
-    format = format,
     detail = detail,
+    format = format,
     digits = digits
   )
   details <- list(count_entities = count_entities)

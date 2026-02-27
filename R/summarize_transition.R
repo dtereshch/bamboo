@@ -4,9 +4,9 @@
 #' across consecutive time periods within entities for panel data.
 #'
 #' @param data A data.frame containing panel data in a long format.
+#' @param select A character string specifying the factor variable to analyze transitions for.
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #'        Not required if data has panel attributes.
-#' @param select A character string specifying the factor variable to analyze transitions for.
 #' @param format A character string specifying the output format: `"wide"` (default) or `"long"`.
 #' @param digits An integer indicating the number of decimal places to round transition shares.
 #'        Default = 3.
@@ -47,14 +47,14 @@
 #'
 #' @examples
 #' data(production)
-#' summarize_transition(production, index = c("firm", "year"), select = "industry")
-#' summarize_transition(production, index = c("firm", "year"), select = "industry", format = "long")
+#' summarize_transition(production, select = "industry", index = c("firm", "year"))
+#' summarize_transition(production, select = "industry", index = c("firm", "year"), format = "long")
 #'
 #' @export
 summarize_transition <- function(
   data,
-  index = NULL,
   select,
+  index = NULL,
   format = "wide",
   digits = 3
 ) {

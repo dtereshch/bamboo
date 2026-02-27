@@ -4,10 +4,10 @@
 #' providing both overall and detailed period-specific missing value counts.
 #'
 #' @param data A data.frame containing panel data in a long format.
-#' @param index A character vector of length 2 specifying the names of the entity and time variables.
-#'        Not required if data has panel attributes.
 #' @param select A character vector specifying which variables to analyze for missing values.
 #'        If not specified, all variables (except entity and time) will be used.
+#' @param index A character vector of length 2 specifying the names of the entity and time variables.
+#'        Not required if data has panel attributes.
 #' @param detail A logical flag indicating whether to return detailed period-specific NA counts.
 #'        Default = FALSE.
 #' @param digits An integer indicating the number of decimal places to round the share column.
@@ -30,13 +30,13 @@
 #' @examples
 #' data(production)
 #' summarize_missing(production, index = c("firm", "year"))
-#' summarize_missing(production, index = c("firm", "year"), select = c("sales", "employees"), detail = TRUE)
+#' summarize_missing(production, select = c("sales", "employees"), index = c("firm", "year"), detail = TRUE)
 #'
 #' @export
 summarize_missing <- function(
   data,
-  index = NULL,
   select = NULL,
+  index = NULL,
   detail = FALSE,
   digits = 3
 ) {

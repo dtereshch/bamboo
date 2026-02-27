@@ -6,91 +6,56 @@
 \usage{
 plot_patterns(
   data,
-  group = NULL,
-  time = NULL,
-  interval = NULL,
-  max_patterns = NULL,
+  index = NULL,
+  delta = NULL,
+  limits = NULL,
   colors = c("#1E4A3B", "white")
 )
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.
-Not required if data has panel attributes.}
+\item{delta}{An optional positive integer giving the expected interval between time periods.}
 
-\item{interval}{An optional positive integer giving the expected interval between time periods.}
-
-\item{max_patterns}{An integer specifying the maximum number of distinct patterns to display.
+\item{limits}{An integer specifying the maximum number of distinct patterns to display.
 If not specified, all patterns are shown.}
 
 \item{colors}{A character vector of two colors for present and missing observations.
 Default = c("#1E4A3B", "white").}
 }
 \value{
-Invisibly returns a list with summary statistics and metadata.
-Creates a heatmap showing presence/absence patterns.
+Invisibly returns a list with summary statistics and metadata. Creates a heatmap.
 }
 \description{
 This function creates a heatmap showing the presence/absence pattern of each entity over time.
 }
 \details{
 An entity/time combination is considered \strong{present} if the corresponding row contains at least
-one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
+one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
-Before plotting, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-the returned list under \code{details$excluded_rows} for further inspection.
+Before plotting, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in the returned list.
 
-If \code{interval} is supplied, the time variable is coerced to numeric (if possible).
-The function then checks that all observed time points are compatible with a regular spacing
-of that interval. If gaps are detected, a message lists the missing periods (unless the interval
-was inherited from panel attributes), and columns for those periods are added to the presence matrix
-(all zeros) before plotting. The heatmap will therefore include those missing periods on the x‑axis,
-and all entities will appear as missing (color for 0) in those columns.
+If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks
+for regular spacing and adds missing periods (with all zeros) to the plot. A message lists missing periods
+unless the interval was inherited from panel attributes.
 
-The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in the returned list under \code{details$entity_time_duplicates}. A message is printed
-only when the identifiers were explicitly provided (i.e., not taken from \code{panel_data} attributes).
+Duplicate entity‑time combinations are checked; if found they are stored and a message is printed
+(unless identifiers came from panel attributes).
 
-The heatmap shows:
-\itemize{
-\item \strong{Present}: Entity is present in the time period
-\item \strong{Missing}: Entity is absent in the time period
-}
-
-Rows are ordered by pattern frequency: the most frequent pattern is at the \strong{top}.
-Within each pattern block, entities appear in their original order (as they first occur in the data).
-If \code{max_patterns} is given, only the most frequent patterns are retained.
-
-The returned list contains the following components:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_patterns}, \code{presence_matrix},
-\code{patterns_groups}, \code{patterns_matrix}, \code{excluded_rows} (if any), and, if duplicates were found,
-\code{entity_time_duplicates}.}
-}
+The heatmap shows present (color1) and missing (color2). Rows are ordered by pattern frequency:
+the most frequent pattern is at the \strong{top}. Within each pattern block, entities appear in their
+original order. If \code{limits} is given, only the most frequent patterns are retained.
 }
 \examples{
 data(production)
-
-# Basic usage
-plot_patterns(production, group = "firm", time = "year")
-
-# Only top 3 patterns
-plot_patterns(production, group = "firm", time = "year", max_patterns = 3)
-
-# Specify interval to fill gaps
-plot_patterns(production, group = "firm", time = "year", interval = 1)
-
-# Custom colors
-plot_patterns(production, group = "firm", time = "year", colors = c("black", "white"))
+plot_patterns(production, index = c("firm", "year"))
+plot_patterns(production, index = c("firm", "year"), limits = 3, delta = 1)
 
 }
 \seealso{
-\code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=plot_periods]{plot_periods()}}
+\code{\link{describe_patterns}}, \code{\link{plot_periods}}
 }

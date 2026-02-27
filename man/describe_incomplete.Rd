@@ -4,23 +4,21 @@
 \alias{describe_incomplete}
 \title{Incomplete Entities Description}
 \usage{
-describe_incomplete(data, group = NULL, time = NULL, detailed = FALSE)
+describe_incomplete(data, index = NULL, detail = FALSE)
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
+\item{index}{A character vector of length 1 or 2 specifying the names of the
+entity and (optionally) time variables. The first element is the entity
+variable; if a second element is provided, it is used as the time variable.
 Not required if data has panel attributes.}
 
-\item{time}{An optional character string specifying the name of the time variable.
-If provided, the function checks for duplicate group-time combinations.
-Not required if data has panel attributes.}
-
-\item{detailed}{A logical flag indicating whether to include detailed missing counts for each variable.
+\item{detail}{A logical flag indicating whether to include detailed missing counts for each variable.
 Default = FALSE.}
 }
 \value{
-A data.frame with incomplete entities description or a character message.
+A data.frame with incomplete entities description or a character message, class \code{"panel_description"}.
 }
 \description{
 This function provides a descriptive table of entities with incomplete observations (missing values).
@@ -28,12 +26,12 @@ This function provides a descriptive table of entities with incomplete observati
 \details{
 When incomplete entities exist, returns a data.frame with:
 \describe{
-\item{\code{[group]}}{The entity/group identifier (name matches input \code{group})}
+\item{\code{[entity]}}{The entity identifier (name matches input entity variable)}
 \item{\code{na_count}}{Total number of missing observations for the entity}
 \item{\code{variables}}{Number of variables with at least one missing value for that entity}
 }
 
-When \code{detailed = TRUE}, additional columns are included:
+When \code{detail = TRUE}, additional columns are included:
 \describe{
 \item{\code{[variable1]}}{Number of NAs in variable1 for the entity}
 \item{\code{[variable2]}}{Number of NAs in variable2 for the entity}
@@ -46,21 +44,19 @@ The data.frame is sorted by:
 \item Total number of NAs (descending)
 }
 
-Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} (if provided)
-variables are removed. Messages indicate how many rows were excluded due to each variable.
+Before analysis, rows with missing values (\code{NA}) in the entity or (if provided)
+time variables are removed. Messages indicate how many rows were excluded.
 The excluded rows are stored in \code{details$excluded_rows} for further inspection.
 
 If no entities have incomplete data, returns the character message:
-"There are no incomplete groups/entities in the data."
+"There are no incomplete entities in the data."
 
-If a time variable is supplied (either by the user or from \code{panel_data} metadata),
-the function checks for duplicate group-time combinations. In a properly structured
-panel dataset, each entity (group) should have at most one observation per time period.
-If duplicates are found, they are stored in \code{details$entity_time_duplicates}.
-A message is printed only when the identifiers were explicitly provided (i.e., not taken
-from \code{panel_data} attributes).
+If a time variable is supplied (either via \code{index} or from panel metadata),
+the function checks for duplicate entity-time combinations. If duplicates are found,
+they are stored in \code{details$entity_time_duplicates}. A message is printed only when
+the identifiers were explicitly provided (i.e., not taken from panel attributes).
 
-The returned data.frame (if any) has class \code{"panel_description"} and the following attributes:
+The returned data.frame (if any) has class \code{"panel_description"} and attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
 \item{\code{details}}{List containing additional information:
@@ -71,21 +67,10 @@ The returned data.frame (if any) has class \code{"panel_description"} and the fo
 }
 \examples{
 data(production)
-
-# Basic usage
-describe_incomplete(production, group = "firm")
-
-# More careful usage with panel balance check and duplicate check
-describe_incomplete(production, group = "firm", time = "year")
-
-# Detailed view with variable-level NA counts
-describe_incomplete(production, group = "firm", detailed = TRUE)
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-describe_incomplete(panel_data)
+describe_incomplete(production, index = "firm")
+describe_incomplete(production, index = c("firm", "year"), detail = TRUE)
 
 }
 \seealso{
-\code{\link[=summarize_missing]{summarize_missing()}}, \code{\link[=describe_patterns]{describe_patterns()}}, \code{\link[=describe_balance]{describe_balance()}}
+\code{\link[=summarize_missing]{summarize_missing()}}, \code{\link[=describe_patterns]{describe_patterns()}}
 }

@@ -8,8 +8,8 @@
 #' @param delta An optional positive integer giving the expected interval between time periods.
 #' @param limits An integer specifying the maximum number of distinct patterns to display.
 #'        If not specified, all patterns are shown.
-#' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param detail A logical flag indicating whether to return detailed patterns. Default = TRUE.
+#' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer specifying the number of decimal places for rounding share column.
 #'        Default = 3.
 #'
@@ -46,8 +46,8 @@ describe_patterns <- function(
   index = NULL,
   delta = NULL,
   limits = NULL,
-  format = "wide",
   detail = TRUE,
+  format = "wide",
   digits = 3
 ) {
   sort_unique_preserve <- function(x) {
@@ -359,8 +359,8 @@ describe_patterns <- function(
     time = time_var,
     delta = delta,
     limits = limits,
-    format = format,
     detail = detail,
+    format = format,
     digits = digits
   )
 

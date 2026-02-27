@@ -6,107 +6,62 @@
 \usage{
 describe_patterns(
   data,
-  group = NULL,
-  time = NULL,
-  interval = NULL,
-  max_patterns = NULL,
+  index = NULL,
+  delta = NULL,
+  limits = NULL,
+  detail = TRUE,
   format = "wide",
-  detailed = TRUE,
   digits = 3
 )
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.
-Not required if data has panel attributes.}
+\item{delta}{An optional positive integer giving the expected interval between time periods.}
 
-\item{interval}{An optional positive integer giving the expected interval between time periods.}
-
-\item{max_patterns}{An integer specifying the maximum number of distinct patterns to display.
+\item{limits}{An integer specifying the maximum number of distinct patterns to display.
 If not specified, all patterns are shown.}
 
-\item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
+\item{detail}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
 
-\item{detailed}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
+\item{format}{A character string specifying the output format: "wide" or "long". Default = "wide".}
 
 \item{digits}{An integer specifying the number of decimal places for rounding share column.
 Default = 3.}
 }
 \value{
-A data.frame with presence patterns.
+A data.frame with presence patterns, class \code{"panel_description"}.
 }
 \description{
 This function describes entities presence patterns in panel data over time.
 }
 \details{
 An entity/time combination is considered \strong{present} if the corresponding row contains at least
-one non-NA value in any substantive variable (i.e., all columns except the group and time identifiers).
+one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
-Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
+Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
 
-If \code{interval} is supplied, the time variable is coerced to numeric (if possible).
-The function then checks that all observed time points are compatible with a regular spacing
-of that interval. If gaps are detected, a message lists the missing periods (unless the interval
-was inherited from panel attributes), and columns for those periods are added to the presence matrix
-(all zeros) before computing patterns. The output data.frame will therefore include those missing
-periods as additional columns (in wide format) or additional rows (in long format). The \code{details}
-attribute is updated accordingly, but no new vectors are added beyond those already present.
+If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks that
+all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
+a message lists the missing periods (unless the interval was inherited from panel attributes), and columns
+for those periods are added to the presence matrix (all zeros) before computing patterns.
 
-The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
-were explicitly provided (i.e., not taken from \code{panel_data} attributes).
+The function also checks for duplicate entity-time combinations. If duplicates are found, they are stored in
+\code{details$entity_time_duplicates} and a message is printed (unless the identifiers came from panel attributes).
 
-The output format depends on the \code{format} and \code{detailed} parameters:
-\describe{
-\item{\code{format = "wide"}, \code{detailed = TRUE}}{Columns: pattern, \link{time_periods}, count, share.}
-\item{\code{format = "long"}, \code{detailed = TRUE}}{Columns: pattern, time, presence, count, share.}
-\item{\code{detailed = FALSE}}{Only pattern and time period columns (or presence in long format).}
-}
-
-If \code{max_patterns} is supplied, only the most frequent patterns are retained; the output is limited
-to the top \code{max_patterns} patterns. The \code{patterns_groups} and \code{patterns_matrix} in the \code{details}
-attribute are updated accordingly.
-
-Patterns are sorted by frequency (most common first).
-
-The returned data.frame has class \code{"panel_description"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_patterns}, \code{presence_matrix},
-\code{patterns_groups}, \code{patterns_matrix}, \code{excluded_rows} (if any), and, if duplicates were found,
-\code{entity_time_duplicates}.}
-}
+Patterns are sorted by frequency (most common first). If \code{limits} is supplied, only the most frequent
+patterns are retained.
 }
 \examples{
 data(production)
+describe_patterns(production, index = c("firm", "year"))
+describe_patterns(production, index = c("firm", "year"), delta = 1, limits = 3)
 
-# Basic usage
-describe_patterns(production, group = "firm", time = "year")
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-describe_patterns(panel_data)
-
-# Specify interval to fill gaps
-describe_patterns(production, group = "firm", time = "year", interval = 1)
-
-# Show only top 3 patterns
-describe_patterns(production, group = "firm", time = "year", max_patterns = 3)
-
-# Simplified version
-describe_patterns(production, group = "firm", time = "year", detailed = FALSE)
-
-}
-\references{
-For Stata users: This corresponds to the \code{xtdes} command.
 }
 \seealso{
-\code{\link[=plot_patterns]{plot_patterns()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}
+\code{\link{plot_patterns}}, \code{\link{describe_periods}}, \code{\link{describe_balance}}
 }

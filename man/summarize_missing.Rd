@@ -6,87 +6,50 @@
 \usage{
 summarize_missing(
   data,
-  selection = NULL,
-  group = NULL,
-  time = NULL,
-  detailed = FALSE,
+  select = NULL,
+  index = NULL,
+  detail = FALSE,
   digits = 3
 )
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{selection}{A character vector specifying which variables to analyze for missing values.
-If not specified, all variables in the data.frame will be used.}
+\item{select}{A character vector specifying which variables to analyze for missing values.
+If not specified, all variables (except entity and time) will be used.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.
-Not required if data has panel attributes.}
-
-\item{detailed}{A logical flag indicating whether to return detailed period-specific NA counts.
+\item{detail}{A logical flag indicating whether to return detailed period-specific NA counts.
 Default = FALSE.}
 
 \item{digits}{An integer indicating the number of decimal places to round the share column.
 Default = 3.}
 }
 \value{
-A data.frame with missing value summary statistics.
+A data.frame with missing value summary statistics, class \code{"panel_summary"}.
 }
 \description{
 This function calculates summary statistics for missing values (NAs) in panel data,
 providing both overall and detailed period-specific missing value counts.
 }
 \details{
-When \code{detailed = FALSE} (default), returns a data.frame with the following columns:
-\describe{
-\item{\code{variable}}{The name of the analyzed variable}
-\item{\code{na_count}}{Total number of missing values (NAs) for the variable}
-\item{\code{na_share}}{Proportion of observations that are missing (0 to 1), rounded to specified digits}
-\item{\code{entities}}{Number of entities/groups with at least one missing value for this variable}
-\item{\code{periods}}{Number of time periods with at least one missing value for this variable}
-}
+When \code{detail = FALSE}, returns columns: variable, na_count, na_share, entities, periods.
+When \code{detail = TRUE}, additional columns for each time period contain NA counts.
 
-When \code{detailed = TRUE}, additional columns are included:
-\describe{
-\item{\code{[period1]}}{Column with NA counts for period1 (name matches the time period value)}
-\item{\code{[period2]}}{Column with NA counts for period2 (name matches the time period value)}
-\item{...}{Additional columns for each unique time period in the data}
-}
+Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
 
-Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
-
-The function checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
-were explicitly provided (i.e., not taken from \code{panel_data} attributes).
-
-The returned data.frame has class \code{"panel_summary"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information:
-\code{count_variables_with_na}, \code{count_variables_without_na}, \code{count_variables} (total analyzed),
-\code{variables_with_na}, \code{variables_without_na}, \code{excluded_rows} (if any), and, if duplicates exist,
-\code{entity_time_duplicates}.}
-}
+Duplicate entity‑time combinations are checked; if found they are stored in \code{details$entity_time_duplicates}
+and a message is printed (unless identifiers came from panel attributes).
 }
 \examples{
 data(production)
-
-# Basic usage with statistics for all variables
-summarize_missing(production, group = "firm", time = "year")
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-summarize_missing(panel_data)
-
-# Detailed output with period-specific NA counts
-summarize_missing(production, group = "firm", time = "year", detailed = TRUE)
+summarize_missing(production, index = c("firm", "year"))
+summarize_missing(production, select = c("sales", "employees"), index = c("firm", "year"), detail = TRUE)
 
 }
 \seealso{
-\code{\link[=describe_incomplete]{describe_incomplete()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_periods]{describe_periods()}}, \code{\link[=summarize_numeric]{summarize_numeric()}}
+\code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{summarize_transition}}
 }

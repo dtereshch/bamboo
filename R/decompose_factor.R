@@ -4,14 +4,13 @@
 #' between and within components for categorical (factor) variables in panel data.
 #'
 #' @param data A data.frame containing panel data in a long format.
+#' @param select A character vector specifying which categorical (factor) variables to analyze.
+#'        If not specified, all factor variables in the data.frame will be used.
 #' @param index A character vector of length 1 or 2 specifying the names of the
 #'        entity and (optionally) time variables. The first element is the entity
 #'        variable; if a second element is provided, it is used as the time variable.
 #'        Not required if data has panel attributes.
-#' @param select A character vector specifying which categorical (factor) variables to analyze.
-#'        If not specified, all factor variables in the data.frame will be used.
-#' @param format A character string specifying the output format: "wide" or "long".
-#'        Default = "wide".
+#' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
 #' @param digits An integer indicating the number of decimal places to round shares.
 #'        Default = 3.
 #'
@@ -67,14 +66,14 @@
 #'
 #' @examples
 #' data(production)
-#' decompose_factor(production, index = "firm")
-#' decompose_factor(production, index = c("firm", "year"), select = "industry")
+#' decompose_factor(production, select = "industry", index = "firm")
+#' decompose_factor(production, index = c("firm", "year"))
 #'
 #' @export
 decompose_factor <- function(
   data,
-  index = NULL,
   select = NULL,
+  index = NULL,
   format = "wide",
   digits = 3
 ) {

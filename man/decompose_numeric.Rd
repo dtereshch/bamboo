@@ -6,47 +6,44 @@
 \usage{
 decompose_numeric(
   data,
-  selection = NULL,
-  group = NULL,
-  time = NULL,
+  select = NULL,
+  index = NULL,
+  detail = TRUE,
   format = "long",
-  detailed = TRUE,
   digits = 3
 )
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{selection}{A character vector specifying which numeric variables to analyze.
+\item{select}{A character vector specifying which numeric variables to analyze.
 If not specified, all numeric variables in the data.frame will be used.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
+\item{index}{A character vector of length 1 or 2 specifying the names of the
+entity and (optionally) time variables. The first element is the entity
+variable; if a second element is provided, it is used as the time variable.
 Not required if data has panel attributes.}
 
-\item{time}{An optional character string specifying the name of the time variable.
-If provided, the function checks for duplicate group-time combinations.
-Not required if data has panel attributes.}
+\item{detail}{A logical flag indicating whether to return detailed Stata-like output.
+Default = TRUE.}
 
 \item{format}{A character string specifying the output format: "long" or "wide".
 Default = "long".}
-
-\item{detailed}{A logical flag indicating whether to return detailed Stata-like output.
-Default = TRUE.}
 
 \item{digits}{An integer indicating the number of decimal places to round statistics.
 Default = 3.}
 }
 \value{
-A data.frame with panel data decomposition statistics.
+A data.frame with panel data decomposition statistics, class \code{"panel_summary"}.
 }
 \description{
-This function decomposes variance of numeric variables
-into between and within components in panel data.
+This function decomposes variance of numeric variables into between and within components
+in panel data.
 }
 \details{
-The output format is controlled by two parameters: \code{format} and \code{detailed}.
+The output format is controlled by two parameters: \code{format} and \code{detail}.
 
-When \code{format = "long"} and \code{detailed = TRUE} (default), returns a data.frame with:
+When \code{format = "long"} and \code{detail = TRUE} (default), returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the analyzed variable}
 \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
@@ -54,10 +51,10 @@ When \code{format = "long"} and \code{detailed = TRUE} (default), returns a data
 \item{\code{std}}{Standard deviation}
 \item{\code{min}}{Minimum value}
 \item{\code{max}}{Maximum value}
-\item{\code{count}}{Number of observations or groups}
+\item{\code{count}}{Number of observations or entities}
 }
 
-When \code{format = "long"} and \code{detailed = FALSE}, returns a data.frame with:
+When \code{format = "long"} and \code{detail = FALSE}, returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the variable}
 \item{\code{dimension}}{Type of decomposition: "overall", "between", or "within"}
@@ -65,7 +62,7 @@ When \code{format = "long"} and \code{detailed = FALSE}, returns a data.frame wi
 \item{\code{std}}{Standard deviation}
 }
 
-When \code{format = "wide"} and \code{detailed = TRUE}, returns a data.frame with:
+When \code{format = "wide"} and \code{detail = TRUE}, returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the variable}
 \item{\code{mean}}{Overall mean}
@@ -73,62 +70,51 @@ When \code{format = "wide"} and \code{detailed = TRUE}, returns a data.frame wit
 \item{\code{min_overall}}{Overall minimum}
 \item{\code{max_overall}}{Overall maximum}
 \item{\code{count_overall}}{Number of observations}
-\item{\code{std_between}}{Between-group standard deviation}
-\item{\code{min_between}}{Minimum of group means}
-\item{\code{max_between}}{Maximum of group means}
-\item{\code{count_between}}{Number of groups}
-\item{\code{std_within}}{Within-group standard deviation}
-\item{\code{min_within}}{Within-group minimum (transformed)}
-\item{\code{max_within}}{Within-group maximum (transformed)}
-\item{\code{count_within}}{Average observations per group}
+\item{\code{std_between}}{Between-entity standard deviation}
+\item{\code{min_between}}{Minimum of entity means}
+\item{\code{max_between}}{Maximum of entity means}
+\item{\code{count_between}}{Number of entities}
+\item{\code{std_within}}{Within-entity standard deviation}
+\item{\code{min_within}}{Within-entity minimum (transformed)}
+\item{\code{max_within}}{Within-entity maximum (transformed)}
+\item{\code{count_within}}{Average observations per entity}
 }
 
-When \code{format = "wide"} and \code{detailed = FALSE}, returns a data.frame with:
+When \code{format = "wide"} and \code{detail = FALSE}, returns a data.frame with:
 \describe{
 \item{\code{variable}}{The name of the variable}
 \item{\code{mean}}{Overall mean}
 \item{\code{std_overall}}{Overall standard deviation}
-\item{\code{std_between}}{Between-group standard deviation}
-\item{\code{std_within}}{Within-group standard deviation}
+\item{\code{std_between}}{Between-entity standard deviation}
+\item{\code{std_within}}{Within-entity standard deviation}
 }
 
-Before any analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time}
-(if provided) variables are removed. Messages indicate how many rows were
-excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
+Before any analysis, rows with missing values (\code{NA}) in the entity or (if provided)
+time variables are removed. Messages indicate how many rows were excluded.
+The excluded rows are stored in \code{details$excluded_rows} for further inspection.
 
-If a time variable is supplied (either by the user or from \code{panel_data} metadata),
-the function checks for duplicate group-time combinations. In a properly structured
-panel dataset, each entity (group) should have at most one observation per time period.
-If duplicates are found, they are stored in \code{details$entity_time_duplicates}.
-A message is printed only when the identifiers were explicitly provided (i.e., not taken
-from \code{panel_data} attributes).
+If a time variable is supplied (either via \code{index} or from panel metadata),
+the function checks for duplicate entity-time combinations. If duplicates are found,
+they are stored in \code{details$entity_time_duplicates}. A message is printed only when
+the identifiers were explicitly provided (i.e., not taken from panel attributes).
 
 The returned data.frame has class \code{"panel_summary"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_groups},
+\item{\code{details}}{List containing additional information: \code{count_entities},
 \code{excluded_rows} (if any), and, if time was supplied and duplicates exist,
 \code{entity_time_duplicates}.}
 }
 }
 \examples{
 data(production)
-
-# Basic usage with statistics for all numeric variables
-decompose_numeric(production, group = "firm")
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-decompose_numeric(panel_data)
-
-# Show statistics with time variable to check duplicates
-decompose_numeric(production, group = "firm", time = "year")
+decompose_numeric(production, select = c("sales", "labor"), index = "firm")
+decompose_numeric(production, index = c("firm", "year"))
 
 }
 \references{
 For Stata users: This corresponds to the \code{xtsum} command.
 }
 \seealso{
-\code{\link[=summarize_numeric]{summarize_numeric()}}, \code{\link[=plot_heterogeneity]{plot_heterogeneity()}}, \code{\link[=decompose_factor]{decompose_factor()}}
+\code{\link[=decompose_factor]{decompose_factor()}}, \code{\link[=summarize_transition]{summarize_transition()}}
 }

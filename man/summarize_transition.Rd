@@ -4,24 +4,14 @@
 \alias{summarize_transition}
 \title{Transition Summary}
 \usage{
-summarize_transition(
-  data,
-  selection,
-  group = NULL,
-  time = NULL,
-  format = "wide",
-  digits = 3
-)
+summarize_transition(data, select, index = NULL, format = "wide", digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{selection}{A character string specifying the factor variable to analyze transitions for.}
+\item{select}{A character string specifying the factor variable to analyze transitions for.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
-Not required if data has panel attributes.}
-
-\item{time}{A character string specifying the name of the time variable.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
 \item{format}{A character string specifying the output format: \code{"wide"} (default) or \code{"long"}.}
@@ -30,15 +20,14 @@ Not required if data has panel attributes.}
 Default = 3.}
 }
 \value{
-A data.frame containing transition summaries.
+A data.frame containing transition summaries, class \code{"panel_summary"}.
 }
 \description{
 Calculates transition counts and shares between states of a categorical (factor) variable
-across consecutive time periods within groups (e.g., firms, individuals) for panel data.
+across consecutive time periods within entities for panel data.
 }
 \details{
 The structure depends on \code{format}:
-
 \describe{
 \item{\code{format = "wide"}}{A transition matrix as a data.frame:
 \itemize{
@@ -51,78 +40,28 @@ row state to the column state (rounded to \code{digits}).
 \itemize{
 \item \code{from}: Originating state.
 \item \code{to}: Destination state.
-\item \code{count}: Number of observed transitions from \code{from} to \code{to}.
-\item \code{share}: Proportion of transitions from \code{from} that go to \code{to} (rounded to \code{digits}).
-}
-All possible state combinations are included, even those with zero transitions.
+\item \code{count}: Number of observed transitions.
+\item \code{share}: Proportion of transitions from \code{from} that go to \code{to} (rounded).
 }
 }
-
-Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
-
-The function checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found:
-\itemize{
-\item The distinct duplicate combinations are stored in \code{details$entity_time_duplicates}.
-\item If, for any duplicate combination, the values of the \code{selection} variable differ,
-an error is raised because the state at that time point is ambiguous.
-\item If all duplicate combinations have identical \code{selection} values, the data is
-collapsed to one row per group‑time (taking the first occurrence) before
-computing transitions. A message is printed (only when the identifiers were
-explicitly provided, not taken from \code{panel_data} attributes) indicating the
-number of collapsed duplicate rows.
 }
 
-The shares are \strong{empirical transition proportions} based on observed consecutive
-time periods. They are not necessarily Markov transition probabilities in the strict
-sense because the function does not normalize for missing time periods (gaps in the panel).
+Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
 
-Missing values in the variable of interest (\code{selection}) are removed before analysis,
-so transitions from nonmissing to missing (or vice versa) are \strong{excluded}.
-The variable of interest is coerced to a factor if it is not already one.
-At least two distinct levels are required in the factor to compute transitions.
+Duplicate entity‑time combinations are checked. If duplicates exist with differing values of the
+\code{select} variable, an error is raised. If all duplicates have identical values, they are collapsed
+to one row per entity‑time (first occurrence kept) and a message is printed.
 
-The returned data.frame has class \code{"panel_summary"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{categories} (vector of levels
-of the analyzed variable), \code{excluded_rows} (if any), and, if duplicates were found,
-\code{entity_time_duplicates}.}
-}
+Missing values in the variable of interest (\code{select}) are removed before analysis.
+The variable is coerced to a factor if not already one, and must have at least two levels.
 }
 \examples{
 data(production)
+summarize_transition(production, select = "industry", index = c("firm", "year"))
+summarize_transition(production, select = "industry", index = c("firm", "year"), format = "long")
 
-# Basic usage (transition matrix)
-summarize_transition(production,
-                     selection = "industry",
-                     group = "firm",
-                     time = "year")
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-summarize_transition(panel_data, selection = "industry")
-
-# Long format (counts and shares)
-summarize_transition(production,
-                     selection = "industry",
-                     group = "firm",
-                     time = "year",
-                     format = "long")
-
-# Control rounding precision
-summarize_transition(production,
-                     selection = "industry",
-                     group = "firm",
-                     time = "year",
-                     digits = 4)
-
-}
-\references{
-For Stata users: This corresponds to the \code{xttrans} command.
 }
 \seealso{
-\code{\link[=decompose_factor]{decompose_factor()}}, \code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=describe_patterns]{describe_patterns()}}
+\code{\link{describe_patterns}}, \code{\link{summarize_missing}}
 }

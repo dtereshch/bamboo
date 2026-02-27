@@ -4,82 +4,52 @@
 \alias{describe_periods}
 \title{Time Periods Completeness Description}
 \usage{
-describe_periods(data, group = NULL, time = NULL, interval = NULL, digits = 3)
+describe_periods(data, index = NULL, delta = NULL, digits = 3)
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
 
-\item{group}{A character string specifying the name of the entity/group variable in panel data.
+\item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
-\item{time}{A character string specifying the name of the time variable.
-Not required if data has panel attributes.}
-
-\item{interval}{An optional positive integer giving the expected interval between time periods.}
+\item{delta}{An optional positive integer giving the expected interval between time periods.}
 
 \item{digits}{An integer specifying the number of decimal places for rounding the share column.
 Default = 3.}
 }
 \value{
-A data.frame with entities presence summary by time period.
+A data.frame with entities presence summary by time period, class \code{"panel_description"}.
 }
 \description{
-This function calculates, for each time period, the number of entities (groups)
-that have at least one non‑missing value in any substantive variable,
-and the corresponding share of all entities.
+This function calculates, for each time period, the number of entities that have at least one
+non‑missing value in any substantive variable, and the corresponding share of all entities.
 }
 \details{
 The returned data.frame contains the following columns:
 \describe{
-\item{\code{[time]}}{Time period identifier (name matches the input \code{time} argument)}
-\item{\code{count}}{Number of distinct entities (groups) observed in that period,
+\item{\code{[time]}}{Time period identifier (name matches the input \code{time} variable)}
+\item{\code{count}}{Number of distinct entities observed in that period,
 i.e., entities with at least one row containing a non‑NA value in substantive variables}
-\item{\code{share}}{Proportion of entities observed in that period,
-relative to the total number of unique entities in the data (0 to 1),
-rounded to \code{digits} decimal places.}
+\item{\code{share}}{Proportion of entities observed in that period (0 to 1), rounded to \code{digits}.}
 }
 
-Before analysis, rows with missing values (\code{NA}) in the \code{group} or \code{time} variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
+Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
+Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
 
-If \code{interval} is supplied, the time variable is coerced to numeric (if possible).
-The function then checks that all observed time points are compatible with a regular spacing
-of that interval. If gaps are detected, a message lists the missing periods (unless the interval
-was inherited from panel attributes), and rows for those periods are added to the output with
-\code{count = 0} and \code{share = 0}. The \code{entities} list in the \code{details} attribute includes empty vectors
-for those missing periods.
+If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks
+that all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
+a message lists the missing periods (unless the interval was inherited from panel attributes), and rows
+for those periods are added to the output with \code{count = 0} and \code{share = 0}.
 
-The function also checks for duplicate group-time combinations. In a properly structured panel dataset,
-each entity (group) should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
-were explicitly provided (i.e., not taken from \code{panel_data} attributes).
-
-Time periods are sorted naturally (numeric order).
-
-The returned data.frame has class \code{"panel_description"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name, group, time, interval, and digits.}
-\item{\code{details}}{List containing additional information: \code{entities} (a named list where
-names are time periods and values are vectors of entity identifiers observed in that period),
-\code{excluded_rows} (if any), and, if duplicates were found, \code{entity_time_duplicates}.}
-}
+Duplicate entity‑time combinations are checked; if found they are stored in \code{details$entity_time_duplicates}
+and a message is printed (unless identifiers came from panel attributes).
 }
 \examples{
 data(production)
-describe_periods(production, group = "firm", time = "year")
-
-# With custom rounding
-describe_periods(production, group = "firm", time = "year", digits = 4)
-
-# With panel attributes
-panel_data <- set_panel(production, group = "firm", time = "year")
-describe_periods(panel_data)
-
-# Specify interval to fill gaps (if any)
-describe_periods(production, group = "firm", time = "year", interval = 1)
+describe_periods(production, index = c("firm", "year"))
+describe_periods(production, index = c("firm", "year"), delta = 1, digits = 4)
 
 }
 \seealso{
-\code{\link[=plot_periods]{plot_periods()}}, \code{\link[=describe_balance]{describe_balance()}}, \code{\link[=describe_patterns]{describe_patterns()}}
+\code{\link{plot_periods}}, \code{\link{describe_balance}}, \code{\link{describe_patterns}}
 }
