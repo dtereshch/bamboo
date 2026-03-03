@@ -121,7 +121,7 @@ plot_heterogeneity <- function(
 
   # --- NEW CHECK: ensure select is not in group ---
   if (select %in% group) {
-    stop("'select' cannot be the same as 'group' variable ('", select, "')")
+    stop("'select' cannot be the same as 'group' ('", select, "')")
   }
   # ---------------------------------------------------
 

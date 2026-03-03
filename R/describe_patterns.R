@@ -122,7 +122,7 @@ describe_patterns <- function(
     stop('variable "', time_var, '" not found in data')
   }
   if (time_var == entity_var) {
-    stop("time and entity variables cannot be the same")
+    stop("entity and time variables cannot be the same")
   }
   if (!is.logical(detail) || length(detail) != 1) {
     stop("'detail' must be a single logical")

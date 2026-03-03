@@ -85,7 +85,7 @@ plot_periods <- function(
     stop('variable "', time_var, '" not found in data')
   }
   if (time_var == entity_var) {
-    stop("time and entity variables cannot be the same")
+    stop("entity and time variables cannot be the same")
   }
   if (!is.character(colors) || length(colors) != 2) {
     stop("'colors' must be a character vector of length 2")

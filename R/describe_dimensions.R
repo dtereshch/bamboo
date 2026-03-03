@@ -98,7 +98,7 @@ describe_dimensions <- function(data, index = NULL) {
     stop('time variable "', time_var, '" not found in data')
   }
   if (time_var == entity_var) {
-    stop("time and entity variables cannot be the same")
+    stop("entity and time variables cannot be the same")
   }
 
   # --- Remove rows with NA in entity or time ---
