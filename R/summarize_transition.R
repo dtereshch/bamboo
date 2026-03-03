@@ -34,7 +34,7 @@
 #' }
 #'
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded. The excluded rows are stored in `details$excluded_rows`.
+#' Messages indicate how many rows were excluded.
 #'
 #' Duplicate entity‑time combinations are checked. If duplicates exist with differing values of the
 #' `select` variable, an error is raised. If all duplicates have identical values, they are collapsed
@@ -140,31 +140,27 @@ summarize_transition <- function(
   messages_printed <- FALSE
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
@@ -336,20 +332,12 @@ summarize_transition <- function(
   )
 
   details <- list(categories = all_levels)
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   attr(out, "metadata") <- metadata
   attr(out, "details") <- details
   class(out) <- c("panel_summary", "data.frame")
 
-  if (
-    messages_printed || !is.null(excluded_rows) || !is.null(dup_combinations)
-  ) {
+  if (messages_printed) {
     cat("\n")
   }
 

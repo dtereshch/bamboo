@@ -91,19 +91,16 @@ When \code{format = "wide"} and \code{detail = FALSE}, returns a data.frame with
 
 Before any analysis, rows with missing values (\code{NA}) in the entity or (if provided)
 time variables are removed. Messages indicate how many rows were excluded.
-The excluded rows are stored in \code{details$excluded_rows} for further inspection.
 
 If a time variable is supplied (either via \code{index} or from panel metadata),
 the function checks for duplicate entity-time combinations. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when
-the identifiers were explicitly provided (i.e., not taken from panel attributes).
+a message is printed only when the identifiers were explicitly provided (i.e., not taken
+from panel attributes).
 
 The returned data.frame has class \code{"panel_summary"} and the following attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_entities},
-\code{excluded_rows} (if any), and, if time was supplied and duplicates exist,
-\code{entity_time_duplicates}.}
+\item{\code{details}}{List containing additional information: \code{count_entities}.}
 }
 }
 \examples{

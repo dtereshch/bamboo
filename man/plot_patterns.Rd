@@ -37,13 +37,13 @@ An entity/time combination is considered \strong{present} if the corresponding r
 one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
 Before plotting, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded. The excluded rows are stored in the returned list.
+Messages indicate how many rows were excluded.
 
 If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks
 for regular spacing and adds missing periods (with all zeros) to the plot. A message lists missing periods
 unless the interval was inherited from panel attributes.
 
-Duplicate entity‑time combinations are checked; if found they are stored and a message is printed
+Duplicate entity‑time combinations are checked; if found, a message is printed
 (unless identifiers came from panel attributes).
 
 The heatmap shows present (color1) and missing (color2). Rows are ordered by pattern frequency:

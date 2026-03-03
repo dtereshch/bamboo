@@ -39,10 +39,10 @@ When \code{detail = FALSE}, returns columns: variable, na_count, na_share, entit
 When \code{detail = TRUE}, additional columns for each time period contain NA counts.
 
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
+Messages indicate how many rows were excluded.
 
-Duplicate entity‑time combinations are checked; if found they are stored in \code{details$entity_time_duplicates}
-and a message is printed (unless identifiers came from panel attributes).
+Duplicate entity‑time combinations are checked; if found, a message is printed
+(unless identifiers came from panel attributes).
 }
 \examples{
 data(production)

@@ -20,15 +20,15 @@
 #' one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 #'
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded. The excluded rows are stored in `details$excluded_rows`.
+#' Messages indicate how many rows were excluded.
 #'
 #' If `delta` is supplied, the time variable is coerced to numeric (if possible). The function checks that
 #' all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
 #' a message lists the missing periods (unless the interval was inherited from panel attributes), and columns
 #' for those periods are added to the presence matrix (all zeros) before computing patterns.
 #'
-#' The function also checks for duplicate entity-time combinations. If duplicates are found, they are stored in
-#' `details$entity_time_duplicates` and a message is printed (unless the identifiers came from panel attributes).
+#' The function also checks for duplicate entity-time combinations. If duplicates are found,
+#' a message is printed (unless the identifiers came from panel attributes).
 #'
 #' Patterns are sorted by frequency (most common first). If `limits` is supplied, only the most frequent
 #' patterns are retained.
@@ -147,37 +147,32 @@ describe_patterns <- function(
   digits <- as.integer(digits)
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Duplicate check ---
-  dup_combinations <- NULL
   dup_rows <- duplicated(data[c(entity_var, time_var)]) |
     duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
   if (any(dup_rows)) {
@@ -346,12 +341,6 @@ describe_patterns <- function(
     patterns_entities = patterns_entities_sorted,
     patterns_matrix = patterns_matrix
   )
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   metadata <- list(
     function_name = as.character(match.call()[[1]]),

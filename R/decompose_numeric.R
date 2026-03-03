@@ -70,19 +70,16 @@
 #'
 #' Before any analysis, rows with missing values (`NA`) in the entity or (if provided)
 #' time variables are removed. Messages indicate how many rows were excluded.
-#' The excluded rows are stored in `details$excluded_rows` for further inspection.
 #'
 #' If a time variable is supplied (either via `index` or from panel metadata),
 #' the function checks for duplicate entity-time combinations. If duplicates are found,
-#' they are stored in `details$entity_time_duplicates`. A message is printed only when
-#' the identifiers were explicitly provided (i.e., not taken from panel attributes).
+#' a message is printed only when the identifiers were explicitly provided (i.e., not taken
+#' from panel attributes).
 #'
 #' The returned data.frame has class `"panel_summary"` and the following attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `count_entities`,
-#'         `excluded_rows` (if any), and, if time was supplied and duplicates exist,
-#'         `entity_time_duplicates`.}
+#'   \item{`details`}{List containing additional information: `count_entities`.}
 #' }
 #'
 #' @references
@@ -166,7 +163,6 @@ decompose_numeric <- function(
   }
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- if (!is.null(time_var)) {
     is.na(data[[time_var]])
@@ -176,31 +172,27 @@ decompose_numeric <- function(
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (!is.null(time_var) && any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Duplicate check (if time provided) ---
-  dup_combinations <- NULL
   if (!is.null(time_var)) {
     dup_rows <- duplicated(data[c(entity_var, time_var)]) |
       duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
@@ -473,20 +465,12 @@ decompose_numeric <- function(
     digits = digits
   )
   details <- list(count_entities = count_entities)
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   attr(result_df, "metadata") <- metadata
   attr(result_df, "details") <- details
   class(result_df) <- c("panel_summary", "data.frame")
 
-  if (
-    messages_printed || !is.null(excluded_rows) || !is.null(dup_combinations)
-  ) {
+  if (messages_printed) {
     cat("\n")
   }
 

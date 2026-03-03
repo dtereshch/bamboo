@@ -43,15 +43,15 @@ An entity/time combination is considered \strong{present} if the corresponding r
 one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
+Messages indicate how many rows were excluded.
 
 If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks that
 all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
 a message lists the missing periods (unless the interval was inherited from panel attributes), and columns
 for those periods are added to the presence matrix (all zeros) before computing patterns.
 
-The function also checks for duplicate entity-time combinations. If duplicates are found, they are stored in
-\code{details$entity_time_duplicates} and a message is printed (unless the identifiers came from panel attributes).
+The function also checks for duplicate entity-time combinations. If duplicates are found,
+a message is printed (unless the identifiers came from panel attributes).
 
 Patterns are sorted by frequency (most common first). If \code{limits} is supplied, only the most frequent
 patterns are retained.

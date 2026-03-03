@@ -34,15 +34,15 @@ i.e., entities with at least one row containing a non‑NA value in substantive 
 }
 
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
+Messages indicate how many rows were excluded.
 
 If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks
 that all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
 a message lists the missing periods (unless the interval was inherited from panel attributes), and rows
 for those periods are added to the output with \code{count = 0} and \code{share = 0}.
 
-Duplicate entity‑time combinations are checked; if found they are stored in \code{details$entity_time_duplicates}
-and a message is printed (unless identifiers came from panel attributes).
+Duplicate entity‑time combinations are checked; if found, a message is printed
+(unless identifiers came from panel attributes).
 }
 \examples{
 data(production)

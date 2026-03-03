@@ -47,7 +47,7 @@ row state to the column state (rounded to \code{digits}).
 }
 
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded. The excluded rows are stored in \code{details$excluded_rows}.
+Messages indicate how many rows were excluded.
 
 Duplicate entity‑time combinations are checked. If duplicates exist with differing values of the
 \code{select} variable, an error is raised. If all duplicates have identical values, they are collapsed

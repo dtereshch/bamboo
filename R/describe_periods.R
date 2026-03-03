@@ -22,15 +22,15 @@
 #' }
 #'
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded. The excluded rows are stored in `details$excluded_rows`.
+#' Messages indicate how many rows were excluded.
 #'
 #' If `delta` is supplied, the time variable is coerced to numeric (if possible). The function checks
 #' that all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
 #' a message lists the missing periods (unless the interval was inherited from panel attributes), and rows
 #' for those periods are added to the output with `count = 0` and `share = 0`.
 #'
-#' Duplicate entity‑time combinations are checked; if found they are stored in `details$entity_time_duplicates`
-#' and a message is printed (unless identifiers came from panel attributes).
+#' Duplicate entity‑time combinations are checked; if found, a message is printed
+#' (unless identifiers came from panel attributes).
 #'
 #' @seealso \code{\link{plot_periods}}, \code{\link{describe_balance}}, \code{\link{describe_patterns}}
 #'
@@ -132,37 +132,32 @@ describe_periods <- function(
   digits <- as.integer(digits)
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Duplicate check ---
-  dup_combinations <- NULL
   dup_rows <- duplicated(data[c(entity_var, time_var)]) |
     duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
   if (any(dup_rows)) {
@@ -295,12 +290,6 @@ describe_periods <- function(
   )
 
   details <- list(entities = entities)
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   attr(result_df, "metadata") <- metadata
   attr(result_df, "details") <- details

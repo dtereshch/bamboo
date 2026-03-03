@@ -33,23 +33,20 @@
 #'
 #' Before analysis, rows with missing values (`NA`) in the entity or (if provided)
 #' time variables are removed. Messages indicate how many rows were excluded.
-#' The excluded rows are stored in `details$excluded_rows` for further inspection.
 #'
 #' If no entities have incomplete data, returns the character message:
 #' "There are no incomplete entities in the data."
 #'
 #' If a time variable is supplied (either via `index` or from panel metadata),
 #' the function checks for duplicate entity-time combinations. If duplicates are found,
-#' they are stored in `details$entity_time_duplicates`. A message is printed only when
-#' the identifiers were explicitly provided (i.e., not taken from panel attributes).
+#' a message is printed only when the identifiers were explicitly provided (i.e., not taken
+#' from panel attributes).
 #'
 #' The returned data.frame (if any) has class `"panel_description"` and attributes:
 #' \describe{
 #'   \item{`metadata`}{List containing the function name and the arguments used.}
 #'   \item{`details`}{List containing additional information:
-#'         `count_entities_total`, `count_entities_incomplete`, `entities_incomplete`,
-#'         `excluded_rows` (if any), and (if time was supplied and duplicates exist)
-#'         `entity_time_duplicates`.}
+#'         `count_entities_total`, `count_entities_incomplete`, `entities_incomplete`.}
 #' }
 #'
 #' @seealso
@@ -127,7 +124,6 @@ describe_incomplete <- function(
   }
 
   # --- Remove rows with NA in entity or time (if time provided) ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- if (!is.null(time_var)) {
     is.na(data[[time_var]])
@@ -137,31 +133,27 @@ describe_incomplete <- function(
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (!is.null(time_var) && any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Duplicate check (if time provided) ---
-  dup_combinations <- NULL
   if (!is.null(time_var)) {
     dup_rows <- duplicated(data[c(entity_var, time_var)]) |
       duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
@@ -279,12 +271,6 @@ describe_incomplete <- function(
     count_entities_incomplete = nrow(incomplete),
     entities_incomplete = incomplete_ids
   )
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   attr(incomplete, "metadata") <- metadata
   attr(incomplete, "details") <- details

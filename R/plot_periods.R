@@ -16,10 +16,10 @@
 #' one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 #'
 #' Before plotting, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded. The excluded rows are stored in the returned list.
+#' Messages indicate how many rows were excluded.
 #'
-#' The function also checks for duplicate entity-time combinations. If found, they are stored and a message
-#' is printed (unless the identifiers came from panel attributes).
+#' The function also checks for duplicate entity-time combinations. If found, a message is printed
+#' (unless the identifiers came from panel attributes).
 #'
 #' The histogram shows the number of time periods covered by each entity (x-axis) and the frequency of
 #' entities with that coverage (y-axis).
@@ -95,37 +95,32 @@ plot_periods <- function(
   line_color <- colors[2]
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Duplicate check ---
-  dup_combinations <- NULL
   dup_rows <- duplicated(data[c(entity_var, time_var)]) |
     duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
   if (any(dup_rows)) {
@@ -269,12 +264,6 @@ plot_periods <- function(
     coverage_by_entity = time_coverage,
     histogram_data = hist_data
   )
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   invisible(list(metadata = metadata, details = details))
 }

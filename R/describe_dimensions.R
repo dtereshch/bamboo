@@ -19,10 +19,10 @@
 #' }
 #'
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded. The excluded rows are stored in `details$excluded_rows`.
+#' Messages indicate how many rows were excluded.
 #'
-#' Duplicate entity-time combinations are checked; if found, they are stored in `details$entity_time_duplicates`
-#' and a message is printed (unless identifiers came from panel attributes).
+#' Duplicate entity-time combinations are checked; if found, a message is printed
+#' (unless identifiers came from panel attributes).
 #'
 #' @seealso \code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{describe_patterns}}, \code{\link{make_panel}}
 #'
@@ -102,37 +102,32 @@ describe_dimensions <- function(data, index = NULL) {
   }
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Duplicate check ---
-  dup_combinations <- NULL
   dup_rows <- duplicated(data[c(entity_var, time_var)]) |
     duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
   if (any(dup_rows)) {
@@ -191,12 +186,6 @@ describe_dimensions <- function(data, index = NULL) {
     periods = periods_vals,
     variables = substantive_vars
   )
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   attr(result, "metadata") <- metadata
   attr(result, "details") <- details

@@ -36,14 +36,12 @@ The returned object has class \code{"panel_data"} and includes the following att
 \describe{
 \item{\code{entities}}{Unique values of the entity variable.}
 \item{\code{periods}}{Sorted unique values of the time variable.}
-\item{\code{excluded_rows}}{Rows removed due to missing entity/time (if any).}
-\item{\code{entity_time_duplicates}}{Distinct duplicate combinations (if any).}
 \item{\code{periods_restored}, \code{periods_missing}}{If \code{delta} is supplied and gaps are detected,
 the full sequence and missing periods.}
 }}
 }
 
-First, rows with missing values in the entity or time variables are removed and stored.
+First, rows with missing values in the entity or time variables are removed and messages are printed.
 Then duplicate entity‑time combinations are checked; if \code{balance} is requested, duplicates are
 automatically removed (first occurrence kept) and a message is issued.
 

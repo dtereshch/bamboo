@@ -24,14 +24,12 @@
 #'         \describe{
 #'           \item{`entities`}{Unique values of the entity variable.}
 #'           \item{`periods`}{Sorted unique values of the time variable.}
-#'           \item{`excluded_rows`}{Rows removed due to missing entity/time (if any).}
-#'           \item{`entity_time_duplicates`}{Distinct duplicate combinations (if any).}
 #'           \item{`periods_restored`, `periods_missing`}{If `delta` is supplied and gaps are detected,
 #'                 the full sequence and missing periods.}
 #'         }}
 #' }
 #'
-#' First, rows with missing values in the entity or time variables are removed and stored.
+#' First, rows with missing values in the entity or time variables are removed and messages are printed.
 #' Then duplicate entity‑time combinations are checked; if `balance` is requested, duplicates are
 #' automatically removed (first occurrence kept) and a message is issued.
 #'
@@ -84,31 +82,27 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
   }
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
@@ -297,12 +291,6 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
   periods <- sort_unique_preserve(data[[time_var]])
 
   details <- list(entities = entities, periods = periods)
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   if (!is.null(delta)) {
     time_vals <- data[[time_var]]

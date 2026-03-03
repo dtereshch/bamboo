@@ -27,10 +27,10 @@ An entity/time combination is considered \strong{present} if the corresponding r
 one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
 Before plotting, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded. The excluded rows are stored in the returned list.
+Messages indicate how many rows were excluded.
 
-The function also checks for duplicate entity-time combinations. If found, they are stored and a message
-is printed (unless the identifiers came from panel attributes).
+The function also checks for duplicate entity-time combinations. If found, a message is printed
+(unless the identifiers came from panel attributes).
 
 The histogram shows the number of time periods covered by each entity (x-axis) and the frequency of
 entities with that coverage (y-axis).

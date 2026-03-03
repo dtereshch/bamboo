@@ -23,12 +23,10 @@
 #' one non-NA value in any substantive variable (all columns except the entity and time identifiers).
 #'
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-#' `details$excluded_rows` for further inspection.
+#' Messages indicate how many rows were excluded.
 #'
 #' The function also checks for duplicate entity-time combinations. In a properly structured panel dataset,
-#' each entity should have at most one observation per time period. If duplicates are found,
-#' they are stored in `details$entity_time_duplicates`. A message is printed only when the identifiers
+#' each entity should have at most one observation per time period. A message is printed only when the identifiers
 #' were explicitly provided (i.e., not taken from panel attributes).
 #'
 #' The returned data.frame has columns `dimension`, `mean`, `std`, `min`, `max`, and if `detail = TRUE`,
@@ -103,37 +101,32 @@ describe_balance <- function(
   }
 
   # --- Remove rows with NA in entity or time ---
-  excluded_rows <- NULL
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
 
   if (any(na_entity)) {
     message(
-      "Missing values in entity variable '",
-      entity_var,
-      "' found. Excluding ",
       sum(na_entity),
-      " rows."
+      " rows with missing values in '",
+      entity_var,
+      "' variable found and excluded."
     )
   }
   if (any(na_time)) {
     message(
-      "Missing values in time variable '",
-      time_var,
-      "' found. Excluding ",
       sum(na_time),
-      " rows."
+      " rows with missing values in '",
+      time_var,
+      "' variable found and excluded."
     )
   }
 
   if (any(na_entity | na_time)) {
-    excluded_rows <- data[na_entity | na_time, , drop = FALSE]
     data <- data[!(na_entity | na_time), , drop = FALSE]
     rownames(data) <- NULL
   }
 
   # --- Check for duplicate entity-time combinations ---
-  dup_combinations <- NULL
   dup_rows <- duplicated(data[c(entity_var, time_var)]) |
     duplicated(data[c(entity_var, time_var)], fromLast = TRUE)
   if (any(dup_rows)) {
@@ -329,12 +322,6 @@ describe_balance <- function(
     digits = digits
   )
   details <- list(presence_matrix = presence_matrix)
-  if (!is.null(excluded_rows)) {
-    details$excluded_rows <- excluded_rows
-  }
-  if (!is.null(dup_combinations)) {
-    details$entity_time_duplicates <- dup_combinations
-  }
 
   attr(result_df, "metadata") <- metadata
   attr(result_df, "details") <- details

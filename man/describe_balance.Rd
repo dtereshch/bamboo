@@ -35,12 +35,10 @@ An entity/time combination is considered \strong{present} if the corresponding r
 one non-NA value in any substantive variable (all columns except the entity and time identifiers).
 
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded due to each variable. The excluded rows are stored in
-\code{details$excluded_rows} for further inspection.
+Messages indicate how many rows were excluded.
 
 The function also checks for duplicate entity-time combinations. In a properly structured panel dataset,
-each entity should have at most one observation per time period. If duplicates are found,
-they are stored in \code{details$entity_time_duplicates}. A message is printed only when the identifiers
+each entity should have at most one observation per time period. A message is printed only when the identifiers
 were explicitly provided (i.e., not taken from panel attributes).
 
 The returned data.frame has columns \code{dimension}, \code{mean}, \code{std}, \code{min}, \code{max}, and if \code{detail = TRUE},
