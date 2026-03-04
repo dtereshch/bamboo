@@ -59,16 +59,16 @@ The variable is coerced to a factor if not already one, and must have at least t
 \examples{
 data(production)
 
-# Basic usage (transition matrix)
+# Basic usage (wide format)
 summarize_transition(production, select = "industry", index = c("firm", "year"))
 
-# Long format output
+# Changing the format argument
 summarize_transition(production, select = "industry",
                      index = c("firm", "year"), format = "long")
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-summarize_transition(panel_data, select = "industry")
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+summarize_transition(panel, select = "industry")
 
 }
 \seealso{

@@ -50,15 +50,15 @@ data(production)
 # Basic usage
 describe_periods(production, index = c("firm", "year"))
 
-# Custom rounding
-describe_periods(production, index = c("firm", "year"), digits = 4)
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+describe_periods(panel)
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-describe_periods(panel_data)
-
-# Specify interval to fill gaps (if any)
+# Changing the delta argument
 describe_periods(production, index = c("firm", "year"), delta = 1)
+
+# Customizing digits
+describe_periods(production, index = c("firm", "year"), digits = 4)
 
 }
 \seealso{

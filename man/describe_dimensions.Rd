@@ -40,14 +40,13 @@ data(production)
 # Basic usage
 describe_dimensions(production, index = c("firm", "year"))
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-describe_dimensions(panel_data)
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+describe_dimensions(panel)
 
-# Access detailed information
+# Accessing detailed information
 dims <- describe_dimensions(production, index = c("firm", "year"))
-attr(dims, "details")$entities
-attr(dims, "details")$variables
+attr(dims, "details")
 
 }
 \seealso{

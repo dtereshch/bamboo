@@ -91,23 +91,20 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage with all numeric variables (long format)
+#' # Basic usage
 #' decompose_numeric(production, index = "firm")
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' decompose_numeric(panel_data)
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' decompose_numeric(panel)
 #'
-#' # Include time variable to check duplicates
-#' decompose_numeric(production, index = c("firm", "year"))
-#'
-#' # Select specific variables
+#' # Selecting specific variables
 #' decompose_numeric(production, select = c("sales", "labor"), index = "firm")
 #'
-#' # Wide format, detailed output
+#' # Changing the format and detail arguments
 #' decompose_numeric(production, index = "firm", format = "wide", detail = TRUE)
 #'
-#' # Access metadata
+#' # Accessing metadata attributes
 #' res <- decompose_numeric(production, index = "firm")
 #' attr(res, "metadata")
 #'
@@ -261,7 +258,7 @@ decompose_numeric <- function(
   }
   digits <- as.integer(digits)
 
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   # --- Determine numeric variables ---
   if (is.null(select)) {
@@ -276,7 +273,7 @@ decompose_numeric <- function(
       "Analyzing all numeric variables: ",
       paste(analyze_vars, collapse = ", ")
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   } else {
     analyze_vars <- select
     missing_vars <- analyze_vars[!analyze_vars %in% names(data)]
@@ -385,15 +382,15 @@ decompose_numeric <- function(
     max_val <- max(x, na.rm = TRUE)
     count_obs <- length(x)
 
-    ent_means <- tapply(x, ent_vec, mean, na.rm = TRUE)
-    between_std <- sd(ent_means, na.rm = TRUE)
-    between_min <- min(ent_means, na.rm = TRUE)
-    between_max <- max(ent_means, na.rm = TRUE)
-    count_ent <- length(ent_means)
+    entity_means <- tapply(x, ent_vec, mean, na.rm = TRUE)
+    between_std <- sd(entity_means, na.rm = TRUE)
+    between_min <- min(entity_means, na.rm = TRUE)
+    between_max <- max(entity_means, na.rm = TRUE)
+    count_ent <- length(entity_means)
 
     # Within transformation
-    ent_means_exp <- ent_means[match(ent_vec, names(ent_means))]
-    deviations <- x - ent_means_exp
+    entity_means_exp <- entity_means[match(ent_vec, names(entity_means))]
+    deviations <- x - entity_means_exp
     within_transformed <- deviations + overall_mean
     within_std <- sd(deviations, na.rm = TRUE)
     within_min <- min(within_transformed, na.rm = TRUE)
@@ -490,7 +487,7 @@ decompose_numeric <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_summary", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

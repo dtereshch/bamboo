@@ -61,30 +61,20 @@ in all other columns.}
 \examples{
 data(production)
 
-# Add panel attributes without interval check
-panel_data <- make_panel(production, index = c("firm", "year"))
+# Basic usage
+panel <- make_panel(production, index = c("firm", "year"))
 
-# Check the attributes
-attr(panel_data, "metadata")
-attr(panel_data, "details")
+# Accessing attributes
+attr(panel, "metadata")
+attr(panel, "details")
 
-# Use with describe_dimensions()
-describe_dimensions(panel_data)
+# Changing the delta argument
+make_panel(production, index = c("firm", "year"), delta = 1)
 
-# With interval specification (assuming yearly data)
-panel_data2 <- make_panel(production, index = c("firm", "year"), delta = 1)
-
-# Keep only firms present in every year
-balanced_entities <- make_panel(production, index = c("firm", "year"),
-                                balance = "entities")
-
-# Keep only years where all firms are observed
-balanced_periods <- make_panel(production, index = c("firm", "year"),
-                               balance = "periods")
-
-# Create a fully balanced panel (all firm‑year combinations)
-fully_balanced <- make_panel(production, index = c("firm", "year"),
-                             balance = "all", delta = 1)
+# Balancing options
+make_panel(production, index = c("firm", "year"), balance = "entities")
+make_panel(production, index = c("firm", "year"), balance = "periods")
+make_panel(production, index = c("firm", "year"), balance = "all", delta = 1)
 
 }
 \seealso{

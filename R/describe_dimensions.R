@@ -32,21 +32,20 @@
 #' # Basic usage
 #' describe_dimensions(production, index = c("firm", "year"))
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' describe_dimensions(panel_data)
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' describe_dimensions(panel)
 #'
-#' # Access detailed information
+#' # Accessing detailed information
 #' dims <- describe_dimensions(production, index = c("firm", "year"))
-#' attr(dims, "details")$entities
-#' attr(dims, "details")$variables
+#' attr(dims, "details")
 #'
 #' @export
 describe_dimensions <- function(data, index = NULL) {
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -106,7 +105,7 @@ describe_dimensions <- function(data, index = NULL) {
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -115,7 +114,7 @@ describe_dimensions <- function(data, index = NULL) {
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -146,7 +145,7 @@ describe_dimensions <- function(data, index = NULL) {
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -188,7 +187,7 @@ describe_dimensions <- function(data, index = NULL) {
   attr(out, "details") <- details
   class(out) <- c("panel_description", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

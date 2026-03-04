@@ -38,18 +38,15 @@ entities with that coverage (y-axis).
 \examples{
 data(production)
 
-# Basic usage with regular data.frame
+# Basic usage
 plot_periods(production, index = c("firm", "year"))
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-plot_periods(panel_data)
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+plot_periods(panel)
 
-# Custom colors - gray fill with black line
+# Custom colors
 plot_periods(production, index = c("firm", "year"), colors = c("gray", "black"))
-
-# Custom colors - light blue fill with blue line
-plot_periods(production, index = c("firm", "year"), colors = c("lightblue", "blue"))
 
 }
 \seealso{

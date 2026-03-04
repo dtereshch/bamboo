@@ -38,14 +38,14 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage with statistics for all variables
+#' # Basic usage
 #' summarize_missing(production, index = c("firm", "year"))
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' summarize_missing(panel_data)
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' summarize_missing(panel)
 #'
-#' # Detailed output with period-specific NA counts
+#' # Changing the detail argument
 #' summarize_missing(production, index = c("firm", "year"), detail = TRUE)
 #'
 #' @export
@@ -59,7 +59,7 @@ summarize_missing <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -142,7 +142,7 @@ summarize_missing <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -151,7 +151,7 @@ summarize_missing <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -182,7 +182,7 @@ summarize_missing <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -193,7 +193,7 @@ summarize_missing <- function(
       stop("no variables found to analyze (besides entity and time)")
     }
     message("Analyzing all variables: ", paste(analyze_vars, collapse = ", "))
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   } else {
     missing_vars <- select[!select %in% names(data)]
     if (length(missing_vars) > 0) {
@@ -206,8 +206,8 @@ summarize_missing <- function(
   }
 
   # Unique time periods
-  time_values <- as.character(data[[time_var]])
-  unique_periods <- unique(time_values)
+  time_char <- as.character(data[[time_var]])
+  unique_periods <- unique(time_char)
   if (all(grepl("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$", unique_periods))) {
     ordered_periods <- as.character(sort(as.numeric(unique_periods)))
   } else {
@@ -251,7 +251,7 @@ summarize_missing <- function(
 
     if (detail) {
       for (per in ordered_periods) {
-        per_data <- data[time_values == per, var, drop = FALSE]
+        per_data <- data[time_char == per, var, drop = FALSE]
         row_df[[per]] <- sum(is.na(per_data[[var]]))
       }
     }
@@ -286,7 +286,7 @@ summarize_missing <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_summary", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

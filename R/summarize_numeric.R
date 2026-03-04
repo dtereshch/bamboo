@@ -56,26 +56,21 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage with statistics for all numeric variables
+#' # Basic usage (overall statistics)
 #' summarize_numeric(production)
 #'
-#' # Detailed output
+#' # Changing the detail argument
 #' summarize_numeric(production, detail = TRUE)
 #'
-#' # Show statistics for a single variable
+#' # Selecting specific variables
 #' summarize_numeric(production, select = "sales")
-#'
-#' # Show statistics for multiple variables
 #' summarize_numeric(production, select = c("capital", "labor"))
 #'
-#' # Show grouped statistics
+#' # Grouped statistics
 #' summarize_numeric(production, group = "year")
 #'
-#' # Show statistics with two digits rounding
+#' # Customizing digits
 #' summarize_numeric(production, digits = 2)
-#'
-#' # Effectively no rounding (use large digit value)
-#' summarize_numeric(production, digits = 999999)
 #'
 #' @export
 summarize_numeric <- function(
@@ -131,7 +126,7 @@ summarize_numeric <- function(
   }
 
   # Track if any messages were printed
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   # If select is NULL, use all numeric variables with message
   if (is.null(select)) {
@@ -169,7 +164,7 @@ summarize_numeric <- function(
       "Analyzing all numeric variables: ",
       paste(analyze_vars, collapse = ", ")
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   } else {
     analyze_vars <- select
   }
@@ -398,7 +393,7 @@ summarize_numeric <- function(
   class(out) <- c("panel_summary", "data.frame")
 
   # Add empty line before returning data.frame if messages were printed
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

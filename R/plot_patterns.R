@@ -39,10 +39,10 @@
 #' # Basic usage
 #' plot_patterns(production, index = c("firm", "year"))
 #'
-#' # Only top 3 patterns
+#' # Changing the limits argument
 #' plot_patterns(production, index = c("firm", "year"), limits = 3)
 #'
-#' # Specify interval to fill gaps
+#' # Changing the delta argument
 #' plot_patterns(production, index = c("firm", "year"), delta = 1)
 #'
 #' # Custom colors
@@ -61,7 +61,7 @@ plot_patterns <- function(
   user_delta <- delta
   entity_time_from_metadata <- FALSE
   delta_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -134,7 +134,7 @@ plot_patterns <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -143,7 +143,7 @@ plot_patterns <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -174,7 +174,7 @@ plot_patterns <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -212,7 +212,7 @@ plot_patterns <- function(
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -241,19 +241,19 @@ plot_patterns <- function(
     dimnames = list(all_entities, all_times)
   )
 
-  entity_vec <- as.character(data[[entity_var]])
-  time_vec <- as.character(data[[time_var]])
+  entity_char <- as.character(data[[entity_var]])
+  time_char <- as.character(data[[time_var]])
 
   has_data <- apply(data[data_cols], 1, function(row) !all(is.na(row)))
-  for (i in seq_along(entity_vec)) {
-    if (has_data[i] && time_vec[i] %in% all_times) {
-      presence_mat[entity_vec[i], time_vec[i]] <- 1
+  for (i in seq_along(entity_char)) {
+    if (has_data[i] && time_char[i] %in% all_times) {
+      presence_mat[entity_char[i], time_char[i]] <- 1
     }
   }
 
   # Patterns
-  pattern_strings <- apply(presence_mat, 1, paste, collapse = "")
-  pattern_freq <- table(pattern_strings)
+  pattern_str <- apply(presence_mat, 1, paste, collapse = "")
+  pattern_freq <- table(pattern_str)
 
   # Full patterns_entities list
   patterns_entities_full <- list()
@@ -270,20 +270,20 @@ plot_patterns <- function(
     top_patterns <- names(sort(pattern_freq, decreasing = TRUE))[
       1:min(limits, length(pattern_freq))
     ]
-    keep <- pattern_strings %in% top_patterns
+    keep <- pattern_str %in% top_patterns
     presence_mat <- presence_mat[keep, , drop = FALSE]
-    pattern_strings <- pattern_strings[keep]
+    pattern_str <- pattern_str[keep]
     pattern_freq <- pattern_freq[top_patterns]
     patterns_entities_full <- patterns_entities_full[top_patterns]
   }
 
   # Order rows: least frequent first (bottom), most frequent last (top)
-  entity_freq <- as.numeric(pattern_freq[pattern_strings])
-  order_idx <- order(entity_freq, pattern_strings, rownames(presence_mat))
+  entity_freq <- as.numeric(pattern_freq[pattern_str])
+  order_idx <- order(entity_freq, pattern_str, rownames(presence_mat))
   presence_mat_sorted <- presence_mat[order_idx, , drop = FALSE]
-  pattern_strings_sorted <- pattern_strings[order_idx]
+  pattern_str_sorted <- pattern_str[order_idx]
 
-  unique_patterns_sorted <- unique(pattern_strings_sorted[order(
+  unique_patterns_sorted <- unique(pattern_str_sorted[order(
     entity_freq,
     decreasing = TRUE
   )])
@@ -336,7 +336,7 @@ plot_patterns <- function(
 
   axis(1, at = 1:nc, labels = all_times, las = 2, tick = TRUE)
 
-  runs <- rle(pattern_strings_sorted)
+  runs <- rle(pattern_str_sorted)
   if (length(runs$lengths) > 1) {
     boundaries <- cumsum(runs$lengths)[-length(runs$lengths)]
     segments(
@@ -379,7 +379,7 @@ plot_patterns <- function(
     patterns_matrix = patterns_matrix
   )
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

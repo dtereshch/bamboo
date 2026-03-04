@@ -62,17 +62,17 @@ data(production)
 # Basic usage
 describe_patterns(production, index = c("firm", "year"))
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-describe_patterns(panel_data)
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+describe_patterns(panel)
 
-# Specify interval to fill gaps
+# Changing the delta argument
 describe_patterns(production, index = c("firm", "year"), delta = 1)
 
-# Show only top 3 patterns
+# Changing the limits argument
 describe_patterns(production, index = c("firm", "year"), limits = 3)
 
-# Simplified version (no shares, only presence)
+# Changing the detail argument
 describe_patterns(production, index = c("firm", "year"), detail = FALSE)
 
 }

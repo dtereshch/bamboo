@@ -40,14 +40,14 @@
 #' # Basic usage
 #' describe_balance(production, index = c("firm", "year"))
 #'
-#' # Detailed output including percentiles
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' describe_balance(panel)
+#'
+#' # Changing the detail argument
 #' describe_balance(production, index = c("firm", "year"), detail = TRUE)
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' describe_balance(panel_data)
-#'
-#' # Custom rounding
+#' # Customizing digits
 #' describe_balance(production, index = c("firm", "year"), digits = 4)
 #'
 #' @export
@@ -60,7 +60,7 @@ describe_balance <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -120,7 +120,7 @@ describe_balance <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -129,7 +129,7 @@ describe_balance <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -160,7 +160,7 @@ describe_balance <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -203,13 +203,13 @@ describe_balance <- function(
     ncol = total_periods,
     dimnames = list(all_entities, all_times)
   )
-  entity_vec <- as.character(data[[entity_var]])
-  time_vec <- as.character(data[[time_var]])
+  entity_char <- as.character(data[[entity_var]])
+  time_char <- as.character(data[[time_var]])
 
   has_data <- apply(data[substantive_vars], 1, function(x) any(!is.na(x)))
-  for (i in seq_along(entity_vec)) {
+  for (i in seq_along(entity_char)) {
     if (has_data[i]) {
-      presence_mat[entity_vec[i], time_vec[i]] <- 1
+      presence_mat[entity_char[i], time_char[i]] <- 1
     }
   }
 
@@ -329,7 +329,7 @@ describe_balance <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_description", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

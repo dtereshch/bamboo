@@ -41,17 +41,17 @@
 #' # Basic usage
 #' describe_patterns(production, index = c("firm", "year"))
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' describe_patterns(panel_data)
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' describe_patterns(panel)
 #'
-#' # Specify interval to fill gaps
+#' # Changing the delta argument
 #' describe_patterns(production, index = c("firm", "year"), delta = 1)
 #'
-#' # Show only top 3 patterns
+#' # Changing the limits argument
 #' describe_patterns(production, index = c("firm", "year"), limits = 3)
 #'
-#' # Simplified version (no shares, only presence)
+#' # Changing the detail argument
 #' describe_patterns(production, index = c("firm", "year"), detail = FALSE)
 #'
 #' @export
@@ -69,7 +69,7 @@ describe_patterns <- function(
   user_delta <- delta
   entity_time_from_metadata <- FALSE
   delta_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -154,7 +154,7 @@ describe_patterns <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -163,7 +163,7 @@ describe_patterns <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -194,7 +194,7 @@ describe_patterns <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -232,7 +232,7 @@ describe_patterns <- function(
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -283,15 +283,15 @@ describe_patterns <- function(
   }
 
   # Patterns
-  pattern_strings <- apply(presence_mat, 1, paste, collapse = "")
-  pattern_counts <- table(pattern_strings)
+  pattern_str <- apply(presence_mat, 1, paste, collapse = "")
+  pattern_counts <- table(pattern_str)
 
   # patterns_entities list
   patterns_entities <- list()
   for (i in seq_along(unique_entities_orig)) {
     ent_orig <- unique_entities_orig[i]
     ent_char <- unique_entities_char[i]
-    pat <- pattern_strings[i]
+    pat <- pattern_str[i]
     if (!pat %in% names(patterns_entities)) {
       patterns_entities[[pat]] <- ent_orig[0]
     }
@@ -321,15 +321,15 @@ describe_patterns <- function(
   }
 
   # Reorder patterns_entities to match sorted result
-  sorted_pattern_strings <- apply(
+  sorted_pattern_str <- apply(
     result[time_cols_char],
     1,
     paste,
     collapse = ""
   )
   patterns_entities_sorted <- list()
-  for (i in seq_along(sorted_pattern_strings)) {
-    pat <- sorted_pattern_strings[i]
+  for (i in seq_along(sorted_pattern_str)) {
+    pat <- sorted_pattern_str[i]
     patterns_entities_sorted[[as.character(i)]] <- patterns_entities[[pat]]
   }
 
@@ -390,7 +390,7 @@ describe_patterns <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_description", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

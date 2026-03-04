@@ -63,21 +63,22 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage with entity only (wide format)
+#' # Basic usage
 #' decompose_factor(production, index = "firm")
 #'
-#' # Long format output
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' decompose_factor(panel)
+#'
+#' # Changing the format argument
 #' decompose_factor(production, index = "firm", format = "long")
 #'
-#' # Using panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' decompose_factor(panel_data)
-#'
-#' # Analyze a specific factor variable
+#' # Selecting specific variables
 #' decompose_factor(production, select = "industry", index = "firm")
 #'
-#' # Include time variable to check for duplicates
-#' decompose_factor(production, index = c("firm", "year"))
+#' # Accessing metadata attributes
+#' res <- decompose_factor(production, index = "firm")
+#' attr(res, "metadata")
 #'
 #' @export
 decompose_factor <- function(
@@ -228,7 +229,7 @@ decompose_factor <- function(
   }
   digits <- as.integer(digits)
 
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   # --- Determine variables to analyze ---
   if (is.null(select)) {
@@ -246,7 +247,7 @@ decompose_factor <- function(
       "Analyzing all factor variables: ",
       paste(analyze_vars, collapse = ", ")
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   } else {
     analyze_vars <- select
   }
@@ -269,7 +270,7 @@ decompose_factor <- function(
         "' to factor. Original class: ",
         class(data[[var]])[1]
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
       data[[var]] <- factor(data[[var]])
     }
   }
@@ -423,7 +424,7 @@ decompose_factor <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_summary", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

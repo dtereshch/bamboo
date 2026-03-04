@@ -48,16 +48,16 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage (transition matrix)
+#' # Basic usage (wide format)
 #' summarize_transition(production, select = "industry", index = c("firm", "year"))
 #'
-#' # Long format output
+#' # Changing the format argument
 #' summarize_transition(production, select = "industry",
 #'                      index = c("firm", "year"), format = "long")
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' summarize_transition(panel_data, select = "industry")
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' summarize_transition(panel, select = "industry")
 #'
 #' @export
 summarize_transition <- function(
@@ -70,6 +70,7 @@ summarize_transition <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -142,8 +143,6 @@ summarize_transition <- function(
   }
   digits <- as.integer(digits)
 
-  messages_printed <- FALSE
-
   # --- Remove rows with NA in entity or time ---
   na_entity <- is.na(data[[entity_var]])
   na_time <- is.na(data[[time_var]])
@@ -155,7 +154,7 @@ summarize_transition <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -164,7 +163,7 @@ summarize_transition <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -185,7 +184,7 @@ summarize_transition <- function(
       "' to factor. Original class: ",
       class(df[[select]])[1]
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
     df[[select]] <- factor(df[[select]])
   }
 
@@ -217,7 +216,7 @@ summarize_transition <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
 
     # Check consistency of select values
@@ -247,7 +246,7 @@ summarize_transition <- function(
           select,
           "' values collapsed."
         )
-        messages_printed <- TRUE
+        msg_printed <- TRUE
       }
     }
   }
@@ -262,7 +261,7 @@ summarize_transition <- function(
       select,
       "'"
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
     df <- df[complete, ]
   }
 
@@ -345,7 +344,7 @@ summarize_transition <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_summary", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

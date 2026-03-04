@@ -56,10 +56,10 @@ data(production)
 # Basic usage
 plot_patterns(production, index = c("firm", "year"))
 
-# Only top 3 patterns
+# Changing the limits argument
 plot_patterns(production, index = c("firm", "year"), limits = 3)
 
-# Specify interval to fill gaps
+# Changing the delta argument
 plot_patterns(production, index = c("firm", "year"), delta = 1)
 
 # Custom colors

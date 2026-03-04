@@ -75,15 +75,15 @@ data(production)
 # Basic usage with entity only
 describe_incomplete(production, index = "firm")
 
-# With time variable (check duplicates, more careful)
+# With time variable (check duplicates)
 describe_incomplete(production, index = c("firm", "year"))
 
-# Detailed view with variable-level NA counts
-describe_incomplete(production, index = "firm", detail = TRUE)
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+describe_incomplete(panel)
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-describe_incomplete(panel_data)
+# Changing the detail argument
+describe_incomplete(production, index = "firm", detail = TRUE)
 
 }
 \seealso{

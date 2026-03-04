@@ -31,26 +31,20 @@
 #' @examples
 #' data(production)
 #'
-#' # Method 1: With regular data.frame
+#' # Basic usage with regular data.frame
 #' plot_heterogeneity(production, select = "labor", group = "year")
 #'
-#' # Method 2: With data.frame with panel attributes (uses both entity and time)
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' plot_heterogeneity(panel_data, select = "labor")
+#' # With panel_data object (uses both entity and time)
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' plot_heterogeneity(panel, select = "labor")
 #'
-#' # Method 3: Explicit grouping even with panel data
-#' plot_heterogeneity(panel_data, select = "capital", group = "year")
+#' # Explicit grouping with panel_data
+#' plot_heterogeneity(panel, select = "capital", group = "year")
 #'
-#' # Plot labor by year
-#' plot_heterogeneity(production, select = "labor", group = "year")
-#'
-#' # Plot capital by firm
-#' plot_heterogeneity(production, select = "capital", group = "firm")
-#'
-#' # Plot sales with multiple grouping variables
+#' # Multiple grouping variables
 #' plot_heterogeneity(production, select = "sales", group = c("firm", "year"))
 #'
-#' # Customize colors
+#' # Custom colors
 #' plot_heterogeneity(production, select = "sales", group = "year",
 #'                    colors = c("black", "gray"))
 #'
@@ -188,7 +182,7 @@ plot_heterogeneity <- function(
       ylim = range(data_sub[[select]], na.rm = TRUE),
       xlab = group_var,
       ylab = select,
-      main = "", # Remove title
+      main = "",
       xaxt = "n",
       frame.plot = FALSE
     )
@@ -202,7 +196,7 @@ plot_heterogeneity <- function(
       x_pos,
       data_sub[[select]],
       col = point_col_alpha,
-      pch = 1, # open circle for a cleaner look when points overlay
+      pch = 1,
       cex = 0.8 * cex
     )
 
@@ -226,7 +220,7 @@ plot_heterogeneity <- function(
       lty = c(NA, 1),
       pt.cex = c(0.8, 1.5),
       bty = "n",
-      cex = 0.8 * cex # Slightly smaller legend for multi-panel plots
+      cex = 0.8 * cex
     )
 
     # Return summary statistics for this group
@@ -238,7 +232,7 @@ plot_heterogeneity <- function(
   }
 
   # Initialize group statistics list
-  group_stats_list <- list()
+  results_list <- list()
 
   if (plot) {
     # Set up plotting layout for multiple groups
@@ -261,8 +255,8 @@ plot_heterogeneity <- function(
       # Set up multi-panel plot
       par(
         mfrow = c(nrow, ncol),
-        mar = c(4, 4, 2, 1) + 0.1, # Tighter margins for multi-panel
-        oma = c(2, 2, 2, 2), # Outer margins for overall labels
+        mar = c(4, 4, 2, 1) + 0.1,
+        oma = c(2, 2, 2, 2),
         las = las
       )
     } else {
@@ -276,7 +270,7 @@ plot_heterogeneity <- function(
     for (i in seq_along(group)) {
       group_var <- group[i]
       group_stats <- create_single_plot(data, group_var)
-      group_stats_list[[group_var]] <- group_stats
+      results_list[[group_var]] <- group_stats
     }
   } else {
     # Calculate statistics without plotting
@@ -286,7 +280,7 @@ plot_heterogeneity <- function(
         x_var <- as.factor(x_var)
       }
 
-      group_stats_list[[group_var]] <- list(
+      results_list[[group_var]] <- list(
         means = tapply(data[[select]], x_var, mean, na.rm = TRUE),
         sd = tapply(data[[select]], x_var, sd, na.rm = TRUE),
         n = tapply(data[[select]], x_var, function(x) sum(!is.na(x)))
@@ -306,6 +300,6 @@ plot_heterogeneity <- function(
   # Return list with metadata and details
   invisible(list(
     metadata = metadata,
-    details = group_stats_list
+    details = results_list
   ))
 }

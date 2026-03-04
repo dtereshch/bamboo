@@ -40,15 +40,15 @@
 #' # Basic usage
 #' describe_periods(production, index = c("firm", "year"))
 #'
-#' # Custom rounding
-#' describe_periods(production, index = c("firm", "year"), digits = 4)
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' describe_periods(panel)
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' describe_periods(panel_data)
-#'
-#' # Specify interval to fill gaps (if any)
+#' # Changing the delta argument
 #' describe_periods(production, index = c("firm", "year"), delta = 1)
+#'
+#' # Customizing digits
+#' describe_periods(production, index = c("firm", "year"), digits = 4)
 #'
 #' @export
 describe_periods <- function(
@@ -62,7 +62,7 @@ describe_periods <- function(
   user_delta <- delta
   entity_time_from_metadata <- FALSE
   delta_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -136,7 +136,7 @@ describe_periods <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -145,7 +145,7 @@ describe_periods <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -176,7 +176,7 @@ describe_periods <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -214,7 +214,7 @@ describe_periods <- function(
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -293,7 +293,7 @@ describe_periods <- function(
   attr(out, "details") <- details
   class(out) <- c("panel_description", "data.frame")
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

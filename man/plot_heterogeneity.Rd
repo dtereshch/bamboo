@@ -45,26 +45,20 @@ each containing means, sd, and n per group.}
 \examples{
 data(production)
 
-# Method 1: With regular data.frame
+# Basic usage with regular data.frame
 plot_heterogeneity(production, select = "labor", group = "year")
 
-# Method 2: With data.frame with panel attributes (uses both entity and time)
-panel_data <- make_panel(production, index = c("firm", "year"))
-plot_heterogeneity(panel_data, select = "labor")
+# With panel_data object (uses both entity and time)
+panel <- make_panel(production, index = c("firm", "year"))
+plot_heterogeneity(panel, select = "labor")
 
-# Method 3: Explicit grouping even with panel data
-plot_heterogeneity(panel_data, select = "capital", group = "year")
+# Explicit grouping with panel_data
+plot_heterogeneity(panel, select = "capital", group = "year")
 
-# Plot labor by year
-plot_heterogeneity(production, select = "labor", group = "year")
-
-# Plot capital by firm
-plot_heterogeneity(production, select = "capital", group = "firm")
-
-# Plot sales with multiple grouping variables
+# Multiple grouping variables
 plot_heterogeneity(production, select = "sales", group = c("firm", "year"))
 
-# Customize colors
+# Custom colors
 plot_heterogeneity(production, select = "sales", group = "year",
                    colors = c("black", "gray"))
 

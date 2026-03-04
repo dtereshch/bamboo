@@ -51,30 +51,20 @@
 #' @examples
 #' data(production)
 #'
-#' # Add panel attributes without interval check
-#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' # Basic usage
+#' panel <- make_panel(production, index = c("firm", "year"))
 #'
-#' # Check the attributes
-#' attr(panel_data, "metadata")
-#' attr(panel_data, "details")
+#' # Accessing attributes
+#' attr(panel, "metadata")
+#' attr(panel, "details")
 #'
-#' # Use with describe_dimensions()
-#' describe_dimensions(panel_data)
+#' # Changing the delta argument
+#' make_panel(production, index = c("firm", "year"), delta = 1)
 #'
-#' # With interval specification (assuming yearly data)
-#' panel_data2 <- make_panel(production, index = c("firm", "year"), delta = 1)
-#'
-#' # Keep only firms present in every year
-#' balanced_entities <- make_panel(production, index = c("firm", "year"),
-#'                                 balance = "entities")
-#'
-#' # Keep only years where all firms are observed
-#' balanced_periods <- make_panel(production, index = c("firm", "year"),
-#'                                balance = "periods")
-#'
-#' # Create a fully balanced panel (all firm‑year combinations)
-#' fully_balanced <- make_panel(production, index = c("firm", "year"),
-#'                              balance = "all", delta = 1)
+#' # Balancing options
+#' make_panel(production, index = c("firm", "year"), balance = "entities")
+#' make_panel(production, index = c("firm", "year"), balance = "periods")
+#' make_panel(production, index = c("firm", "year"), balance = "all", delta = 1)
 #'
 #' @export
 make_panel <- function(data, index, delta = NULL, balance = NULL) {
@@ -102,7 +92,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
     stop("'balance' must be NULL, 'entities', 'periods', or 'all'")
   }
 
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   # --- Remove rows with NA in entity or time ---
   na_entity <- is.na(data[[entity_var]])
@@ -115,7 +105,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -124,7 +114,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -151,11 +141,11 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
       " duplicate entity-time combinations found. Examples: ",
       example_str
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
     if (!is.null(balance)) {
       data <- data[!duplicated(data[c(entity_var, time_var)]), , drop = FALSE]
       message("Duplicates removed (first occurrence kept) for balancing.")
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -328,7 +318,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -345,7 +335,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
   attr(out, "details") <- details
   class(out) <- c("panel_data", class(out))
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 

@@ -76,21 +76,22 @@ The returned data.frame has class \code{"panel_summary"} and the following attri
 \examples{
 data(production)
 
-# Basic usage with entity only (wide format)
+# Basic usage
 decompose_factor(production, index = "firm")
 
-# Long format output
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+decompose_factor(panel)
+
+# Changing the format argument
 decompose_factor(production, index = "firm", format = "long")
 
-# Using panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-decompose_factor(panel_data)
-
-# Analyze a specific factor variable
+# Selecting specific variables
 decompose_factor(production, select = "industry", index = "firm")
 
-# Include time variable to check for duplicates
-decompose_factor(production, index = c("firm", "year"))
+# Accessing metadata attributes
+res <- decompose_factor(production, index = "firm")
+attr(res, "metadata")
 
 }
 \references{

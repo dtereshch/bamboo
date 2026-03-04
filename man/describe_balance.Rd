@@ -50,14 +50,14 @@ data(production)
 # Basic usage
 describe_balance(production, index = c("firm", "year"))
 
-# Detailed output including percentiles
+# With panel_data object
+panel <- make_panel(production, index = c("firm", "year"))
+describe_balance(panel)
+
+# Changing the detail argument
 describe_balance(production, index = c("firm", "year"), detail = TRUE)
 
-# With panel_data class object
-panel_data <- make_panel(production, index = c("firm", "year"))
-describe_balance(panel_data)
-
-# Custom rounding
+# Customizing digits
 describe_balance(production, index = c("firm", "year"), digits = 4)
 
 }

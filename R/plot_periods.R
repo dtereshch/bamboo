@@ -29,18 +29,15 @@
 #' @examples
 #' data(production)
 #'
-#' # Basic usage with regular data.frame
+#' # Basic usage
 #' plot_periods(production, index = c("firm", "year"))
 #'
-#' # With panel_data class object
-#' panel_data <- make_panel(production, index = c("firm", "year"))
-#' plot_periods(panel_data)
+#' # With panel_data object
+#' panel <- make_panel(production, index = c("firm", "year"))
+#' plot_periods(panel)
 #'
-#' # Custom colors - gray fill with black line
+#' # Custom colors
 #' plot_periods(production, index = c("firm", "year"), colors = c("gray", "black"))
-#'
-#' # Custom colors - light blue fill with blue line
-#' plot_periods(production, index = c("firm", "year"), colors = c("lightblue", "blue"))
 #'
 #' @export
 plot_periods <- function(
@@ -51,7 +48,7 @@ plot_periods <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
-  messages_printed <- FALSE
+  msg_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -117,7 +114,7 @@ plot_periods <- function(
       entity_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -126,7 +123,7 @@ plot_periods <- function(
       time_var,
       "' variable found and excluded."
     )
-    messages_printed <- TRUE
+    msg_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -157,7 +154,7 @@ plot_periods <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
-      messages_printed <- TRUE
+      msg_printed <- TRUE
     }
   }
 
@@ -280,7 +277,7 @@ plot_periods <- function(
     histogram_data = hist_data
   )
 
-  if (messages_printed) {
+  if (msg_printed) {
     cat("\n")
   }
 
