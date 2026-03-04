@@ -129,16 +129,6 @@ summarize_numeric <- function(
       panel_id_vars <- c(metadata$entity, metadata$time)
     }
   }
-  # ----------------------------------------------------------------------
-
-  # Helper function for rounding
-  round_if_needed <- function(x, digits) {
-    if (is.numeric(x) && !all(is.na(x))) {
-      round(x, digits)
-    } else {
-      x
-    }
-  }
 
   # Track if any messages were printed
   messages_printed <- FALSE
@@ -146,9 +136,9 @@ summarize_numeric <- function(
   # If select is NULL, use all numeric variables with message
   if (is.null(select)) {
     numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
-    select <- names(data)[numeric_vars]
+    analyze_vars <- names(data)[numeric_vars]
 
-    if (length(select) == 0) {
+    if (length(analyze_vars) == 0) {
       stop("no numeric variables found in the dataset")
     }
 
@@ -156,38 +146,40 @@ summarize_numeric <- function(
     # - the grouping variable (if provided and numeric)
     # - panel identifiers (if they are numeric and present)
     exclude_vars <- character(0)
-    if (!is.null(group) && group %in% select) {
+    if (!is.null(group) && group %in% analyze_vars) {
       exclude_vars <- c(exclude_vars, group)
     }
     if (length(panel_id_vars) > 0) {
-      panel_id_vars_in_selection <- intersect(panel_id_vars, select)
+      panel_id_vars_in_selection <- intersect(panel_id_vars, analyze_vars)
       if (length(panel_id_vars_in_selection) > 0) {
         exclude_vars <- c(exclude_vars, panel_id_vars_in_selection)
       }
     }
     if (length(exclude_vars) > 0) {
-      select <- select[!select %in% exclude_vars]
+      analyze_vars <- analyze_vars[!analyze_vars %in% exclude_vars]
     }
 
-    if (length(select) == 0) {
+    if (length(analyze_vars) == 0) {
       stop(
         "after removing grouping variable and panel identifiers, there are no numeric variables to analyze"
       )
     }
 
     message(
-      "Analyzing all numeric variable(s): ",
-      paste(select, collapse = ", ")
+      "Analyzing all numeric variables: ",
+      paste(analyze_vars, collapse = ", ")
     )
     messages_printed <- TRUE
+  } else {
+    analyze_vars <- select
   }
 
   # Validate select
-  if (length(select) == 0) {
+  if (length(analyze_vars) == 0) {
     stop("no numeric variables found to analyze")
   }
 
-  missing_vars <- select[!select %in% names(data)]
+  missing_vars <- analyze_vars[!analyze_vars %in% names(data)]
   if (length(missing_vars) > 0) {
     stop(
       "the following variables were not found in data: ",
@@ -196,7 +188,9 @@ summarize_numeric <- function(
   }
 
   # Check if specified columns are numeric
-  non_numeric_vars <- select[!sapply(data[select], is.numeric)]
+  non_numeric_vars <- analyze_vars[
+    !vapply(data[analyze_vars], is.numeric, logical(1))
+  ]
   if (length(non_numeric_vars) > 0) {
     stop(
       "the following variables are not numeric: ",
@@ -205,7 +199,7 @@ summarize_numeric <- function(
   }
 
   # Check that select does not include the grouping variable
-  if (!is.null(group) && group %in% select) {
+  if (!is.null(group) && group %in% analyze_vars) {
     stop(
       "'select' cannot contain the same variable as the 'group' variable ('",
       group,
@@ -235,7 +229,7 @@ summarize_numeric <- function(
 
   # Calculate statistics without grouping
   if (is.null(group)) {
-    results <- lapply(select, function(var) {
+    results_list <- lapply(analyze_vars, function(var) {
       x <- data[[var]]
 
       # Handle case where all values are NA
@@ -265,18 +259,18 @@ summarize_numeric <- function(
           stats_row <- data.frame(
             count = count_non_na(x),
             mean = mean(x, na.rm = TRUE),
-            std = stats::sd(x, na.rm = TRUE),
+            std = sd(x, na.rm = TRUE),
             min = min(x, na.rm = TRUE),
-            p25 = stats::quantile(x, probs = 0.25, na.rm = TRUE, names = FALSE),
-            p50 = stats::quantile(x, probs = 0.50, na.rm = TRUE, names = FALSE),
-            p75 = stats::quantile(x, probs = 0.75, na.rm = TRUE, names = FALSE),
+            p25 = quantile(x, probs = 0.25, na.rm = TRUE, names = FALSE),
+            p50 = quantile(x, probs = 0.50, na.rm = TRUE, names = FALSE),
+            p75 = quantile(x, probs = 0.75, na.rm = TRUE, names = FALSE),
             max = max(x, na.rm = TRUE)
           )
         } else {
           stats_row <- data.frame(
             count = count_non_na(x),
             mean = mean(x, na.rm = TRUE),
-            std = stats::sd(x, na.rm = TRUE),
+            std = sd(x, na.rm = TRUE),
             min = min(x, na.rm = TRUE),
             max = max(x, na.rm = TRUE)
           )
@@ -292,13 +286,13 @@ summarize_numeric <- function(
       data.frame(variable = var, stats_row)
     })
 
-    result_df <- do.call(rbind, results)
+    out <- do.call(rbind, results_list)
   } else {
     # Calculate statistics with grouping
     group_combinations <- unique(data[[group]])
     group_combinations <- sort(group_combinations[!is.na(group_combinations)])
 
-    results <- list()
+    results_list <- list()
 
     for (i in seq_along(group_combinations)) {
       current_group <- group_combinations[i]
@@ -309,7 +303,7 @@ summarize_numeric <- function(
       ]
 
       # Calculate statistics for each variable in current group
-      group_results <- lapply(select, function(var) {
+      group_results <- lapply(analyze_vars, function(var) {
         x <- group_subset[[var]]
 
         # Handle case where all values are NA
@@ -339,33 +333,18 @@ summarize_numeric <- function(
             stats_row <- data.frame(
               count = count_non_na(x),
               mean = mean(x, na.rm = TRUE),
-              std = stats::sd(x, na.rm = TRUE),
+              std = sd(x, na.rm = TRUE),
               min = min(x, na.rm = TRUE),
-              p25 = stats::quantile(
-                x,
-                probs = 0.25,
-                na.rm = TRUE,
-                names = FALSE
-              ),
-              p50 = stats::quantile(
-                x,
-                probs = 0.50,
-                na.rm = TRUE,
-                names = FALSE
-              ),
-              p75 = stats::quantile(
-                x,
-                probs = 0.75,
-                na.rm = TRUE,
-                names = FALSE
-              ),
+              p25 = quantile(x, probs = 0.25, na.rm = TRUE, names = FALSE),
+              p50 = quantile(x, probs = 0.50, na.rm = TRUE, names = FALSE),
+              p75 = quantile(x, probs = 0.75, na.rm = TRUE, names = FALSE),
               max = max(x, na.rm = TRUE)
             )
           } else {
             stats_row <- data.frame(
               count = count_non_na(x),
               mean = mean(x, na.rm = TRUE),
-              std = stats::sd(x, na.rm = TRUE),
+              std = sd(x, na.rm = TRUE),
               min = min(x, na.rm = TRUE),
               max = max(x, na.rm = TRUE)
             )
@@ -385,20 +364,20 @@ summarize_numeric <- function(
         )
       })
 
-      results <- c(results, group_results)
+      results_list <- c(results_list, group_results)
     }
 
-    result_df <- do.call(rbind, results)
+    out <- do.call(rbind, results_list)
   }
 
   # Reset row names
-  rownames(result_df) <- NULL
+  rownames(out) <- NULL
 
   # Build metadata
   call <- match.call()
   metadata <- list(
     function_name = as.character(call[[1]]),
-    select = select,
+    select = analyze_vars,
     group = group,
     detail = detail,
     digits = digits
@@ -406,22 +385,22 @@ summarize_numeric <- function(
 
   # Build details list (only non-metadata info)
   details <- list(
-    count_variables = length(select),
+    count_variables = length(analyze_vars),
     count_groups = n_groups,
     count_obs = n_obs
   )
 
   # Set attributes
-  attr(result_df, "metadata") <- metadata
-  attr(result_df, "details") <- details
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
 
   # Set class
-  class(result_df) <- c("panel_summary", "data.frame")
+  class(out) <- c("panel_summary", "data.frame")
 
   # Add empty line before returning data.frame if messages were printed
   if (messages_printed) {
     cat("\n")
   }
 
-  return(result_df)
+  return(out)
 }

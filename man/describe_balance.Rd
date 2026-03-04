@@ -46,11 +46,19 @@ also \code{p5}, \code{p25}, \code{p50}, \code{p75}, \code{p95}.
 }
 \examples{
 data(production)
+
+# Basic usage
 describe_balance(production, index = c("firm", "year"))
 
-# With panel attributes
+# Detailed output including percentiles
+describe_balance(production, index = c("firm", "year"), detail = TRUE)
+
+# With panel_data class object
 panel_data <- make_panel(production, index = c("firm", "year"))
 describe_balance(panel_data)
+
+# Custom rounding
+describe_balance(production, index = c("firm", "year"), digits = 4)
 
 }
 \seealso{

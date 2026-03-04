@@ -71,8 +71,19 @@ Users should consider the panel structure when interpreting the results.
 }
 \examples{
 data(production)
+
+# Basic usage with entity only
 describe_incomplete(production, index = "firm")
-describe_incomplete(production, index = c("firm", "year"), detail = TRUE)
+
+# With time variable (check duplicates, more careful)
+describe_incomplete(production, index = c("firm", "year"))
+
+# Detailed view with variable-level NA counts
+describe_incomplete(production, index = "firm", detail = TRUE)
+
+# With panel_data class object
+panel_data <- make_panel(production, index = c("firm", "year"))
+describe_incomplete(panel_data)
 
 }
 \seealso{

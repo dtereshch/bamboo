@@ -37,8 +37,16 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage with statistics for all variables
 #' summarize_missing(production, index = c("firm", "year"))
-#' summarize_missing(production, select = c("sales", "employees"), index = c("firm", "year"), detail = TRUE)
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' summarize_missing(panel_data)
+#'
+#' # Detailed output with period-specific NA counts
+#' summarize_missing(production, index = c("firm", "year"), detail = TRUE)
 #'
 #' @export
 summarize_missing <- function(
@@ -51,6 +59,7 @@ summarize_missing <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -133,6 +142,7 @@ summarize_missing <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -141,6 +151,7 @@ summarize_missing <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -171,27 +182,25 @@ summarize_missing <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
-  }
-
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
   }
 
   # Determine variables to analyze
   if (is.null(select)) {
-    select <- setdiff(names(data), c(entity_var, time_var))
-    if (length(select) == 0) {
+    analyze_vars <- setdiff(names(data), c(entity_var, time_var))
+    if (length(analyze_vars) == 0) {
       stop("no variables found to analyze (besides entity and time)")
     }
-    message("Analyzing all variable(s): ", paste(select, collapse = ", "))
+    message("Analyzing all variables: ", paste(analyze_vars, collapse = ", "))
+    messages_printed <- TRUE
   } else {
     missing_vars <- select[!select %in% names(data)]
     if (length(missing_vars) > 0) {
       stop("variables not found: ", paste(missing_vars, collapse = ", "))
     }
-    select <- setdiff(select, c(entity_var, time_var))
-    if (length(select) == 0) {
+    analyze_vars <- setdiff(select, c(entity_var, time_var))
+    if (length(analyze_vars) == 0) {
       stop("no variables to analyze (excluding entity and time)")
     }
   }
@@ -210,9 +219,9 @@ summarize_missing <- function(
   total_entities <- length(unique_entities)
   total_periods <- length(ordered_periods)
 
-  results <- list()
+  results_list <- list()
 
-  for (var in select) {
+  for (var in analyze_vars) {
     na_count <- sum(is.na(data[[var]]))
     na_share <- ifelse(total_obs > 0, na_count / total_obs, 0)
     na_share <- round_if_needed(na_share, digits)
@@ -247,18 +256,18 @@ summarize_missing <- function(
       }
     }
 
-    results[[var]] <- row_df
+    results_list[[var]] <- row_df
   }
 
-  result_df <- do.call(rbind, results)
-  rownames(result_df) <- NULL
+  out <- do.call(rbind, results_list)
+  rownames(out) <- NULL
 
-  vars_with_na <- result_df$variable[result_df$na_count > 0]
-  vars_without_na <- result_df$variable[result_df$na_count == 0]
+  vars_with_na <- out$variable[out$na_count > 0]
+  vars_without_na <- out$variable[out$na_count == 0]
 
   metadata <- list(
     function_name = as.character(match.call()[[1]]),
-    select = select,
+    select = analyze_vars,
     entity = entity_var,
     time = time_var,
     detail = detail,
@@ -268,19 +277,18 @@ summarize_missing <- function(
   details <- list(
     count_variables_with_na = length(vars_with_na),
     count_variables_without_na = length(vars_without_na),
-    count_variables = length(select),
+    count_variables = length(analyze_vars),
     variables_with_na = vars_with_na,
     variables_without_na = vars_without_na
   )
 
-  attr(result_df, "metadata") <- metadata
-  attr(result_df, "details") <- details
-  class(result_df) <- c("panel_summary", "data.frame")
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
+  class(out) <- c("panel_summary", "data.frame")
 
-  # Print newline if messages were printed
-  if (!is.null(select)) {
+  if (messages_printed) {
     cat("\n")
   }
 
-  return(result_df)
+  return(out)
 }

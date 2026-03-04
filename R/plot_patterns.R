@@ -35,8 +35,18 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage
 #' plot_patterns(production, index = c("firm", "year"))
-#' plot_patterns(production, index = c("firm", "year"), limits = 3, delta = 1)
+#'
+#' # Only top 3 patterns
+#' plot_patterns(production, index = c("firm", "year"), limits = 3)
+#'
+#' # Specify interval to fill gaps
+#' plot_patterns(production, index = c("firm", "year"), delta = 1)
+#'
+#' # Custom colors
+#' plot_patterns(production, index = c("firm", "year"), colors = c("black", "white"))
 #'
 #' @export
 plot_patterns <- function(
@@ -51,6 +61,7 @@ plot_patterns <- function(
   user_delta <- delta
   entity_time_from_metadata <- FALSE
   delta_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -123,6 +134,7 @@ plot_patterns <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -131,6 +143,7 @@ plot_patterns <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -161,6 +174,7 @@ plot_patterns <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -198,6 +212,7 @@ plot_patterns <- function(
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -219,7 +234,7 @@ plot_patterns <- function(
     }
   }
 
-  presence_binary <- matrix(
+  presence_mat <- matrix(
     0,
     nrow = length(all_entities),
     ncol = length(all_times),
@@ -232,18 +247,18 @@ plot_patterns <- function(
   has_data <- apply(data[data_cols], 1, function(row) !all(is.na(row)))
   for (i in seq_along(entity_vec)) {
     if (has_data[i] && time_vec[i] %in% all_times) {
-      presence_binary[entity_vec[i], time_vec[i]] <- 1
+      presence_mat[entity_vec[i], time_vec[i]] <- 1
     }
   }
 
   # Patterns
-  pattern_strings <- apply(presence_binary, 1, paste, collapse = "")
+  pattern_strings <- apply(presence_mat, 1, paste, collapse = "")
   pattern_freq <- table(pattern_strings)
 
   # Full patterns_entities list
   patterns_entities_full <- list()
   for (ent in all_entities) {
-    pat <- paste(presence_binary[ent, ], collapse = "")
+    pat <- paste(presence_mat[ent, ], collapse = "")
     if (!pat %in% names(patterns_entities_full)) {
       patterns_entities_full[[pat]] <- character(0)
     }
@@ -256,7 +271,7 @@ plot_patterns <- function(
       1:min(limits, length(pattern_freq))
     ]
     keep <- pattern_strings %in% top_patterns
-    presence_binary <- presence_binary[keep, , drop = FALSE]
+    presence_mat <- presence_mat[keep, , drop = FALSE]
     pattern_strings <- pattern_strings[keep]
     pattern_freq <- pattern_freq[top_patterns]
     patterns_entities_full <- patterns_entities_full[top_patterns]
@@ -264,8 +279,8 @@ plot_patterns <- function(
 
   # Order rows: least frequent first (bottom), most frequent last (top)
   entity_freq <- as.numeric(pattern_freq[pattern_strings])
-  order_idx <- order(entity_freq, pattern_strings, rownames(presence_binary))
-  presence_binary_sorted <- presence_binary[order_idx, , drop = FALSE]
+  order_idx <- order(entity_freq, pattern_strings, rownames(presence_mat))
+  presence_mat_sorted <- presence_mat[order_idx, , drop = FALSE]
   pattern_strings_sorted <- pattern_strings[order_idx]
 
   unique_patterns_sorted <- unique(pattern_strings_sorted[order(
@@ -291,7 +306,7 @@ plot_patterns <- function(
   on.exit(par(old_par))
   par(mar = c(3, 1, 2.5, 1) + 0.1)
 
-  presence_rev <- 1 - presence_binary_sorted
+  presence_rev <- 1 - presence_mat_sorted
   nr <- nrow(presence_rev)
   nc <- ncol(presence_rev)
 
@@ -358,11 +373,15 @@ plot_patterns <- function(
   )
 
   details <- list(
-    presence_matrix = presence_binary_sorted,
+    presence_matrix = presence_mat_sorted,
     patterns_entities = patterns_entities_sorted,
     count_patterns = length(patterns_entities_sorted),
     patterns_matrix = patterns_matrix
   )
+
+  if (messages_printed) {
+    cat("\n")
+  }
 
   invisible(list(metadata = metadata, details = details))
 }

@@ -52,8 +52,18 @@ original order. If \code{limits} is given, only the most frequent patterns are r
 }
 \examples{
 data(production)
+
+# Basic usage
 plot_patterns(production, index = c("firm", "year"))
-plot_patterns(production, index = c("firm", "year"), limits = 3, delta = 1)
+
+# Only top 3 patterns
+plot_patterns(production, index = c("firm", "year"), limits = 3)
+
+# Specify interval to fill gaps
+plot_patterns(production, index = c("firm", "year"), delta = 1)
+
+# Custom colors
+plot_patterns(production, index = c("firm", "year"), colors = c("black", "white"))
 
 }
 \seealso{

@@ -62,7 +62,21 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage with entity only (wide format)
+#' decompose_factor(production, index = "firm")
+#'
+#' # Long format output
+#' decompose_factor(production, index = "firm", format = "long")
+#'
+#' # Using panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' decompose_factor(panel_data)
+#'
+#' # Analyze a specific factor variable
 #' decompose_factor(production, select = "industry", index = "firm")
+#'
+#' # Include time variable to check for duplicates
 #' decompose_factor(production, index = c("firm", "year"))
 #'
 #' @export
@@ -214,11 +228,6 @@ decompose_factor <- function(
   }
   digits <- as.integer(digits)
 
-  # Helper for rounding
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
-  }
-
   messages_printed <- FALSE
 
   # --- Determine variables to analyze ---
@@ -228,17 +237,22 @@ decompose_factor <- function(
     if (!is.null(time_var) && time_var %in% names(data)) {
       is_factor[time_var] <- FALSE
     }
-    select <- names(data)[is_factor]
+    analyze_vars <- names(data)[is_factor]
 
-    if (length(select) == 0) {
+    if (length(analyze_vars) == 0) {
       stop("no factor variables found in the dataset")
     }
-    message("Analyzing all factor variables: ", paste(select, collapse = ", "))
+    message(
+      "Analyzing all factor variables: ",
+      paste(analyze_vars, collapse = ", ")
+    )
     messages_printed <- TRUE
+  } else {
+    analyze_vars <- select
   }
 
   # Validate selected variables
-  missing_vars <- select[!select %in% names(data)]
+  missing_vars <- analyze_vars[!analyze_vars %in% names(data)]
   if (length(missing_vars) > 0) {
     stop(
       "the following variables were not found in data: ",
@@ -247,7 +261,7 @@ decompose_factor <- function(
   }
 
   # Convert selected variables to factor if needed
-  for (var in select) {
+  for (var in analyze_vars) {
     if (!is.factor(data[[var]])) {
       message(
         "Converting variable '",
@@ -261,7 +275,7 @@ decompose_factor <- function(
   }
 
   # Ensure entity variable is not in select
-  if (entity_var %in% select) {
+  if (entity_var %in% analyze_vars) {
     stop("'select' cannot contain the entity variable '", entity_var, "'")
   }
 
@@ -274,9 +288,9 @@ decompose_factor <- function(
   # Helper function for one variable
   decompose_factor_1 <- function(df, varname, ent_var, format_out, d) {
     complete_cases <- complete.cases(df[[varname]], df[[ent_var]])
-    df_clean <- df[complete_cases, , drop = FALSE]
+    clean_data <- df[complete_cases, , drop = FALSE]
 
-    if (nrow(df_clean) == 0) {
+    if (nrow(clean_data) == 0) {
       if (format_out == "wide") {
         return(data.frame(
           variable = character(),
@@ -300,16 +314,16 @@ decompose_factor <- function(
       }
     }
 
-    if (!is.factor(df_clean[[varname]])) {
-      df_clean[[varname]] <- factor(df_clean[[varname]])
+    if (!is.factor(clean_data[[varname]])) {
+      clean_data[[varname]] <- factor(clean_data[[varname]])
     }
 
-    categories <- levels(df_clean[[varname]])
-    overall_counts <- table(df_clean[[varname]])
+    categories <- levels(clean_data[[varname]])
+    overall_counts <- table(clean_data[[varname]])
     total_obs <- sum(overall_counts)
 
     # Split by entity
-    entity_data <- split(df_clean[[varname]], df_clean[[ent_var]])
+    entity_data <- split(clean_data[[varname]], clean_data[[ent_var]])
 
     between_counts <- sapply(categories, function(cat) {
       sum(sapply(entity_data, function(gd) any(as.character(gd) == cat)))
@@ -379,25 +393,25 @@ decompose_factor <- function(
   }
 
   # Apply to each selected variable
-  results <- lapply(select, function(v) {
+  results_list <- lapply(analyze_vars, function(v) {
     decompose_factor_1(data, v, entity_var, format, digits)
   })
-  result_df <- do.call(rbind, results)
-  rownames(result_df) <- NULL
+  out <- do.call(rbind, results_list)
+  rownames(out) <- NULL
 
   if (format == "long") {
-    result_df$category <- factor(
-      result_df$category,
-      levels = unique(result_df$category)
+    out$category <- factor(
+      out$category,
+      levels = unique(out$category)
     )
-    result_df <- result_df[order(result_df$variable, result_df$dimension), ]
-    rownames(result_df) <- NULL
+    out <- out[order(out$variable, out$dimension), ]
+    rownames(out) <- NULL
   }
 
   # Build metadata and details
   metadata <- list(
     function_name = as.character(match.call()[[1]]),
-    select = select,
+    select = analyze_vars,
     entity = entity_var,
     time = time_var,
     format = format,
@@ -405,13 +419,13 @@ decompose_factor <- function(
   )
   details <- list(count_entities = count_entities)
 
-  attr(result_df, "metadata") <- metadata
-  attr(result_df, "details") <- details
-  class(result_df) <- c("panel_summary", "data.frame")
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
+  class(out) <- c("panel_summary", "data.frame")
 
   if (messages_printed) {
     cat("\n")
   }
 
-  return(result_df)
+  return(out)
 }

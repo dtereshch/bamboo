@@ -61,8 +61,19 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage with entity only
 #' describe_incomplete(production, index = "firm")
-#' describe_incomplete(production, index = c("firm", "year"), detail = TRUE)
+#'
+#' # With time variable (check duplicates, more careful)
+#' describe_incomplete(production, index = c("firm", "year"))
+#'
+#' # Detailed view with variable-level NA counts
+#' describe_incomplete(production, index = "firm", detail = TRUE)
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' describe_incomplete(panel_data)
 #'
 #' @export
 describe_incomplete <- function(
@@ -73,6 +84,7 @@ describe_incomplete <- function(
   # --- Initialisation: entity and time from index or metadata ---
   user_index <- index
   entity_time_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -145,6 +157,7 @@ describe_incomplete <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (!is.null(time_var) && any(na_time)) {
     message(
@@ -153,6 +166,7 @@ describe_incomplete <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -184,6 +198,7 @@ describe_incomplete <- function(
           " duplicate entity-time combinations found. Examples: ",
           example_str
         )
+        messages_printed <- TRUE
       }
     }
   }
@@ -206,24 +221,24 @@ describe_incomplete <- function(
   if (!is.null(time_var)) {
     exclude <- c(exclude, time_var)
   }
-  vars <- setdiff(names(data), exclude)
+  analyze_vars <- setdiff(names(data), exclude)
 
-  if (length(vars) == 0) {
+  if (length(analyze_vars) == 0) {
     stop("no variables to analyze (only entity and time variables found)")
   }
 
   # Initialize result data frame
-  result <- data.frame(
+  out <- data.frame(
     entity = unique_entities,
     na_count = 0L,
     variables = 0L,
     stringsAsFactors = FALSE
   )
-  names(result)[1] <- entity_var
+  names(out)[1] <- entity_var
 
   if (detail) {
-    for (v in vars) {
-      result[[v]] <- 0L
+    for (v in analyze_vars) {
+      out[[v]] <- 0L
     }
   }
 
@@ -231,26 +246,29 @@ describe_incomplete <- function(
   for (i in seq_along(unique_entities)) {
     ent <- unique_entities[i]
     idx <- data[[entity_var]] == ent
-    ent_data <- data[idx, vars, drop = FALSE]
+    ent_data <- data[idx, analyze_vars, drop = FALSE]
 
     vars_with_na <- sum(vapply(ent_data, function(x) any(is.na(x)), logical(1)))
     total_na <- sum(vapply(ent_data, function(x) sum(is.na(x)), integer(1)))
 
-    result$variables[i] <- vars_with_na
-    result$na_count[i] <- total_na
+    out$variables[i] <- vars_with_na
+    out$na_count[i] <- total_na
 
     if (detail) {
-      for (v in vars) {
-        result[[v]][i] <- sum(is.na(ent_data[[v]]))
+      for (v in analyze_vars) {
+        out[[v]][i] <- sum(is.na(ent_data[[v]]))
       }
     }
   }
 
   # Keep only incomplete entities
-  incomplete <- result[result$variables > 0, ]
-  incomplete_ids <- result[[entity_var]][result$variables > 0]
+  incomplete <- out[out$variables > 0, ]
+  incomplete_ids <- out[[entity_var]][out$variables > 0]
 
   if (nrow(incomplete) == 0) {
+    if (messages_printed) {
+      cat("\n")
+    }
     return("There are no incomplete entities in the data.")
   }
 
@@ -274,6 +292,10 @@ describe_incomplete <- function(
   attr(incomplete, "metadata") <- metadata
   attr(incomplete, "details") <- details
   class(incomplete) <- c("panel_description", "data.frame")
+
+  if (messages_printed) {
+    cat("\n")
+  }
 
   return(incomplete)
 }

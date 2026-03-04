@@ -54,8 +54,16 @@ panel structure when interpreting the results.
 }
 \examples{
 data(production)
+
+# Basic usage with statistics for all variables
 summarize_missing(production, index = c("firm", "year"))
-summarize_missing(production, select = c("sales", "employees"), index = c("firm", "year"), detail = TRUE)
+
+# With panel_data class object
+panel_data <- make_panel(production, index = c("firm", "year"))
+summarize_missing(panel_data)
+
+# Detailed output with period-specific NA counts
+summarize_missing(production, index = c("firm", "year"), detail = TRUE)
 
 }
 \seealso{

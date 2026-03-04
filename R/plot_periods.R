@@ -28,8 +28,19 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage with regular data.frame
 #' plot_periods(production, index = c("firm", "year"))
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' plot_periods(panel_data)
+#'
+#' # Custom colors - gray fill with black line
 #' plot_periods(production, index = c("firm", "year"), colors = c("gray", "black"))
+#'
+#' # Custom colors - light blue fill with blue line
+#' plot_periods(production, index = c("firm", "year"), colors = c("lightblue", "blue"))
 #'
 #' @export
 plot_periods <- function(
@@ -40,6 +51,7 @@ plot_periods <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -105,6 +117,7 @@ plot_periods <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -113,6 +126,7 @@ plot_periods <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -143,6 +157,7 @@ plot_periods <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -168,7 +183,7 @@ plot_periods <- function(
   }
   ordered_times <- unique_times[time_order]
 
-  presence_matrix <- matrix(
+  presence_mat <- matrix(
     0,
     nrow = length(unique_groups),
     ncol = length(ordered_times),
@@ -176,11 +191,11 @@ plot_periods <- function(
   )
 
   for (i in seq_along(group_var)) {
-    presence_matrix[group_var[i], time_var_ch[i]] <- 1
+    presence_mat[group_var[i], time_var_ch[i]] <- 1
   }
 
-  time_coverage <- rowSums(presence_matrix)
-  names(time_coverage) <- rownames(presence_matrix)
+  time_coverage <- rowSums(presence_mat)
+  names(time_coverage) <- rownames(presence_mat)
 
   # Histogram data
   coverage_table <- table(time_coverage)
@@ -264,6 +279,10 @@ plot_periods <- function(
     coverage_by_entity = time_coverage,
     histogram_data = hist_data
   )
+
+  if (messages_printed) {
+    cat("\n")
+  }
 
   invisible(list(metadata = metadata, details = details))
 }

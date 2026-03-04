@@ -47,8 +47,17 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage (transition matrix)
 #' summarize_transition(production, select = "industry", index = c("firm", "year"))
-#' summarize_transition(production, select = "industry", index = c("firm", "year"), format = "long")
+#'
+#' # Long format output
+#' summarize_transition(production, select = "industry",
+#'                      index = c("firm", "year"), format = "long")
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' summarize_transition(panel_data, select = "industry")
 #'
 #' @export
 summarize_transition <- function(
@@ -133,10 +142,6 @@ summarize_transition <- function(
   }
   digits <- as.integer(digits)
 
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
-  }
-
   messages_printed <- FALSE
 
   # --- Remove rows with NA in entity or time ---
@@ -150,6 +155,7 @@ summarize_transition <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -158,6 +164,7 @@ summarize_transition <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -210,6 +217,7 @@ summarize_transition <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
 
     # Check consistency of select values

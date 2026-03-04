@@ -46,8 +46,19 @@ Duplicate entity‑time combinations are checked; if found, a message is printed
 }
 \examples{
 data(production)
+
+# Basic usage
 describe_periods(production, index = c("firm", "year"))
-describe_periods(production, index = c("firm", "year"), delta = 1, digits = 4)
+
+# Custom rounding
+describe_periods(production, index = c("firm", "year"), digits = 4)
+
+# With panel_data class object
+panel_data <- make_panel(production, index = c("firm", "year"))
+describe_periods(panel_data)
+
+# Specify interval to fill gaps (if any)
+describe_periods(production, index = c("firm", "year"), delta = 1)
 
 }
 \seealso{

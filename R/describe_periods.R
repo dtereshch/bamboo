@@ -36,8 +36,19 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage
 #' describe_periods(production, index = c("firm", "year"))
-#' describe_periods(production, index = c("firm", "year"), delta = 1, digits = 4)
+#'
+#' # Custom rounding
+#' describe_periods(production, index = c("firm", "year"), digits = 4)
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' describe_periods(panel_data)
+#'
+#' # Specify interval to fill gaps (if any)
+#' describe_periods(production, index = c("firm", "year"), delta = 1)
 #'
 #' @export
 describe_periods <- function(
@@ -46,29 +57,12 @@ describe_periods <- function(
   delta = NULL,
   digits = 3
 ) {
-  sort_unique_preserve <- function(x) {
-    ux <- unique(x)
-    if (is.numeric(ux)) {
-      sort(ux)
-    } else if (inherits(ux, "Date") || inherits(ux, "POSIXt")) {
-      sort(ux)
-    } else if (is.factor(ux)) {
-      sorted_char <- sort(as.character(ux))
-      factor(sorted_char, levels = sorted_char, ordered = is.ordered(ux))
-    } else {
-      sort(ux)
-    }
-  }
-
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
-  }
-
   # --- Initialisation ---
   user_index <- index
   user_delta <- delta
   entity_time_from_metadata <- FALSE
   delta_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -142,6 +136,7 @@ describe_periods <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -150,6 +145,7 @@ describe_periods <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -180,6 +176,7 @@ describe_periods <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -217,6 +214,7 @@ describe_periods <- function(
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -273,13 +271,13 @@ describe_periods <- function(
 
   share <- round_if_needed(period_counts / total_entities, digits)
 
-  result_df <- data.frame(
+  out <- data.frame(
     time_period = unique_times,
     count = period_counts,
     share = share,
     stringsAsFactors = FALSE
   )
-  names(result_df)[1] <- time_var
+  names(out)[1] <- time_var
 
   metadata <- list(
     function_name = as.character(match.call()[[1]]),
@@ -291,9 +289,13 @@ describe_periods <- function(
 
   details <- list(entities = entities)
 
-  attr(result_df, "metadata") <- metadata
-  attr(result_df, "details") <- details
-  class(result_df) <- c("panel_description", "data.frame")
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
+  class(out) <- c("panel_description", "data.frame")
 
-  return(result_df)
+  if (messages_printed) {
+    cat("\n")
+  }
+
+  return(out)
 }

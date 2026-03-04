@@ -58,8 +58,22 @@ patterns are retained.
 }
 \examples{
 data(production)
+
+# Basic usage
 describe_patterns(production, index = c("firm", "year"))
-describe_patterns(production, index = c("firm", "year"), delta = 1, limits = 3)
+
+# With panel_data class object
+panel_data <- make_panel(production, index = c("firm", "year"))
+describe_patterns(panel_data)
+
+# Specify interval to fill gaps
+describe_patterns(production, index = c("firm", "year"), delta = 1)
+
+# Show only top 3 patterns
+describe_patterns(production, index = c("firm", "year"), limits = 3)
+
+# Simplified version (no shares, only presence)
+describe_patterns(production, index = c("firm", "year"), detail = FALSE)
 
 }
 \seealso{

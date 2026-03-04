@@ -90,8 +90,26 @@
 #'
 #' @examples
 #' data(production)
-#' decompose_numeric(production, select = c("sales", "labor"), index = "firm")
+#'
+#' # Basic usage with all numeric variables (long format)
+#' decompose_numeric(production, index = "firm")
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' decompose_numeric(panel_data)
+#'
+#' # Include time variable to check duplicates
 #' decompose_numeric(production, index = c("firm", "year"))
+#'
+#' # Select specific variables
+#' decompose_numeric(production, select = c("sales", "labor"), index = "firm")
+#'
+#' # Wide format, detailed output
+#' decompose_numeric(production, index = "firm", format = "wide", detail = TRUE)
+#'
+#' # Access metadata
+#' res <- decompose_numeric(production, index = "firm")
+#' attr(res, "metadata")
 #'
 #' @export
 decompose_numeric <- function(
@@ -243,39 +261,41 @@ decompose_numeric <- function(
   }
   digits <- as.integer(digits)
 
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
-  }
-
   messages_printed <- FALSE
 
   # --- Determine numeric variables ---
   if (is.null(select)) {
     numeric_vars <- vapply(data, is.numeric, FUN.VALUE = logical(1))
-    select <- names(data)[numeric_vars]
+    analyze_vars <- names(data)[numeric_vars]
     # Remove entity and time if they appear
-    select <- setdiff(select, c(entity_var, time_var))
-    if (length(select) == 0) {
+    analyze_vars <- setdiff(analyze_vars, c(entity_var, time_var))
+    if (length(analyze_vars) == 0) {
       stop("no numeric variables found in the dataset")
     }
-    message("Analyzing all numeric variables: ", paste(select, collapse = ", "))
+    message(
+      "Analyzing all numeric variables: ",
+      paste(analyze_vars, collapse = ", ")
+    )
     messages_printed <- TRUE
   } else {
-    missing_vars <- select[!select %in% names(data)]
+    analyze_vars <- select
+    missing_vars <- analyze_vars[!analyze_vars %in% names(data)]
     if (length(missing_vars) > 0) {
       stop("variables not found: ", paste(missing_vars, collapse = ", "))
     }
-    non_num <- select[!vapply(data[select], is.numeric, FUN.VALUE = logical(1))]
+    non_num <- analyze_vars[
+      !vapply(data[analyze_vars], is.numeric, FUN.VALUE = logical(1))
+    ]
     if (length(non_num) > 0) {
       stop(
         "the following variables are not numeric: ",
         paste(non_num, collapse = ", ")
       )
     }
-    if (entity_var %in% select) {
+    if (entity_var %in% analyze_vars) {
       stop("'select' cannot contain the entity variable '", entity_var, "'")
     }
-    if (!is.null(time_var) && time_var %in% select) {
+    if (!is.null(time_var) && time_var %in% analyze_vars) {
       stop("'select' cannot contain the time variable '", time_var, "'")
     }
   }
@@ -300,9 +320,9 @@ decompose_numeric <- function(
     d
   ) {
     complete_cases <- complete.cases(df[[varname]], df[[ent_var]])
-    df_clean <- df[complete_cases, , drop = FALSE]
+    clean_data <- df[complete_cases, , drop = FALSE]
 
-    if (nrow(df_clean) == 0) {
+    if (nrow(clean_data) == 0) {
       if (format_out == "long") {
         if (detail_out) {
           return(data.frame(
@@ -356,8 +376,8 @@ decompose_numeric <- function(
       }
     }
 
-    ent_vec <- as.character(df_clean[[ent_var]])
-    x <- df_clean[[varname]]
+    ent_vec <- as.character(clean_data[[ent_var]])
+    x <- clean_data[[varname]]
 
     overall_mean <- mean(x, na.rm = TRUE)
     overall_std <- sd(x, na.rm = TRUE)
@@ -449,15 +469,15 @@ decompose_numeric <- function(
     return(result)
   }
 
-  results <- lapply(select, function(v) {
+  results_list <- lapply(analyze_vars, function(v) {
     decompose_numeric_1(data, v, entity_var, format, detail, digits)
   })
-  result_df <- do.call(rbind, results)
-  rownames(result_df) <- NULL
+  out <- do.call(rbind, results_list)
+  rownames(out) <- NULL
 
   metadata <- list(
     function_name = as.character(match.call()[[1]]),
-    select = select,
+    select = analyze_vars,
     entity = entity_var,
     time = time_var,
     detail = detail,
@@ -466,13 +486,13 @@ decompose_numeric <- function(
   )
   details <- list(count_entities = count_entities)
 
-  attr(result_df, "metadata") <- metadata
-  attr(result_df, "details") <- details
-  class(result_df) <- c("panel_summary", "data.frame")
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
+  class(out) <- c("panel_summary", "data.frame")
 
   if (messages_printed) {
     cat("\n")
   }
 
-  return(result_df)
+  return(out)
 }

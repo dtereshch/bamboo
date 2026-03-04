@@ -28,31 +28,25 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage
 #' describe_dimensions(production, index = c("firm", "year"))
 #'
-#' # With panel attributes
+#' # With panel_data class object
 #' panel_data <- make_panel(production, index = c("firm", "year"))
 #' describe_dimensions(panel_data)
 #'
+#' # Access detailed information
+#' dims <- describe_dimensions(production, index = c("firm", "year"))
+#' attr(dims, "details")$entities
+#' attr(dims, "details")$variables
+#'
 #' @export
 describe_dimensions <- function(data, index = NULL) {
-  sort_unique_preserve <- function(x) {
-    ux <- unique(x)
-    if (is.numeric(ux)) {
-      sort(ux)
-    } else if (inherits(ux, "Date") || inherits(ux, "POSIXt")) {
-      sort(ux)
-    } else if (is.factor(ux)) {
-      sorted_char <- sort(as.character(ux))
-      factor(sorted_char, levels = sorted_char, ordered = is.ordered(ux))
-    } else {
-      sort(ux)
-    }
-  }
-
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -112,6 +106,7 @@ describe_dimensions <- function(data, index = NULL) {
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -120,6 +115,7 @@ describe_dimensions <- function(data, index = NULL) {
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -150,6 +146,7 @@ describe_dimensions <- function(data, index = NULL) {
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -168,7 +165,7 @@ describe_dimensions <- function(data, index = NULL) {
     variables = length(substantive_vars)
   )
 
-  result <- data.frame(
+  out <- data.frame(
     dimension = names(counts),
     count = as.integer(counts),
     stringsAsFactors = FALSE,
@@ -187,9 +184,13 @@ describe_dimensions <- function(data, index = NULL) {
     variables = substantive_vars
   )
 
-  attr(result, "metadata") <- metadata
-  attr(result, "details") <- details
-  class(result) <- c("panel_description", "data.frame")
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
+  class(out) <- c("panel_description", "data.frame")
 
-  return(result)
+  if (messages_printed) {
+    cat("\n")
+  }
+
+  return(out)
 }

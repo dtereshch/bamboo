@@ -36,11 +36,19 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage
 #' describe_balance(production, index = c("firm", "year"))
 #'
-#' # With panel attributes
+#' # Detailed output including percentiles
+#' describe_balance(production, index = c("firm", "year"), detail = TRUE)
+#'
+#' # With panel_data class object
 #' panel_data <- make_panel(production, index = c("firm", "year"))
 #' describe_balance(panel_data)
+#'
+#' # Custom rounding
+#' describe_balance(production, index = c("firm", "year"), digits = 4)
 #'
 #' @export
 describe_balance <- function(
@@ -52,6 +60,7 @@ describe_balance <- function(
   # --- Initialisation ---
   user_index <- index
   entity_time_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -111,6 +120,7 @@ describe_balance <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -119,6 +129,7 @@ describe_balance <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -149,6 +160,7 @@ describe_balance <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -185,7 +197,7 @@ describe_balance <- function(
   total_periods <- length(all_times)
 
   # Presence matrix
-  presence_matrix <- matrix(
+  presence_mat <- matrix(
     0,
     nrow = total_entities,
     ncol = total_periods,
@@ -197,44 +209,37 @@ describe_balance <- function(
   has_data <- apply(data[substantive_vars], 1, function(x) any(!is.na(x)))
   for (i in seq_along(entity_vec)) {
     if (has_data[i]) {
-      presence_matrix[entity_vec[i], time_vec[i]] <- 1
+      presence_mat[entity_vec[i], time_vec[i]] <- 1
     }
   }
 
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
-  }
-
   # Entities per period
-  entities_per_period <- colSums(presence_matrix)
+  entities_per_period <- colSums(presence_mat)
   entity_stats <- entities_per_period[entities_per_period > 0]
   if (length(entity_stats) > 0) {
     mean_entities <- round_if_needed(mean(entity_stats, na.rm = TRUE), digits)
-    std_entities <- round_if_needed(
-      stats::sd(entity_stats, na.rm = TRUE),
-      digits
-    )
+    std_entities <- round_if_needed(sd(entity_stats, na.rm = TRUE), digits)
     min_entities <- min(entity_stats)
     max_entities <- max(entity_stats)
     if (detail) {
       p5_entities <- round_if_needed(
-        stats::quantile(entity_stats, 0.05, names = FALSE),
+        quantile(entity_stats, 0.05, names = FALSE),
         digits
       )
       p25_entities <- round_if_needed(
-        stats::quantile(entity_stats, 0.25, names = FALSE),
+        quantile(entity_stats, 0.25, names = FALSE),
         digits
       )
       p50_entities <- round_if_needed(
-        stats::quantile(entity_stats, 0.50, names = FALSE),
+        quantile(entity_stats, 0.50, names = FALSE),
         digits
       )
       p75_entities <- round_if_needed(
-        stats::quantile(entity_stats, 0.75, names = FALSE),
+        quantile(entity_stats, 0.75, names = FALSE),
         digits
       )
       p95_entities <- round_if_needed(
-        stats::quantile(entity_stats, 0.95, names = FALSE),
+        quantile(entity_stats, 0.95, names = FALSE),
         digits
       )
     }
@@ -246,35 +251,32 @@ describe_balance <- function(
   }
 
   # Periods per entity
-  periods_per_entity <- rowSums(presence_matrix)
+  periods_per_entity <- rowSums(presence_mat)
   period_stats <- periods_per_entity[periods_per_entity > 0]
   if (length(period_stats) > 0) {
     mean_periods <- round_if_needed(mean(period_stats, na.rm = TRUE), digits)
-    std_periods <- round_if_needed(
-      stats::sd(period_stats, na.rm = TRUE),
-      digits
-    )
+    std_periods <- round_if_needed(sd(period_stats, na.rm = TRUE), digits)
     min_periods <- min(period_stats)
     max_periods <- max(period_stats)
     if (detail) {
       p5_periods <- round_if_needed(
-        stats::quantile(period_stats, 0.05, names = FALSE),
+        quantile(period_stats, 0.05, names = FALSE),
         digits
       )
       p25_periods <- round_if_needed(
-        stats::quantile(period_stats, 0.25, names = FALSE),
+        quantile(period_stats, 0.25, names = FALSE),
         digits
       )
       p50_periods <- round_if_needed(
-        stats::quantile(period_stats, 0.50, names = FALSE),
+        quantile(period_stats, 0.50, names = FALSE),
         digits
       )
       p75_periods <- round_if_needed(
-        stats::quantile(period_stats, 0.75, names = FALSE),
+        quantile(period_stats, 0.75, names = FALSE),
         digits
       )
       p95_periods <- round_if_needed(
-        stats::quantile(period_stats, 0.95, names = FALSE),
+        quantile(period_stats, 0.95, names = FALSE),
         digits
       )
     }
@@ -287,7 +289,7 @@ describe_balance <- function(
 
   # Build result data.frame
   if (detail) {
-    result_df <- data.frame(
+    out <- data.frame(
       dimension = c("entities", "periods"),
       mean = c(mean_entities, mean_periods),
       std = c(std_entities, std_periods),
@@ -302,7 +304,7 @@ describe_balance <- function(
       row.names = NULL
     )
   } else {
-    result_df <- data.frame(
+    out <- data.frame(
       dimension = c("entities", "periods"),
       mean = c(mean_entities, mean_periods),
       std = c(std_entities, std_periods),
@@ -321,11 +323,15 @@ describe_balance <- function(
     detail = detail,
     digits = digits
   )
-  details <- list(presence_matrix = presence_matrix)
+  details <- list(presence_matrix = presence_mat)
 
-  attr(result_df, "metadata") <- metadata
-  attr(result_df, "details") <- details
-  class(result_df) <- c("panel_description", "data.frame")
+  attr(out, "metadata") <- metadata
+  attr(out, "details") <- details
+  class(out) <- c("panel_description", "data.frame")
 
-  return(result_df)
+  if (messages_printed) {
+    cat("\n")
+  }
+
+  return(out)
 }

@@ -105,8 +105,26 @@ The returned data.frame has class \code{"panel_summary"} and the following attri
 }
 \examples{
 data(production)
-decompose_numeric(production, select = c("sales", "labor"), index = "firm")
+
+# Basic usage with all numeric variables (long format)
+decompose_numeric(production, index = "firm")
+
+# With panel_data class object
+panel_data <- make_panel(production, index = c("firm", "year"))
+decompose_numeric(panel_data)
+
+# Include time variable to check duplicates
 decompose_numeric(production, index = c("firm", "year"))
+
+# Select specific variables
+decompose_numeric(production, select = c("sales", "labor"), index = "firm")
+
+# Wide format, detailed output
+decompose_numeric(production, index = "firm", format = "wide", detail = TRUE)
+
+# Access metadata
+res <- decompose_numeric(production, index = "firm")
+attr(res, "metadata")
 
 }
 \references{

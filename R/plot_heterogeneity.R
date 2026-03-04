@@ -34,7 +34,7 @@
 #' # Method 1: With regular data.frame
 #' plot_heterogeneity(production, select = "labor", group = "year")
 #'
-#' # Method 2: With data.frame with panel attributes
+#' # Method 2: With data.frame with panel attributes (uses both entity and time)
 #' panel_data <- make_panel(production, index = c("firm", "year"))
 #' plot_heterogeneity(panel_data, select = "labor")
 #'
@@ -51,7 +51,8 @@
 #' plot_heterogeneity(production, select = "sales", group = c("firm", "year"))
 #'
 #' # Customize colors
-#' plot_heterogeneity(production, select = "sales", group = "year", colors = c("black", "gray"))
+#' plot_heterogeneity(production, select = "sales", group = "year",
+#'                    colors = c("black", "gray"))
 #'
 #' @export
 plot_heterogeneity <- function(
@@ -119,11 +120,9 @@ plot_heterogeneity <- function(
     )
   }
 
-  # --- NEW CHECK: ensure select is not in group ---
   if (select %in% group) {
     stop("'select' cannot be the same as 'group' ('", select, "')")
   }
-  # ---------------------------------------------------
 
   # Validate colors parameter
   if (!is.character(colors) || length(colors) != 2) {

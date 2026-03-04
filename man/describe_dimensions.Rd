@@ -36,11 +36,18 @@ Duplicate entity-time combinations are checked; if found, a message is printed
 }
 \examples{
 data(production)
+
+# Basic usage
 describe_dimensions(production, index = c("firm", "year"))
 
-# With panel attributes
+# With panel_data class object
 panel_data <- make_panel(production, index = c("firm", "year"))
 describe_dimensions(panel_data)
+
+# Access detailed information
+dims <- describe_dimensions(production, index = c("firm", "year"))
+attr(dims, "details")$entities
+attr(dims, "details")$variables
 
 }
 \seealso{

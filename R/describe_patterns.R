@@ -37,8 +37,22 @@
 #'
 #' @examples
 #' data(production)
+#'
+#' # Basic usage
 #' describe_patterns(production, index = c("firm", "year"))
-#' describe_patterns(production, index = c("firm", "year"), delta = 1, limits = 3)
+#'
+#' # With panel_data class object
+#' panel_data <- make_panel(production, index = c("firm", "year"))
+#' describe_patterns(panel_data)
+#'
+#' # Specify interval to fill gaps
+#' describe_patterns(production, index = c("firm", "year"), delta = 1)
+#'
+#' # Show only top 3 patterns
+#' describe_patterns(production, index = c("firm", "year"), limits = 3)
+#'
+#' # Simplified version (no shares, only presence)
+#' describe_patterns(production, index = c("firm", "year"), detail = FALSE)
 #'
 #' @export
 describe_patterns <- function(
@@ -50,29 +64,12 @@ describe_patterns <- function(
   format = "wide",
   digits = 3
 ) {
-  sort_unique_preserve <- function(x) {
-    ux <- unique(x)
-    if (is.numeric(ux)) {
-      sort(ux)
-    } else if (inherits(ux, "Date") || inherits(ux, "POSIXt")) {
-      sort(ux)
-    } else if (is.factor(ux)) {
-      sorted_char <- sort(as.character(ux))
-      factor(sorted_char, levels = sorted_char, ordered = is.ordered(ux))
-    } else {
-      sort(ux)
-    }
-  }
-
-  round_if_needed <- function(x, d) {
-    if (is.numeric(x) && !all(is.na(x))) round(x, d) else x
-  }
-
   # --- Initialisation ---
   user_index <- index
   user_delta <- delta
   entity_time_from_metadata <- FALSE
   delta_from_metadata <- FALSE
+  messages_printed <- FALSE
 
   if (inherits(data, "panel_data")) {
     metadata <- attr(data, "metadata")
@@ -157,6 +154,7 @@ describe_patterns <- function(
       entity_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
   if (any(na_time)) {
     message(
@@ -165,6 +163,7 @@ describe_patterns <- function(
       time_var,
       "' variable found and excluded."
     )
+    messages_printed <- TRUE
   }
 
   if (any(na_entity | na_time)) {
@@ -195,6 +194,7 @@ describe_patterns <- function(
         " duplicate entity-time combinations found. Examples: ",
         example_str
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -232,6 +232,7 @@ describe_patterns <- function(
         "Irregular time intervals detected. Missing periods: ",
         paste(missing, collapse = ", ")
       )
+      messages_printed <- TRUE
     }
   }
 
@@ -269,7 +270,7 @@ describe_patterns <- function(
   }
 
   # Presence matrix
-  presence_binary <- matrix(
+  presence_mat <- matrix(
     0,
     nrow = length(unique_entities_orig),
     ncol = length(time_cols_char),
@@ -277,12 +278,12 @@ describe_patterns <- function(
   )
   for (i in seq_along(entity_filt_char)) {
     if (time_filt_char[i] %in% time_cols_char) {
-      presence_binary[entity_filt_char[i], time_filt_char[i]] <- 1
+      presence_mat[entity_filt_char[i], time_filt_char[i]] <- 1
     }
   }
 
   # Patterns
-  pattern_strings <- apply(presence_binary, 1, paste, collapse = "")
+  pattern_strings <- apply(presence_mat, 1, paste, collapse = "")
   pattern_counts <- table(pattern_strings)
 
   # patterns_entities list
@@ -337,7 +338,7 @@ describe_patterns <- function(
 
   details <- list(
     count_patterns = nrow(result),
-    presence_matrix = presence_binary,
+    presence_matrix = presence_mat,
     patterns_entities = patterns_entities_sorted,
     patterns_matrix = patterns_matrix
   )
@@ -388,5 +389,10 @@ describe_patterns <- function(
   attr(out, "metadata") <- metadata
   attr(out, "details") <- details
   class(out) <- c("panel_description", "data.frame")
+
+  if (messages_printed) {
+    cat("\n")
+  }
+
   return(out)
 }
