@@ -6,7 +6,8 @@
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #'        Not required if data has panel attributes.
 #' @param delta An optional positive integer giving the expected interval between time periods.
-#' @param limits An integer specifying the maximum number of distinct patterns to display.
+#' @param limits Either a single integer (show that many most frequent patterns)
+#'        or a vector of two integers (show patterns with ranks between the two values, inclusive).
 #'        If not specified, all patterns are shown.
 #' @param colors A character vector of two colors for present and missing observations.
 #'        Default = c("#1E4A3B", "white").
@@ -43,7 +44,7 @@
 #' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless identifiers came from panel attributes).
 #'
-#' If `limits` is given, only the most frequent patterns are retained.
+#' If `limits` is given, only the requested patterns are retained.
 #'
 #' @seealso
 #' [describe_patterns()] for tabular description of presence patterns.
@@ -55,8 +56,11 @@
 #' # Basic usage
 #' plot_patterns(production, index = c("firm", "year"))
 #'
-#' # Changing the limits argument
+#' # Show only the top 3 patterns
 #' plot_patterns(production, index = c("firm", "year"), limits = 3)
+#'
+#' # Show patterns ranked 4 to 6
+#' plot_patterns(production, index = c("firm", "year"), limits = c(4, 6))
 #'
 #' # Changing the delta argument
 #' plot_patterns(production, index = c("firm", "year"), delta = 1)
@@ -129,12 +133,31 @@ plot_patterns <- function(
   if (time_var == entity_var) {
     stop("entity and time variables cannot be the same")
   }
-  if (
-    !is.null(limits) &&
-      (!is.numeric(limits) || limits < 1 || limits != round(limits))
-  ) {
-    stop("'limits' must be a positive integer or NULL")
+
+  # --- Updated limits validation ---
+  if (!is.null(limits)) {
+    if (length(limits) == 1) {
+      if (!is.numeric(limits) || limits < 1 || limits != round(limits)) {
+        stop(
+          "'limits' must be a positive integer or a vector of two positive integers."
+        )
+      }
+    } else if (length(limits) == 2) {
+      if (
+        !is.numeric(limits) || any(limits < 1) || any(limits != round(limits))
+      ) {
+        stop("'limits' must contain positive integers.")
+      }
+      if (limits[1] > limits[2]) {
+        stop("In 'limits = c(m, n)', m must be less than or equal to n.")
+      }
+    } else {
+      stop(
+        "'limits' must be a positive integer or a vector of two positive integers."
+      )
+    }
   }
+
   if (!is.character(colors) || length(colors) != 2) {
     stop("'colors' must be a character vector of length 2")
   }
@@ -281,16 +304,38 @@ plot_patterns <- function(
     patterns_entities_full[[pat]] <- c(patterns_entities_full[[pat]], ent)
   }
 
-  # Filter by limits
+  # --- Updated limits filtering ---
   if (!is.null(limits)) {
-    top_patterns <- names(sort(pattern_freq, decreasing = TRUE))[
-      1:min(limits, length(pattern_freq))
-    ]
-    keep <- pattern_str %in% top_patterns
+    # Sort pattern frequencies decreasing
+    pattern_freq_sorted <- sort(pattern_freq, decreasing = TRUE)
+    total_patterns <- length(pattern_freq_sorted)
+
+    if (length(limits) == 1) {
+      m <- 1
+      n <- limits
+    } else {
+      # length 2
+      m <- limits[1]
+      n <- limits[2]
+    }
+
+    if (n > total_patterns) {
+      stop(
+        "n (",
+        n,
+        ") exceeds the total number of patterns (",
+        total_patterns,
+        ")."
+      )
+    }
+
+    selected_patterns <- names(pattern_freq_sorted)[m:n]
+
+    keep <- pattern_str %in% selected_patterns
     presence_mat <- presence_mat[keep, , drop = FALSE]
     pattern_str <- pattern_str[keep]
-    pattern_freq <- pattern_freq[top_patterns]
-    patterns_entities_full <- patterns_entities_full[top_patterns]
+    pattern_freq <- pattern_freq[selected_patterns] # keep only selected
+    patterns_entities_full <- patterns_entities_full[selected_patterns]
   }
 
   # Order rows: least frequent first (bottom), most frequent last (top)

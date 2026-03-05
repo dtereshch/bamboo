@@ -20,7 +20,8 @@ Not required if data has panel attributes.}
 
 \item{delta}{An optional positive integer giving the expected interval between time periods.}
 
-\item{limits}{An integer specifying the maximum number of distinct patterns to display.
+\item{limits}{Either a single integer (show that many most frequent patterns)
+or a vector of two integers (show patterns with ranks between the two values, inclusive).
 If not specified, all patterns are shown.}
 
 \item{colors}{A character vector of two colors for present and missing observations.
@@ -62,7 +63,7 @@ Messages indicate how many rows were excluded.
 Duplicate entity‑time combinations are checked; if found, a message is printed
 (unless identifiers came from panel attributes).
 
-If \code{limits} is given, only the most frequent patterns are retained.
+If \code{limits} is given, only the requested patterns are retained.
 }
 \examples{
 data(production)
@@ -70,8 +71,11 @@ data(production)
 # Basic usage
 plot_patterns(production, index = c("firm", "year"))
 
-# Changing the limits argument
+# Show only the top 3 patterns
 plot_patterns(production, index = c("firm", "year"), limits = 3)
+
+# Show patterns ranked 4 to 6
+plot_patterns(production, index = c("firm", "year"), limits = c(4, 6))
 
 # Changing the delta argument
 plot_patterns(production, index = c("firm", "year"), delta = 1)

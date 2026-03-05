@@ -20,9 +20,10 @@ describe_patterns(
 \item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
-\item{delta}{An optional positive integer giving the expected interval between time periods.}
+\item{delta}{An optional integer giving the expected interval between time periods.}
 
-\item{limits}{An integer specifying the maximum number of distinct patterns to display.
+\item{limits}{Either a single integer (show that many most frequent patterns)
+or a vector of two integers (show patterns with ranks between the two values, inclusive).
 If not specified, all patterns are shown.}
 
 \item{detail}{A logical flag indicating whether to return detailed patterns. Default = TRUE.}
@@ -86,7 +87,7 @@ Messages indicate how many rows were excluded.
 Duplicate entity‑time combinations are checked; if found, a message is printed
 (unless identifiers came from panel attributes).
 
-Patterns are sorted by frequency (most common first). If \code{limits} is supplied, only the most frequent
+Patterns are sorted by frequency (most common first). If \code{limits} is supplied, only the requested
 patterns are retained.
 }
 \examples{
@@ -102,8 +103,11 @@ describe_patterns(panel)
 # Changing the delta argument
 describe_patterns(production, index = c("firm", "year"), delta = 1)
 
-# Changing the limits argument
+# Show only the top 3 patterns
 describe_patterns(production, index = c("firm", "year"), limits = 3)
+
+# Show patterns ranked 4 to 6
+describe_patterns(production, index = c("firm", "year"), limits = c(4, 6))
 
 # Changing the detail argument
 describe_patterns(production, index = c("firm", "year"), detail = FALSE)

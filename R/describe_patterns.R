@@ -5,8 +5,9 @@
 #' @param data A data.frame containing panel data in a long format.
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #'        Not required if data has panel attributes.
-#' @param delta An optional positive integer giving the expected interval between time periods.
-#' @param limits An integer specifying the maximum number of distinct patterns to display.
+#' @param delta An optional integer giving the expected interval between time periods.
+#' @param limits Either a single integer (show that many most frequent patterns)
+#'        or a vector of two integers (show patterns with ranks between the two values, inclusive).
 #'        If not specified, all patterns are shown.
 #' @param detail A logical flag indicating whether to return detailed patterns. Default = TRUE.
 #' @param format A character string specifying the output format: "wide" or "long". Default = "wide".
@@ -63,7 +64,7 @@
 #' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless identifiers came from panel attributes).
 #'
-#' Patterns are sorted by frequency (most common first). If `limits` is supplied, only the most frequent
+#' Patterns are sorted by frequency (most common first). If `limits` is supplied, only the requested
 #' patterns are retained.
 #'
 #' @seealso
@@ -84,8 +85,11 @@
 #' # Changing the delta argument
 #' describe_patterns(production, index = c("firm", "year"), delta = 1)
 #'
-#' # Changing the limits argument
+#' # Show only the top 3 patterns
 #' describe_patterns(production, index = c("firm", "year"), limits = 3)
+#'
+#' # Show patterns ranked 4 to 6
+#' describe_patterns(production, index = c("firm", "year"), limits = c(4, 6))
 #'
 #' # Changing the detail argument
 #' describe_patterns(production, index = c("firm", "year"), detail = FALSE)
@@ -163,12 +167,31 @@ describe_patterns <- function(
   if (!format %in% c("wide", "long")) {
     stop('format must be "wide" or "long"')
   }
-  if (
-    !is.null(limits) &&
-      (!is.numeric(limits) || limits < 1 || limits != round(limits))
-  ) {
-    stop("'limits' must be a positive integer or NULL")
+
+  # --- Updated limits validation ---
+  if (!is.null(limits)) {
+    if (length(limits) == 1) {
+      if (!is.numeric(limits) || limits < 1 || limits != round(limits)) {
+        stop(
+          "'limits' must be a positive integer or a vector of two positive integers."
+        )
+      }
+    } else if (length(limits) == 2) {
+      if (
+        !is.numeric(limits) || any(limits < 1) || any(limits != round(limits))
+      ) {
+        stop("'limits' must contain positive integers.")
+      }
+      if (limits[1] > limits[2]) {
+        stop("In 'limits = c(m, n)', m must be less than or equal to n.")
+      }
+    } else {
+      stop(
+        "'limits' must be a positive integer or a vector of two positive integers."
+      )
+    }
   }
+
   if (
     !is.numeric(digits) ||
       length(digits) != 1 ||
@@ -352,8 +375,28 @@ describe_patterns <- function(
   result$pattern <- seq_len(nrow(result))
   rownames(result) <- NULL
 
+  # --- Updated limits subsetting ---
   if (!is.null(limits)) {
-    result <- result[seq_len(min(limits, nrow(result))), , drop = FALSE]
+    if (length(limits) == 1) {
+      m <- 1
+      n <- limits
+    } else {
+      # length 2
+      m <- limits[1]
+      n <- limits[2]
+    }
+    # Additional checks (m and n already validated)
+    total_patterns <- nrow(result)
+    if (n > total_patterns) {
+      stop(
+        "n (",
+        n,
+        ") exceeds the total number of patterns (",
+        total_patterns,
+        ")."
+      )
+    }
+    result <- result[m:n, , drop = FALSE]
   }
 
   # Reorder patterns_entities to match sorted result
