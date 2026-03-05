@@ -13,25 +13,38 @@ describe_dimensions(data, index = NULL)
 Not required if data has panel attributes.}
 }
 \value{
-A data.frame with panel dimension counts, class \code{"panel_description"}.
+A data.frame with panel dimension counts.
 }
 \description{
 This function provides basic dimension counts for panel data:
 number of rows, unique entities, unique time periods, and substantive variables.
 }
 \details{
+The returned data.frame contains columns:
+\describe{
+\item{\code{dimension}}{The name of the dimension: "entities", "periods", "rows", "variables".}
+\item{\code{count}}{The corresponding count (integer).}
+}
+
 The counts are defined as follows:
 \itemize{
-\item{\bold{rows}}{ Total number of rows in the data frame.}
 \item{\bold{entities}}{ Number of distinct values in the entity variable.}
 \item{\bold{periods}}{ Number of distinct values in the time variable.}
+\item{\bold{rows}}{ Total number of rows in the data frame.}
 \item{\bold{variables}}{ Number of substantive variables (all columns except entity and time).}
 }
 
+The object has class \code{"panel_description"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List with the actual vectors of entities, periods, and substantive variables.}
+}
+}
+\note{
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
 Messages indicate how many rows were excluded.
 
-Duplicate entity-time combinations are checked; if found, a message is printed
+Duplicate entity‑time combinations are checked; if found, a message is printed
 (unless identifiers came from panel attributes).
 }
 \examples{
@@ -50,5 +63,6 @@ attr(dims, "details")
 
 }
 \seealso{
-\code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{describe_patterns}}, \code{\link{make_panel}}
+\code{\link[=describe_balance]{describe_balance()}} for balance statistics.
+\code{\link[=make_panel]{make_panel()}} for creating a panel_data object.
 }

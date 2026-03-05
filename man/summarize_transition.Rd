@@ -20,7 +20,7 @@ Not required if data has panel attributes.}
 Default = 3.}
 }
 \value{
-A data.frame containing transition summaries, class \code{"panel_summary"}.
+A data.frame containing transition summaries.
 }
 \description{
 Calculates transition counts and shares between states of a categorical (factor) variable
@@ -28,24 +28,29 @@ across consecutive time periods within entities for panel data.
 }
 \details{
 The structure depends on \code{format}:
+
+When \code{format = "wide"}, a transition matrix as a data.frame:
 \describe{
-\item{\code{format = "wide"}}{A transition matrix as a data.frame:
-\itemize{
-\item \code{from_to}: The originating state (row label).
-\item Columns for each destination state, containing the share of transitions from the
-row state to the column state (rounded to \code{digits}).
-}
-}
-\item{\code{format = "long"}}{A data.frame with columns:
-\itemize{
-\item \code{from}: Originating state.
-\item \code{to}: Destination state.
-\item \code{count}: Number of observed transitions.
-\item \code{share}: Proportion of transitions from \code{from} that go to \code{to} (rounded).
-}
-}
+\item{\code{from_to}}{The originating state (row label).}
+\item{Columns for each destination state, containing the share of transitions from the
+row state to the column state (rounded to \code{digits}).}
 }
 
+When \code{format = "long"}, a data.frame with columns:
+\describe{
+\item{\code{from}}{Originating state.}
+\item{\code{to}}{Destination state.}
+\item{\code{count}}{Number of observed transitions.}
+\item{\code{share}}{Proportion of transitions from \code{from} that go to \code{to} (rounded).}
+}
+
+The object has class \code{"panel_summary"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List with the vector of all category levels.}
+}
+}
+\note{
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
 Messages indicate how many rows were excluded.
 
@@ -72,5 +77,6 @@ summarize_transition(panel, select = "industry")
 
 }
 \seealso{
-\code{\link{describe_patterns}}, \code{\link{summarize_missing}}
+\code{\link[=describe_patterns]{describe_patterns()}} for entity presence patterns.
+\code{\link[=summarize_missing]{summarize_missing()}} for missing value summaries.
 }

@@ -11,27 +11,43 @@
 #' @param colors A character vector of two colors for present and missing observations.
 #'        Default = c("#1E4A3B", "white").
 #'
-#' @return Invisibly returns a list with summary statistics and metadata. Creates a heatmap.
+#' @return Invisibly returns a list with summary statistics and metadata.
 #'
 #' @details
+#' The function creates a heatmap where rows are entities and columns are time periods.
+#' Present cells are coloured with the first color, missing cells with the second.
+#' Rows are ordered by pattern frequency: the most frequent pattern is at the **top**.
+#' Within each pattern block, entities appear in their original order.
+#'
+#' **Effect of `delta`:**
+#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
+#' The function checks for regular spacing and adds missing periods (with all zeros) to the plot.
+#' A message lists missing periods unless the interval was inherited from panel attributes.
+#' The heatmap will therefore show columns for the full regular time sequence,
+#' with missing periods appearing entirely white (or the color for missing).
+#'
+#' The returned list contains:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List with the sorted presence matrix, pattern‑entity mapping, pattern count,
+#'         and the pattern matrix (unique patterns as rows).}
+#' }
+#'
+#' @note
 #' An entity/time combination is considered **present** if the corresponding row contains at least
-#' one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
+#' one non‑NA value in any substantive variable (all columns except the entity and time identifiers).
 #'
 #' Before plotting, rows with missing values (`NA`) in the entity or time variables are removed.
 #' Messages indicate how many rows were excluded.
 #'
-#' If `delta` is supplied, the time variable is coerced to numeric (if possible). The function checks
-#' for regular spacing and adds missing periods (with all zeros) to the plot. A message lists missing periods
-#' unless the interval was inherited from panel attributes.
-#'
 #' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless identifiers came from panel attributes).
 #'
-#' The heatmap shows present (color1) and missing (color2). Rows are ordered by pattern frequency:
-#' the most frequent pattern is at the **top**. Within each pattern block, entities appear in their
-#' original order. If `limits` is given, only the most frequent patterns are retained.
+#' If `limits` is given, only the most frequent patterns are retained.
 #'
-#' @seealso \code{\link{describe_patterns}}, \code{\link{plot_periods}}
+#' @seealso
+#' [describe_patterns()] for tabular description of presence patterns.
+#' [plot_periods()] for histogram of time coverage.
 #'
 #' @examples
 #' data(production)

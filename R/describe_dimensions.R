@@ -7,24 +7,39 @@
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #'        Not required if data has panel attributes.
 #'
-#' @return A data.frame with panel dimension counts, class `"panel_description"`.
+#' @return A data.frame with panel dimension counts.
 #'
 #' @details
+#' The returned data.frame contains columns:
+#' \describe{
+#'   \item{\code{dimension}}{The name of the dimension: "entities", "periods", "rows", "variables".}
+#'   \item{\code{count}}{The corresponding count (integer).}
+#' }
+#'
 #' The counts are defined as follows:
 #' \itemize{
-#'   \item{\bold{rows}}{ Total number of rows in the data frame.}
 #'   \item{\bold{entities}}{ Number of distinct values in the entity variable.}
 #'   \item{\bold{periods}}{ Number of distinct values in the time variable.}
+#'   \item{\bold{rows}}{ Total number of rows in the data frame.}
 #'   \item{\bold{variables}}{ Number of substantive variables (all columns except entity and time).}
 #' }
 #'
+#' The object has class `"panel_description"` and two additional attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List with the actual vectors of entities, periods, and substantive variables.}
+#' }
+#'
+#' @note
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
 #' Messages indicate how many rows were excluded.
 #'
-#' Duplicate entity-time combinations are checked; if found, a message is printed
+#' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless identifiers came from panel attributes).
 #'
-#' @seealso \code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{describe_patterns}}, \code{\link{make_panel}}
+#' @seealso
+#' [describe_balance()] for balance statistics.
+#' [make_panel()] for creating a panel_data object.
 #'
 #' @examples
 #' data(production)
@@ -157,10 +172,11 @@ describe_dimensions <- function(data, index = NULL) {
   periods_vals <- sort_unique_preserve(time_orig)
   substantive_vars <- setdiff(names(data), c(entity_var, time_var))
 
+  # Create counts in desired order: entities, periods, rows, variables
   counts <- c(
-    rows = nrow(data),
     entities = length(entities_vals),
     periods = length(periods_vals),
+    rows = nrow(data),
     variables = length(substantive_vars)
   )
 

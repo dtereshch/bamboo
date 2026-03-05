@@ -13,12 +13,11 @@ make_panel(data, index, delta = NULL, balance = NULL)
 
 \item{delta}{An optional positive integer giving the expected interval between time periods.}
 
-\item{balance}{One of \code{NULL} (default), \code{"entities"}, \code{"periods"}, or \code{"all"}. If not \code{NULL},
+\item{balance}{One of \code{NULL} (default), \code{"entities"}, \code{"periods"}, or \code{"rows"}. If not \code{NULL},
 the panel is balanced according to the chosen method (see Details).}
 }
 \value{
 The input data.frame with additional attributes, after possibly filtering or expanding rows.
-Class \code{"panel_data"} is added.
 }
 \description{
 This function adds panel structure attributes to a data.frame, storing entity and time variable names,
@@ -41,22 +40,24 @@ the full sequence and missing periods.}
 }}
 }
 
-First, rows with missing values in the entity or time variables are removed and messages are printed.
-Then duplicate entity‑time combinations are checked; if \code{balance} is requested, duplicates are
-automatically removed (first occurrence kept) and a message is issued.
-
-When \code{delta} is specified, the time variable is coerced to numeric (if possible) and checked for
-regular spacing. If gaps are detected, a message lists the missing periods and the full sequence
-is stored.
+\strong{Effect of \code{delta}:}
+If \code{delta} is supplied, the time variable is coerced to numeric (if possible).
+The function checks that all observed time points are separated by multiples of \code{delta}.
+If gaps are detected, a message lists the missing periods and the full sequence is stored in \code{details$periods_restored}.
 
 \strong{Balancing the panel} (presence definition as in \code{describe_patterns}):
 \describe{
 \item{\code{balance = "entities"}}{Keep only entities present in \strong{all} time periods.}
 \item{\code{balance = "periods"}}{Keep only time periods where \strong{all} entities are present.}
-\item{\code{balance = "all"}}{Create a row for every entity‑time combination. If \code{delta} is supplied,
+\item{\code{balance = "rows"}}{Create a row for every entity‑time combination. If \code{delta} is supplied,
 the full time sequence (including missing periods) is used. Missing combinations get \code{NA}
 in all other columns.}
 }
+}
+\note{
+First, rows with missing values in the entity or time variables are removed and messages are printed.
+Then duplicate entity‑time combinations are checked; if \code{balance} is requested, duplicates are
+automatically removed (first occurrence kept) and a message is issued.
 }
 \examples{
 data(production)
@@ -74,9 +75,12 @@ make_panel(production, index = c("firm", "year"), delta = 1)
 # Balancing options
 make_panel(production, index = c("firm", "year"), balance = "entities")
 make_panel(production, index = c("firm", "year"), balance = "periods")
-make_panel(production, index = c("firm", "year"), balance = "all", delta = 1)
+make_panel(production, index = c("firm", "year"), balance = "rows", delta = 1)
 
 }
 \seealso{
-\code{\link{describe_dimensions}}, \code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{describe_patterns}}
+\code{\link[=describe_dimensions]{describe_dimensions()}} for basic dimension counts.
+\code{\link[=describe_balance]{describe_balance()}} for balance statistics.
+\code{\link[=describe_periods]{describe_periods()}} for period‑wise entity counts.
+\code{\link[=describe_patterns]{describe_patterns()}} for entity presence patterns.
 }

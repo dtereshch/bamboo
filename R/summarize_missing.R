@@ -13,19 +13,34 @@
 #' @param digits An integer indicating the number of decimal places to round the share column.
 #'        Default = 3.
 #'
-#' @return A data.frame with missing value summary statistics, class `"panel_summary"`.
+#' @return A data.frame with missing value summary statistics.
 #'
 #' @details
-#' When `detail = FALSE`, returns columns: variable, na_count, na_share, entities, periods.
-#' When `detail = TRUE`, additional columns for each time period contain NA counts.
+#' When `detail = FALSE`, returns columns:
+#' \describe{
+#'   \item{\code{variable}}{Variable name.}
+#'   \item{\code{na_count}}{Total number of missing values in that variable.}
+#'   \item{\code{na_share}}{Proportion of missing values (rounded to `digits`).}
+#'   \item{\code{entities}}{Number of distinct entities that have at least one missing value in that variable.}
+#'   \item{\code{periods}}{Number of distinct time periods that have at least one missing value in that variable.}
+#' }
 #'
+#' When `detail = TRUE`, additional columns for each time period contain the number of missing values
+#' in that variable for that period.
+#'
+#' The object has class `"panel_summary"` and two additional attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List with counts of variables with/without NAs, and their names.}
+#' }
+#'
+#' @note
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
 #' Messages indicate how many rows were excluded.
 #'
 #' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless identifiers came from panel attributes).
 #'
-#' @note
 #' The interpretation of missing counts may differ depending on whether the panel is balanced or unbalanced.
 #' In a balanced panel, each time period contains the same number of entities, so the raw NA counts per period
 #' (when `detail = TRUE`) are directly comparable across periods. In an unbalanced panel, the number of entities
@@ -33,7 +48,9 @@
 #' in each period. The function does not standardize the counts by period size; users should account for the
 #' panel structure when interpreting the results.
 #'
-#' @seealso \code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{summarize_transition}}
+#' @seealso
+#' [describe_incomplete()] for entity‑wise missing description.
+#' [summarize_transition()] for transition summaries.
 #'
 #' @examples
 #' data(production)

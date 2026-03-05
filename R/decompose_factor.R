@@ -14,10 +14,10 @@
 #' @param digits An integer indicating the number of decimal places to round shares.
 #'        Default = 3.
 #'
-#' @return A data.frame with categorical panel data decomposition statistics, class `"panel_summary"`.
+#' @return A data.frame with categorical panel data decomposition statistics.
 #'
 #' @details
-#' The output format is controlled by the `format` parameter:
+#' The output format is controlled by the `format` parameter.
 #'
 #' When `format = "wide"` (default), returns a data.frame with columns:
 #' \describe{
@@ -39,6 +39,13 @@
 #'   \item{\code{share}}{Share proportion (0 to 1)}
 #' }
 #'
+#' The object has class `"panel_summary"` and two additional attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List containing additional information: `count_entities`.}
+#' }
+#'
+#' @note
 #' Before any analysis, rows with missing values (`NA`) in the entity or (if provided)
 #' time variables are removed. Messages indicate how many rows were excluded.
 #'
@@ -48,17 +55,12 @@
 #' A message is printed only when the identifiers were explicitly provided (i.e., not taken
 #' from panel attributes).
 #'
-#' The returned data.frame has class `"panel_summary"` and the following attributes:
-#' \describe{
-#'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `count_entities`.}
-#' }
-#'
 #' @references
 #' For Stata users: This corresponds to the `xttab` command.
 #'
 #' @seealso
-#' [decompose_numeric()], [summarize_transition()]
+#' [decompose_numeric()] for decomposition of numeric variables into between and within components.
+#' [summarize_transition()] for transition summaries between states of a factor variable.
 #'
 #' @examples
 #' data(production)

@@ -8,11 +8,10 @@
 #' @param data A data.frame containing panel data in a long format.
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #' @param delta An optional positive integer giving the expected interval between time periods.
-#' @param balance One of `NULL` (default), `"entities"`, `"periods"`, or `"all"`. If not `NULL`,
+#' @param balance One of `NULL` (default), `"entities"`, `"periods"`, or `"rows"`. If not `NULL`,
 #'        the panel is balanced according to the chosen method (see Details).
 #'
 #' @return The input data.frame with additional attributes, after possibly filtering or expanding rows.
-#'         Class `"panel_data"` is added.
 #'
 #' @details
 #' This function adds attributes to a data.frame to mark it as panel data.
@@ -29,24 +28,30 @@
 #'         }}
 #' }
 #'
-#' First, rows with missing values in the entity or time variables are removed and messages are printed.
-#' Then duplicate entity‑time combinations are checked; if `balance` is requested, duplicates are
-#' automatically removed (first occurrence kept) and a message is issued.
-#'
-#' When `delta` is specified, the time variable is coerced to numeric (if possible) and checked for
-#' regular spacing. If gaps are detected, a message lists the missing periods and the full sequence
-#' is stored.
+#' **Effect of `delta`:**
+#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
+#' The function checks that all observed time points are separated by multiples of `delta`.
+#' If gaps are detected, a message lists the missing periods and the full sequence is stored in `details$periods_restored`.
 #'
 #' **Balancing the panel** (presence definition as in `describe_patterns`):
 #' \describe{
 #'   \item{`balance = "entities"`}{Keep only entities present in **all** time periods.}
 #'   \item{`balance = "periods"`}{Keep only time periods where **all** entities are present.}
-#'   \item{`balance = "all"`}{Create a row for every entity‑time combination. If `delta` is supplied,
+#'   \item{`balance = "rows"`}{Create a row for every entity‑time combination. If `delta` is supplied,
 #'         the full time sequence (including missing periods) is used. Missing combinations get `NA`
 #'         in all other columns.}
 #' }
 #'
-#' @seealso \code{\link{describe_dimensions}}, \code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{describe_patterns}}
+#' @note
+#' First, rows with missing values in the entity or time variables are removed and messages are printed.
+#' Then duplicate entity‑time combinations are checked; if `balance` is requested, duplicates are
+#' automatically removed (first occurrence kept) and a message is issued.
+#'
+#' @seealso
+#' [describe_dimensions()] for basic dimension counts.
+#' [describe_balance()] for balance statistics.
+#' [describe_periods()] for period‑wise entity counts.
+#' [describe_patterns()] for entity presence patterns.
 #'
 #' @examples
 #' data(production)
@@ -64,7 +69,7 @@
 #' # Balancing options
 #' make_panel(production, index = c("firm", "year"), balance = "entities")
 #' make_panel(production, index = c("firm", "year"), balance = "periods")
-#' make_panel(production, index = c("firm", "year"), balance = "all", delta = 1)
+#' make_panel(production, index = c("firm", "year"), balance = "rows", delta = 1)
 #'
 #' @export
 make_panel <- function(data, index, delta = NULL, balance = NULL) {
@@ -87,7 +92,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
     stop("entity and time variables cannot be the same")
   }
 
-  valid_balance <- c("entities", "periods", "all")
+  valid_balance <- c("entities", "periods", "rows")
   if (!is.null(balance) && !balance %in% valid_balance) {
     stop("'balance' must be NULL, 'entities', 'periods', or 'all'")
   }
@@ -219,7 +224,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
         drop = FALSE
       ]
       rownames(data) <- NULL
-    } else if (balance == "all") {
+    } else if (balance == "rows") {
       if (!is.null(delta)) {
         time_vals <- sort(unique(data[[time_var]]))
         full_time <- seq(from = min(time_vals), to = max(time_vals), by = delta)

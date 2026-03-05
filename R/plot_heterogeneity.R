@@ -11,7 +11,6 @@
 #'        Default = c("#1E4A3B", "#D4B87A").
 #'
 #' @return Invisibly returns a list with summary statistics and metadata.
-#'         Creates a plot with individual observations and group means.
 #'
 #' @details
 #' This function creates one or more plots (depending on the number of grouping variables)
@@ -25,8 +24,15 @@
 #'         each containing means, sd, and n per group.}
 #' }
 #'
+#' @note
+#' The function validates that the selected variable is numeric and that grouping variables exist.
+#' If a grouping variable is not a factor, it is coerced to factor for plotting.
+#' No preliminary data cleaning (removal of NAs) is performed – missing values are handled by the
+#' underlying `tapply` calls (they are removed with `na.rm = TRUE` for mean and sd).
+#'
 #' @seealso
-#' [decompose_numeric()], [summarize_numeric()]
+#' [decompose_numeric()] for decomposition of numeric variables.
+#' [summarize_numeric()] for numeric summaries.
 #'
 #' @examples
 #' data(production)

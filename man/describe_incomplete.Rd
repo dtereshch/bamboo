@@ -18,25 +18,21 @@ Not required if data has panel attributes.}
 Default = FALSE.}
 }
 \value{
-A data.frame with incomplete entities description or a character message, class \code{"panel_description"}.
+A data.frame with incomplete entities description, or a character message if none exist.
 }
 \description{
 This function provides a descriptive table of entities with incomplete observations (missing values).
 }
 \details{
-When incomplete entities exist, returns a data.frame with:
+When incomplete entities exist, the returned data.frame has the following structure:
 \describe{
 \item{\code{[entity]}}{The entity identifier (name matches input entity variable)}
 \item{\code{na_count}}{Total number of missing observations for the entity}
 \item{\code{variables}}{Number of variables with at least one missing value for that entity}
 }
 
-When \code{detail = TRUE}, additional columns are included:
-\describe{
-\item{\code{[variable1]}}{Number of NAs in variable1 for the entity}
-\item{\code{[variable2]}}{Number of NAs in variable2 for the entity}
-\item{...}{Additional columns for each substantive variable in the data}
-}
+When \code{detail = TRUE}, additional columns are included for each substantive variable,
+showing the number of NAs in that variable for the entity.
 
 The data.frame is sorted by:
 \enumerate{
@@ -44,25 +40,21 @@ The data.frame is sorted by:
 \item Total number of NAs (descending)
 }
 
-Before analysis, rows with missing values (\code{NA}) in the entity or (if provided)
-time variables are removed. Messages indicate how many rows were excluded.
-
-If no entities have incomplete data, returns the character message:
-"There are no incomplete entities in the data."
-
-If a time variable is supplied (either via \code{index} or from panel metadata),
-the function checks for duplicate entity-time combinations. If duplicates are found,
-a message is printed only when the identifiers were explicitly provided (i.e., not taken
-from panel attributes).
-
-The returned data.frame (if any) has class \code{"panel_description"} and attributes:
+The object has class \code{"panel_description"} and two additional attributes:
 \describe{
 \item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information:
-\code{count_entities_total}, \code{count_entities_incomplete}, \code{entities_incomplete}.}
+\item{\code{details}}{List containing total entity counts and the IDs of incomplete entities.}
 }
 }
 \note{
+Before analysis, rows with missing values (\code{NA}) in the entity or (if provided)
+time variables are removed. Messages indicate how many rows were excluded.
+
+If a time variable is supplied (either via \code{index} or from panel metadata),
+the function checks for duplicate entity‑time combinations. If duplicates are found,
+a message is printed only when the identifiers were explicitly provided (i.e., not taken
+from panel attributes).
+
 The interpretation of incomplete entities may differ depending on whether the panel is balanced or unbalanced.
 In a balanced panel, each entity has the same number of time periods, so the total possible observations per entity are equal.
 In an unbalanced panel, entities may have different numbers of time periods, so the number of missing values should be interpreted relative to the entity's total observations.
@@ -87,5 +79,6 @@ describe_incomplete(production, index = "firm", detail = TRUE)
 
 }
 \seealso{
-\code{\link[=summarize_missing]{summarize_missing()}}, \code{\link[=describe_patterns]{describe_patterns()}}
+\code{\link[=summarize_missing]{summarize_missing()}} for variable‑wise missing value summaries.
+\code{\link[=describe_patterns]{describe_patterns()}} for entity presence patterns over time.
 }

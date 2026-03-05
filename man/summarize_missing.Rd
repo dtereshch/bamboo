@@ -28,23 +28,38 @@ Default = FALSE.}
 Default = 3.}
 }
 \value{
-A data.frame with missing value summary statistics, class \code{"panel_summary"}.
+A data.frame with missing value summary statistics.
 }
 \description{
 This function calculates summary statistics for missing values (NAs) in panel data,
 providing both overall and detailed period-specific missing value counts.
 }
 \details{
-When \code{detail = FALSE}, returns columns: variable, na_count, na_share, entities, periods.
-When \code{detail = TRUE}, additional columns for each time period contain NA counts.
+When \code{detail = FALSE}, returns columns:
+\describe{
+\item{\code{variable}}{Variable name.}
+\item{\code{na_count}}{Total number of missing values in that variable.}
+\item{\code{na_share}}{Proportion of missing values (rounded to \code{digits}).}
+\item{\code{entities}}{Number of distinct entities that have at least one missing value in that variable.}
+\item{\code{periods}}{Number of distinct time periods that have at least one missing value in that variable.}
+}
 
+When \code{detail = TRUE}, additional columns for each time period contain the number of missing values
+in that variable for that period.
+
+The object has class \code{"panel_summary"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List with counts of variables with/without NAs, and their names.}
+}
+}
+\note{
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
 Messages indicate how many rows were excluded.
 
 Duplicate entity‑time combinations are checked; if found, a message is printed
 (unless identifiers came from panel attributes).
-}
-\note{
+
 The interpretation of missing counts may differ depending on whether the panel is balanced or unbalanced.
 In a balanced panel, each time period contains the same number of entities, so the raw NA counts per period
 (when \code{detail = TRUE}) are directly comparable across periods. In an unbalanced panel, the number of entities
@@ -67,5 +82,6 @@ summarize_missing(production, index = c("firm", "year"), detail = TRUE)
 
 }
 \seealso{
-\code{\link{describe_balance}}, \code{\link{describe_periods}}, \code{\link{summarize_transition}}
+\code{\link[=describe_incomplete]{describe_incomplete()}} for entity‑wise missing description.
+\code{\link[=summarize_transition]{summarize_transition()}} for transition summaries.
 }

@@ -33,25 +33,58 @@ If not specified, all patterns are shown.}
 Default = 3.}
 }
 \value{
-A data.frame with presence patterns, class \code{"panel_description"}.
+A data.frame with presence patterns.
 }
 \description{
 This function describes entities presence patterns in panel data over time.
 }
 \details{
 An entity/time combination is considered \strong{present} if the corresponding row contains at least
-one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
+one non‑NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 
+The output format is controlled by \code{format} and \code{detail}.
+
+When \code{format = "wide"} and \code{detail = TRUE} (default):
+\describe{
+\item{\code{pattern}}{Pattern number (ranked by frequency).}
+\item{\code{[time1], [time2], ...}}{Presence (1) / absence (0) for each time period.}
+\item{\code{count}}{Number of entities sharing this pattern.}
+\item{\code{share}}{Proportion of entities with this pattern (rounded to \code{digits}).}
+}
+
+When \code{format = "wide"} and \code{detail = FALSE}, only the \code{pattern} and presence columns are returned.
+
+When \code{format = "long"} and \code{detail = TRUE}:
+\describe{
+\item{\code{pattern}}{Pattern number.}
+\item{\code{[time]}}{Time period identifier (name equals the original time variable).}
+\item{\code{presence}}{Presence (1) / absence (0).}
+\item{\code{count}}{Number of entities with this pattern.}
+\item{\code{share}}{Proportion of entities with this pattern.}
+}
+
+When \code{format = "long"} and \code{detail = FALSE}, only \code{pattern}, time, and \code{presence} columns are returned.
+
+\strong{Effect of \code{delta}:}
+If \code{delta} is supplied, the time variable is coerced to numeric (if possible).
+The function checks that all observed time points are separated by multiples of \code{delta}.
+If gaps are detected, a message lists the missing periods (unless the interval was inherited from panel attributes),
+and columns for those missing periods are added to the presence matrix –
+and therefore to the output data.frame – with all zeros.
+This ensures that the patterns reflect the full regular sequence of time periods.
+
+The object has class \code{"panel_description"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List with the full presence matrix, pattern‑entity mapping, and the pattern matrix.}
+}
+}
+\note{
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
 Messages indicate how many rows were excluded.
 
-If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks that
-all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
-a message lists the missing periods (unless the interval was inherited from panel attributes), and columns
-for those periods are added to the presence matrix (all zeros) before computing patterns.
-
-The function also checks for duplicate entity-time combinations. If duplicates are found,
-a message is printed (unless the identifiers came from panel attributes).
+Duplicate entity‑time combinations are checked; if found, a message is printed
+(unless identifiers came from panel attributes).
 
 Patterns are sorted by frequency (most common first). If \code{limits} is supplied, only the most frequent
 patterns are retained.
@@ -77,5 +110,7 @@ describe_patterns(production, index = c("firm", "year"), detail = FALSE)
 
 }
 \seealso{
-\code{\link{plot_patterns}}, \code{\link{describe_periods}}, \code{\link{describe_balance}}
+\code{\link[=plot_patterns]{plot_patterns()}} for visualisation of presence patterns.
+\code{\link[=describe_periods]{describe_periods()}} for period‑wise entity counts.
+\code{\link[=describe_balance]{describe_balance()}} for balance statistics.
 }

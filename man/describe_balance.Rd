@@ -12,37 +12,60 @@ describe_balance(data, index = NULL, detail = FALSE, digits = 3)
 \item{index}{A character vector of length 2 specifying the names of the entity and time variables.
 Not required if data has panel attributes.}
 
-\item{detail}{A logical flag indicating whether to return additional statistics (p5, p25, p50, p75, p95).
-Default = FALSE.}
+\item{detail}{A logical flag indicating whether to return additional statistics
+(5th, 25th, 50th, 75th, and 95th percentiles). Default = FALSE.}
 
 \item{digits}{An integer specifying the number of decimal places for rounding mean values.
 Default = 3.}
 }
 \value{
 A data.frame with panel data summary statistics for entities and periods.
-Class \code{"panel_description"}.
 }
 \description{
 This function provides summary statistics for panel data structure with focus on balance
 and data completeness.
 }
 \details{
-The statistics for entities describe the distribution of entities observed per time period
-(cross-sectional size per period), while statistics for periods describe the distribution
-of time periods observed per entity (temporal length per entity).
+The statistics for entities describe the distribution of the number of entities
+observed per time period (cross‑sectional size per period). The statistics for
+periods describe the distribution of the number of time periods observed per
+entity (temporal length per entity).
 
+The returned data.frame always contains the following columns:
+\describe{
+\item{\code{dimension}}{Either "entities" or "periods".}
+\item{\code{mean}}{Mean number of entities per period (or periods per entity).}
+\item{\code{std}}{Standard deviation.}
+\item{\code{min}}{Minimum value.}
+\item{\code{max}}{Maximum value.}
+}
+
+When \code{detail = TRUE}, five additional percentile columns are included:
+\describe{
+\item{\code{p5}}{5th percentile.}
+\item{\code{p25}}{25th percentile (first quartile).}
+\item{\code{p50}}{50th percentile (median).}
+\item{\code{p75}}{75th percentile (third quartile).}
+\item{\code{p95}}{95th percentile.}
+}
+All statistics are rounded to the number of decimal places specified by \code{digits}.
+
+The object has class \code{"panel_description"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List containing the full presence matrix.}
+}
+}
+\note{
 An entity/time combination is considered \strong{present} if the corresponding row contains at least
-one non-NA value in any substantive variable (all columns except the entity and time identifiers).
+one non‑NA value in any substantive variable (all columns except the entity and time identifiers).
 
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
 Messages indicate how many rows were excluded.
 
-The function also checks for duplicate entity-time combinations. In a properly structured panel dataset,
+The function also checks for duplicate entity‑time combinations. In a properly structured panel dataset,
 each entity should have at most one observation per time period. A message is printed only when the identifiers
 were explicitly provided (i.e., not taken from panel attributes).
-
-The returned data.frame has columns \code{dimension}, \code{mean}, \code{std}, \code{min}, \code{max}, and if \code{detail = TRUE},
-also \code{p5}, \code{p25}, \code{p50}, \code{p75}, \code{p95}.
 }
 \examples{
 data(production)
@@ -62,5 +85,8 @@ describe_balance(production, index = c("firm", "year"), digits = 4)
 
 }
 \seealso{
-\code{\link{describe_periods}}, \code{\link{describe_patterns}}, \code{\link{plot_periods}}, \code{\link{plot_patterns}}
+\code{\link[=describe_periods]{describe_periods()}} for period‑wise entity counts.
+\code{\link[=describe_patterns]{describe_patterns()}} for entity presence patterns over time.
+\code{\link[=plot_periods]{plot_periods()}} for visualisation of time coverage distribution.
+\code{\link[=plot_patterns]{plot_patterns()}} for visualisation of presence patterns.
 }

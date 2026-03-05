@@ -11,28 +11,33 @@
 #' @param digits An integer indicating the number of decimal places to round transition shares.
 #'        Default = 3.
 #'
-#' @return A data.frame containing transition summaries, class `"panel_summary"`.
+#' @return A data.frame containing transition summaries.
 #'
 #' @details
 #' The structure depends on `format`:
+#'
+#' When `format = "wide"`, a transition matrix as a data.frame:
 #' \describe{
-#'   \item{`format = "wide"`}{A transition matrix as a data.frame:
-#'     \itemize{
-#'       \item `from_to`: The originating state (row label).
-#'       \item Columns for each destination state, containing the share of transitions from the
-#'             row state to the column state (rounded to `digits`).
-#'     }
-#'   }
-#'   \item{`format = "long"`}{A data.frame with columns:
-#'     \itemize{
-#'       \item `from`: Originating state.
-#'       \item `to`: Destination state.
-#'       \item `count`: Number of observed transitions.
-#'       \item `share`: Proportion of transitions from `from` that go to `to` (rounded).
-#'     }
-#'   }
+#'   \item{\code{from_to}}{The originating state (row label).}
+#'   \item{Columns for each destination state, containing the share of transitions from the
+#'         row state to the column state (rounded to `digits`).}
 #' }
 #'
+#' When `format = "long"`, a data.frame with columns:
+#' \describe{
+#'   \item{\code{from}}{Originating state.}
+#'   \item{\code{to}}{Destination state.}
+#'   \item{\code{count}}{Number of observed transitions.}
+#'   \item{\code{share}}{Proportion of transitions from `from` that go to `to` (rounded).}
+#' }
+#'
+#' The object has class `"panel_summary"` and two additional attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List with the vector of all category levels.}
+#' }
+#'
+#' @note
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
 #' Messages indicate how many rows were excluded.
 #'
@@ -43,7 +48,9 @@
 #' Missing values in the variable of interest (`select`) are removed before analysis.
 #' The variable is coerced to a factor if not already one, and must have at least two levels.
 #'
-#' @seealso \code{\link{describe_patterns}}, \code{\link{summarize_missing}}
+#' @seealso
+#' [describe_patterns()] for entity presence patterns.
+#' [summarize_missing()] for missing value summaries.
 #'
 #' @examples
 #' data(production)

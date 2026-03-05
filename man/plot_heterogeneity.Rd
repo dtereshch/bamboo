@@ -25,7 +25,6 @@ Default = c("#1E4A3B", "#D4B87A").}
 }
 \value{
 Invisibly returns a list with summary statistics and metadata.
-Creates a plot with individual observations and group means.
 }
 \description{
 This function creates visualizations of heterogeneity among groups.
@@ -41,6 +40,12 @@ The returned list contains the following components:
 \item{\code{details}}{List containing group-level statistics for each grouping variable,
 each containing means, sd, and n per group.}
 }
+}
+\note{
+The function validates that the selected variable is numeric and that grouping variables exist.
+If a grouping variable is not a factor, it is coerced to factor for plotting.
+No preliminary data cleaning (removal of NAs) is performed – missing values are handled by the
+underlying \code{tapply} calls (they are removed with \code{na.rm = TRUE} for mean and sd).
 }
 \examples{
 data(production)
@@ -64,5 +69,6 @@ plot_heterogeneity(production, select = "sales", group = "year",
 
 }
 \seealso{
-\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_numeric]{summarize_numeric()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}} for decomposition of numeric variables.
+\code{\link[=summarize_numeric]{summarize_numeric()}} for numeric summaries.
 }

@@ -9,22 +9,31 @@
 #' @param colors A character vector of length 2 specifying the fill color and line color for the histogram.
 #'        First color is for fill, second color is for the border line. Default = c("#1E4A3B", "white").
 #'
-#' @return Invisibly returns a list with summary statistics and metadata. Creates a histogram.
+#' @return Invisibly returns a list with summary statistics and metadata.
 #'
 #' @details
+#' The function creates a histogram of the number of time periods covered by each entity.
+#' The x‑axis shows coverage (periods per entity), the y‑axis shows the count of entities.
+#'
+#' The returned list contains:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List with the coverage vector per entity and the histogram data used for plotting.}
+#' }
+#'
+#' @note
 #' An entity/time combination is considered **present** if the corresponding row contains at least
-#' one non-NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
+#' one non‑NA value in any substantive variable (all columns except the entity and time identifiers).
 #'
 #' Before plotting, rows with missing values (`NA`) in the entity or time variables are removed.
 #' Messages indicate how many rows were excluded.
 #'
-#' The function also checks for duplicate entity-time combinations. If found, a message is printed
+#' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless the identifiers came from panel attributes).
 #'
-#' The histogram shows the number of time periods covered by each entity (x-axis) and the frequency of
-#' entities with that coverage (y-axis).
-#'
-#' @seealso \code{\link{describe_periods}}, \code{\link{plot_patterns}}
+#' @seealso
+#' [describe_periods()] for period‑wise entity counts.
+#' [plot_patterns()] for heatmap of presence patterns.
 #'
 #' @examples
 #' data(production)

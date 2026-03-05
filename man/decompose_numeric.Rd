@@ -34,7 +34,7 @@ Default = "long".}
 Default = 3.}
 }
 \value{
-A data.frame with panel data decomposition statistics, class \code{"panel_summary"}.
+A data.frame with panel data decomposition statistics.
 }
 \description{
 This function decomposes variance of numeric variables into between and within components
@@ -89,6 +89,13 @@ When \code{format = "wide"} and \code{detail = FALSE}, returns a data.frame with
 \item{\code{std_within}}{Within-entity standard deviation}
 }
 
+The object has class \code{"panel_summary"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List containing additional information: \code{count_entities}.}
+}
+}
+\note{
 Before any analysis, rows with missing values (\code{NA}) in the entity or (if provided)
 time variables are removed. Messages indicate how many rows were excluded.
 
@@ -96,12 +103,6 @@ If a time variable is supplied (either via \code{index} or from panel metadata),
 the function checks for duplicate entity-time combinations. If duplicates are found,
 a message is printed only when the identifiers were explicitly provided (i.e., not taken
 from panel attributes).
-
-The returned data.frame has class \code{"panel_summary"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_entities}.}
-}
 }
 \examples{
 data(production)
@@ -128,5 +129,6 @@ attr(res, "metadata")
 For Stata users: This corresponds to the \code{xtsum} command.
 }
 \seealso{
-\code{\link[=decompose_factor]{decompose_factor()}}, \code{\link[=summarize_transition]{summarize_transition()}}
+\code{\link[=decompose_factor]{decompose_factor()}} for decomposition of factor variables.
+\code{\link[=summarize_transition]{summarize_transition()}} for transition summaries.
 }

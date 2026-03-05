@@ -18,7 +18,7 @@ Not required if data has panel attributes.}
 Default = 3.}
 }
 \value{
-A data.frame with entities presence summary by time period, class \code{"panel_description"}.
+A data.frame with entities presence summary by time period.
 }
 \description{
 This function calculates, for each time period, the number of entities that have at least one
@@ -27,19 +27,29 @@ non‑missing value in any substantive variable, and the corresponding share of 
 \details{
 The returned data.frame contains the following columns:
 \describe{
-\item{\code{[time]}}{Time period identifier (name matches the input \code{time} variable)}
+\item{\code{[time]}}{Time period identifier (name matches the input \code{time} variable).}
 \item{\code{count}}{Number of distinct entities observed in that period,
-i.e., entities with at least one row containing a non‑NA value in substantive variables}
+i.e., entities with at least one row containing a non‑NA value in substantive variables.}
 \item{\code{share}}{Proportion of entities observed in that period (0 to 1), rounded to \code{digits}.}
 }
 
+\strong{Effect of \code{delta}:}
+If \code{delta} is supplied, the time variable is coerced to numeric (if possible).
+The function checks that all observed time points are separated by multiples of \code{delta}.
+If gaps are detected, a message lists the missing periods
+(unless the interval was inherited from panel attributes).
+For each missing period, a row is added to the output with \code{count = 0} and \code{share = 0},
+ensuring that the output covers the full regular time sequence.
+
+The object has class \code{"panel_description"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List with a named list \code{entities} giving, for each period, the vector of entities observed.}
+}
+}
+\note{
 Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
 Messages indicate how many rows were excluded.
-
-If \code{delta} is supplied, the time variable is coerced to numeric (if possible). The function checks
-that all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
-a message lists the missing periods (unless the interval was inherited from panel attributes), and rows
-for those periods are added to the output with \code{count = 0} and \code{share = 0}.
 
 Duplicate entity‑time combinations are checked; if found, a message is printed
 (unless identifiers came from panel attributes).
@@ -62,5 +72,7 @@ describe_periods(production, index = c("firm", "year"), digits = 4)
 
 }
 \seealso{
-\code{\link{plot_periods}}, \code{\link{describe_balance}}, \code{\link{describe_patterns}}
+\code{\link[=plot_periods]{plot_periods()}} for visualisation of time coverage distribution.
+\code{\link[=describe_balance]{describe_balance()}} for balance statistics.
+\code{\link[=describe_patterns]{describe_patterns()}} for entity presence patterns.
 }

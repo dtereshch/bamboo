@@ -28,35 +28,43 @@ Default = FALSE.}
 Default = 3.}
 }
 \value{
-A data.frame with descriptive statistics summary, class \code{"panel_summary"}.
+A data.frame with descriptive statistics summary.
 }
 \description{
 This function calculates summary statistics for numeric variables,
 either overall or grouped by a single grouping variable.
 }
 \details{
-The returned data.frame contains the following columns:
+The returned data.frame contains columns depending on the arguments:
+
+When no grouping variable is specified (overall):
 \describe{
-\item{\code{variable}}{The name of the numeric variable (always present)}
-\item{\code{group}}{The grouping variable (present only when \code{group} is specified)}
-\item{\code{count}}{Number of non-NA observations}
-\item{\code{mean}}{Arithmetic mean}
-\item{\code{std}}{Standard deviation}
-\item{\code{min}}{Minimum value}
-\item{\code{max}}{Maximum value}
+\item{\code{variable}}{The name of the numeric variable.}
+\item{\code{count}}{Number of non‑NA observations.}
+\item{\code{mean}}{Arithmetic mean.}
+\item{\code{std}}{Standard deviation.}
+\item{\code{min}}{Minimum value.}
+\item{\code{max}}{Maximum value.}
 }
 
 When \code{detail = TRUE}, additional columns are included:
 \describe{
-\item{\code{p25}}{25th percentile (first quartile)}
-\item{\code{p50}}{50th percentile (median)}
-\item{\code{p75}}{75th percentile (third quartile)}
+\item{\code{p25}}{25th percentile (first quartile).}
+\item{\code{p50}}{50th percentile (median).}
+\item{\code{p75}}{75th percentile (third quartile).}
 }
 
-When no grouping variable is specified, statistics are calculated overall.
-When a grouping variable is specified, statistics are calculated for each group.
-If a grouping variable is provided, it cannot be included in \code{select}; otherwise an error is raised.
+When a grouping variable is specified, statistics are calculated for each group,
+and the data.frame includes a column named after the grouping variable,
+followed by the same statistics columns as above.
 
+The object has class \code{"panel_summary"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List with counts of variables, groups, and total observations.}
+}
+}
+\note{
 If the input data is a \code{panel_data} object (e.g., from the \strong{panelr} package),
 the function automatically retrieves the entity and time identifiers from its
 metadata. These variables are then excluded from the default selection of
@@ -65,8 +73,7 @@ not represent substantive measurements. However, if you explicitly include
 them in the \code{select} argument, they will be analyzed. The \code{group} argument
 for grouping summaries is independent and can be set to any variable,
 including the panel's time or entity variable.
-}
-\note{
+
 This function does \strong{not} use panel attributes for grouping; it is designed for general use.
 }
 \examples{
@@ -90,5 +97,8 @@ summarize_numeric(production, digits = 2)
 
 }
 \seealso{
-\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=decompose_factor]{decompose_factor()}}, \code{\link[=summarize_transition]{summarize_transition()}}, \code{\link[=summarize_missing]{summarize_missing()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}} for variance decomposition.
+\code{\link[=decompose_factor]{decompose_factor()}} for factor variable decomposition.
+\code{\link[=summarize_transition]{summarize_transition()}} for transition summaries.
+\code{\link[=summarize_missing]{summarize_missing()}} for missing value summaries.
 }

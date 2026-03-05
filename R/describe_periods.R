@@ -10,29 +10,42 @@
 #' @param digits An integer specifying the number of decimal places for rounding the share column.
 #'        Default = 3.
 #'
-#' @return A data.frame with entities presence summary by time period, class `"panel_description"`.
+#' @return A data.frame with entities presence summary by time period.
 #'
 #' @details
 #' The returned data.frame contains the following columns:
 #' \describe{
-#'   \item{\code{[time]}}{Time period identifier (name matches the input `time` variable)}
+#'   \item{\code{[time]}}{Time period identifier (name matches the input `time` variable).}
 #'   \item{\code{count}}{Number of distinct entities observed in that period,
-#'         i.e., entities with at least one row containing a non‑NA value in substantive variables}
+#'         i.e., entities with at least one row containing a non‑NA value in substantive variables.}
 #'   \item{\code{share}}{Proportion of entities observed in that period (0 to 1), rounded to `digits`.}
 #' }
 #'
+#' **Effect of `delta`:**
+#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
+#' The function checks that all observed time points are separated by multiples of `delta`.
+#' If gaps are detected, a message lists the missing periods
+#' (unless the interval was inherited from panel attributes).
+#' For each missing period, a row is added to the output with `count = 0` and `share = 0`,
+#' ensuring that the output covers the full regular time sequence.
+#'
+#' The object has class `"panel_description"` and two additional attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List with a named list `entities` giving, for each period, the vector of entities observed.}
+#' }
+#'
+#' @note
 #' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
 #' Messages indicate how many rows were excluded.
-#'
-#' If `delta` is supplied, the time variable is coerced to numeric (if possible). The function checks
-#' that all observed time points are compatible with a regular spacing of that interval. If gaps are detected,
-#' a message lists the missing periods (unless the interval was inherited from panel attributes), and rows
-#' for those periods are added to the output with `count = 0` and `share = 0`.
 #'
 #' Duplicate entity‑time combinations are checked; if found, a message is printed
 #' (unless identifiers came from panel attributes).
 #'
-#' @seealso \code{\link{plot_periods}}, \code{\link{describe_balance}}, \code{\link{describe_patterns}}
+#' @seealso
+#' [plot_periods()] for visualisation of time coverage distribution.
+#' [describe_balance()] for balance statistics.
+#' [describe_patterns()] for entity presence patterns.
 #'
 #' @examples
 #' data(production)

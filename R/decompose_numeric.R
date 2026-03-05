@@ -17,7 +17,7 @@
 #' @param digits An integer indicating the number of decimal places to round statistics.
 #'        Default = 3.
 #'
-#' @return A data.frame with panel data decomposition statistics, class `"panel_summary"`.
+#' @return A data.frame with panel data decomposition statistics.
 #'
 #' @details
 #' The output format is controlled by two parameters: `format` and `detail`.
@@ -68,6 +68,13 @@
 #'   \item{\code{std_within}}{Within-entity standard deviation}
 #' }
 #'
+#' The object has class `"panel_summary"` and two additional attributes:
+#' \describe{
+#'   \item{`metadata`}{List containing the function name and the arguments used.}
+#'   \item{`details`}{List containing additional information: `count_entities`.}
+#' }
+#'
+#' @note
 #' Before any analysis, rows with missing values (`NA`) in the entity or (if provided)
 #' time variables are removed. Messages indicate how many rows were excluded.
 #'
@@ -76,17 +83,12 @@
 #' a message is printed only when the identifiers were explicitly provided (i.e., not taken
 #' from panel attributes).
 #'
-#' The returned data.frame has class `"panel_summary"` and the following attributes:
-#' \describe{
-#'   \item{`metadata`}{List containing the function name and the arguments used.}
-#'   \item{`details`}{List containing additional information: `count_entities`.}
-#' }
-#'
 #' @references
 #' For Stata users: This corresponds to the `xtsum` command.
 #'
 #' @seealso
-#' [decompose_factor()], [summarize_transition()]
+#' [decompose_factor()] for decomposition of factor variables.
+#' [summarize_transition()] for transition summaries.
 #'
 #' @examples
 #' data(production)

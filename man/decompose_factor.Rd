@@ -29,14 +29,14 @@ Not required if data has panel attributes.}
 Default = 3.}
 }
 \value{
-A data.frame with categorical panel data decomposition statistics, class \code{"panel_summary"}.
+A data.frame with categorical panel data decomposition statistics.
 }
 \description{
 This function performs one-way tabulations and decomposes counts into
 between and within components for categorical (factor) variables in panel data.
 }
 \details{
-The output format is controlled by the \code{format} parameter:
+The output format is controlled by the \code{format} parameter.
 
 When \code{format = "wide"} (default), returns a data.frame with columns:
 \describe{
@@ -58,6 +58,13 @@ When \code{format = "long"}, returns a data.frame with columns:
 \item{\code{share}}{Share proportion (0 to 1)}
 }
 
+The object has class \code{"panel_summary"} and two additional attributes:
+\describe{
+\item{\code{metadata}}{List containing the function name and the arguments used.}
+\item{\code{details}}{List containing additional information: \code{count_entities}.}
+}
+}
+\note{
 Before any analysis, rows with missing values (\code{NA}) in the entity or (if provided)
 time variables are removed. Messages indicate how many rows were excluded.
 
@@ -66,12 +73,6 @@ the function checks for duplicate entity-time combinations. In a properly struct
 panel dataset, each entity should have at most one observation per time period.
 A message is printed only when the identifiers were explicitly provided (i.e., not taken
 from panel attributes).
-
-The returned data.frame has class \code{"panel_summary"} and the following attributes:
-\describe{
-\item{\code{metadata}}{List containing the function name and the arguments used.}
-\item{\code{details}}{List containing additional information: \code{count_entities}.}
-}
 }
 \examples{
 data(production)
@@ -98,5 +99,6 @@ attr(res, "metadata")
 For Stata users: This corresponds to the \code{xttab} command.
 }
 \seealso{
-\code{\link[=decompose_numeric]{decompose_numeric()}}, \code{\link[=summarize_transition]{summarize_transition()}}
+\code{\link[=decompose_numeric]{decompose_numeric()}} for decomposition of numeric variables into between and within components.
+\code{\link[=summarize_transition]{summarize_transition()}} for transition summaries between states of a factor variable.
 }
