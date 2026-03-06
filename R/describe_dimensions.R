@@ -30,13 +30,6 @@
 #'   \item{`details`}{List with the actual vectors of entities, periods, and substantive variables.}
 #' }
 #'
-#' @note
-#' Before analysis, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded.
-#'
-#' Duplicate entity‑time combinations are checked; if found, a message is printed
-#' (unless identifiers came from panel attributes).
-#'
 #' @seealso
 #' See also [describe_balance()], [describe_periods()].
 #'

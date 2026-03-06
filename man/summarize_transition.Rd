@@ -50,17 +50,6 @@ The object has class \code{"panel_summary"} and two additional attributes:
 \item{\code{details}}{List with the vector of all category levels.}
 }
 }
-\note{
-Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded.
-
-Duplicate entity‑time combinations are checked. If duplicates exist with differing values of the
-\code{select} variable, an error is raised. If all duplicates have identical values, they are collapsed
-to one row per entity‑time (first occurrence kept) and a message is printed.
-
-Missing values in the variable of interest (\code{select}) are removed before analysis.
-The variable is coerced to a factor if not already one, and must have at least two levels.
-}
 \examples{
 data(production)
 

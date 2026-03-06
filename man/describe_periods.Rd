@@ -47,13 +47,6 @@ The object has class \code{"panel_description"} and two additional attributes:
 \item{\code{details}}{List with a named list \code{entities} giving, for each period, the vector of entities observed.}
 }
 }
-\note{
-Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded.
-
-Duplicate entity‑time combinations are checked; if found, a message is printed
-(unless identifiers came from panel attributes).
-}
 \examples{
 data(production)
 

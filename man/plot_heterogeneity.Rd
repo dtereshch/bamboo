@@ -41,12 +41,6 @@ The returned list contains the following components:
 each containing means, sd, and n per group.}
 }
 }
-\note{
-The function validates that the selected variable is numeric and that grouping variables exist.
-If a grouping variable is not a factor, it is coerced to factor for plotting.
-No preliminary data cleaning (removal of NAs) is performed – missing values are handled by the
-underlying \code{tapply} calls (they are removed with \code{na.rm = TRUE} for mean and sd).
-}
 \examples{
 data(production)
 

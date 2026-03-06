@@ -41,14 +41,6 @@
 #'         in all other columns.}
 #' }
 #'
-#' @note
-#' First, rows with missing values in the entity or time variables are removed and messages are printed.
-#' Then duplicate entity‑time combinations are checked:
-#' \itemize{
-#'   \item If duplicates are found and **no** `balance` is requested, a message lists the duplicates but the data are not altered.
-#'   \item If duplicates are found **and** a `balance` method is supplied, the function stops with an error.
-#' }
-#'
 #' @seealso
 #' See also [describe_dimensions()], [describe_balance()], [describe_periods()].
 #'

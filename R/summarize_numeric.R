@@ -45,18 +45,6 @@
 #'   \item{`details`}{List with counts of variables, groups, and total observations.}
 #' }
 #'
-#' @note
-#' If the input data is a `panel_data` object (e.g., from the **panelr** package),
-#' the function automatically retrieves the entity and time identifiers from its
-#' metadata. These variables are then excluded from the default selection of
-#' numeric variables (i.e., when `select = NULL`) because they typically do
-#' not represent substantive measurements. However, if you explicitly include
-#' them in the `select` argument, they will be analyzed. The `group` argument
-#' for grouping summaries is independent and can be set to any variable,
-#' including the panel's time or entity variable.
-#'
-#' This function does **not** use panel attributes for grouping; it is designed for general use.
-#'
 #' @seealso
 #' See also [decompose_numeric()], [plot_heterogeneity()].
 #'

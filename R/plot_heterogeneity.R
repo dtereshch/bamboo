@@ -24,12 +24,6 @@
 #'         each containing means, sd, and n per group.}
 #' }
 #'
-#' @note
-#' The function validates that the selected variable is numeric and that grouping variables exist.
-#' If a grouping variable is not a factor, it is coerced to factor for plotting.
-#' No preliminary data cleaning (removal of NAs) is performed – missing values are handled by the
-#' underlying `tapply` calls (they are removed with `na.rm = TRUE` for mean and sd).
-#'
 #' @seealso
 #' See also [decompose_numeric()], [summarize_numeric()].
 #'

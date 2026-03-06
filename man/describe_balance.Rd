@@ -57,15 +57,8 @@ The object has class \code{"panel_description"} and two additional attributes:
 }
 }
 \note{
-An entity/time combination is considered \strong{present} if the corresponding row contains at least
+An entity-time combination is considered \strong{present} if the corresponding row contains at least
 one non‑NA value in any substantive variable (all columns except the entity and time identifiers).
-
-Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded.
-
-The function also checks for duplicate entity‑time combinations. In a properly structured panel dataset,
-each entity should have at most one observation per time period. A message is printed only when the identifiers
-were explicitly provided (i.e., not taken from panel attributes).
 }
 \examples{
 data(production)

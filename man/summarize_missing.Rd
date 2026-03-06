@@ -54,12 +54,6 @@ The object has class \code{"panel_summary"} and two additional attributes:
 }
 }
 \note{
-Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded.
-
-Duplicate entity‑time combinations are checked; if found, a message is printed
-(unless identifiers came from panel attributes).
-
 The interpretation of missing counts may differ depending on whether the panel is balanced or unbalanced.
 In a balanced panel, each time period contains the same number of entities, so the raw NA counts per period
 (when \code{detail = TRUE}) are directly comparable across periods. In an unbalanced panel, the number of entities

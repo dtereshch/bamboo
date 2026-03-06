@@ -22,14 +22,8 @@
 #' }
 #'
 #' @note
-#' An entity/time combination is considered **present** if the corresponding row contains at least
+#' An entity-time combination is considered **present** if the corresponding row contains at least
 #' one non‑NA value in any substantive variable (all columns except the entity and time identifiers).
-#'
-#' Before plotting, rows with missing values (`NA`) in the entity or time variables are removed.
-#' Messages indicate how many rows were excluded.
-#'
-#' Duplicate entity‑time combinations are checked; if found, a message is printed
-#' (unless the identifiers came from panel attributes).
 #'
 #' @seealso
 #' See also [describe_periods()], [plot_patterns()].

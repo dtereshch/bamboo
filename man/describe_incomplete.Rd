@@ -47,14 +47,6 @@ The object has class \code{"panel_description"} and two additional attributes:
 }
 }
 \note{
-Before analysis, rows with missing values (\code{NA}) in the entity or (if provided)
-time variables are removed. Messages indicate how many rows were excluded.
-
-If a time variable is supplied (either via \code{index} or from panel metadata),
-the function checks for duplicate entity‑time combinations. If duplicates are found,
-a message is printed only when the identifiers were explicitly provided (i.e., not taken
-from panel attributes).
-
 The interpretation of incomplete entities may differ depending on whether the panel is balanced or unbalanced.
 In a balanced panel, each entity has the same number of time periods, so the total possible observations per entity are equal.
 In an unbalanced panel, entities may have different numbers of time periods, so the number of missing values should be interpreted relative to the entity's total observations.

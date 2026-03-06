@@ -64,16 +64,6 @@ The object has class \code{"panel_summary"} and two additional attributes:
 \item{\code{details}}{List containing additional information: \code{count_entities}.}
 }
 }
-\note{
-Before any analysis, rows with missing values (\code{NA}) in the entity or (if provided)
-time variables are removed. Messages indicate how many rows were excluded.
-
-If a time variable is supplied (either via \code{index} or from panel metadata),
-the function checks for duplicate entity-time combinations. In a properly structured
-panel dataset, each entity should have at most one observation per time period.
-A message is printed only when the identifiers were explicitly provided (i.e., not taken
-from panel attributes).
-}
 \examples{
 data(production)
 

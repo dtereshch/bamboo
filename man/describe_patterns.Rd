@@ -40,9 +40,6 @@ A data.frame with presence patterns.
 This function describes entities presence patterns in panel data over time.
 }
 \details{
-An entity/time combination is considered \strong{present} if the corresponding row contains at least
-one non‑NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
-
 The output format is controlled by \code{format} and \code{detail}.
 
 When \code{format = "wide"} and \code{detail = TRUE} (default):
@@ -81,14 +78,8 @@ The object has class \code{"panel_description"} and two additional attributes:
 }
 }
 \note{
-Before analysis, rows with missing values (\code{NA}) in the entity or time variables are removed.
-Messages indicate how many rows were excluded.
-
-Duplicate entity‑time combinations are checked; if found, a message is printed
-(unless identifiers came from panel attributes).
-
-Patterns are sorted by frequency (most common first). If \code{limits} is supplied, only the requested
-patterns are retained.
+An entity-time combination is considered \strong{present} if the corresponding row contains at least
+one non‑NA value in any substantive variable (i.e., all columns except the entity and time identifiers).
 }
 \examples{
 data(production)

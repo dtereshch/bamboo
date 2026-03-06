@@ -64,18 +64,6 @@ The object has class \code{"panel_summary"} and two additional attributes:
 \item{\code{details}}{List with counts of variables, groups, and total observations.}
 }
 }
-\note{
-If the input data is a \code{panel_data} object (e.g., from the \strong{panelr} package),
-the function automatically retrieves the entity and time identifiers from its
-metadata. These variables are then excluded from the default selection of
-numeric variables (i.e., when \code{select = NULL}) because they typically do
-not represent substantive measurements. However, if you explicitly include
-them in the \code{select} argument, they will be analyzed. The \code{group} argument
-for grouping summaries is independent and can be set to any variable,
-including the panel's time or entity variable.
-
-This function does \strong{not} use panel attributes for grouping; it is designed for general use.
-}
 \examples{
 data(production)
 

@@ -45,16 +45,6 @@
 #'   \item{`details`}{List containing additional information: `count_entities`.}
 #' }
 #'
-#' @note
-#' Before any analysis, rows with missing values (`NA`) in the entity or (if provided)
-#' time variables are removed. Messages indicate how many rows were excluded.
-#'
-#' If a time variable is supplied (either via `index` or from panel metadata),
-#' the function checks for duplicate entity-time combinations. In a properly structured
-#' panel dataset, each entity should have at most one observation per time period.
-#' A message is printed only when the identifiers were explicitly provided (i.e., not taken
-#' from panel attributes).
-#'
 #' @references
 #' For Stata users: This corresponds to the `xttab` command.
 #'
