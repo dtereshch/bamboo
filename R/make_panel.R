@@ -7,7 +7,7 @@
 #' @param data A data.frame containing panel data in a long format.
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #' @param delta An optional integer giving the expected interval between time periods.
-#' @param balance One `"entities"`, `"periods"`, or `"rows"`.
+#' @param balance One of `"entities"`, `"periods"`, or `"rows"`.
 #'        If specified, the panel is balanced according to the chosen method.
 #'
 #' @return The input data.frame with additional attributes, after possibly filtering or expanding rows.
@@ -43,8 +43,11 @@
 #'
 #' @note
 #' First, rows with missing values in the entity or time variables are removed and messages are printed.
-#' Then duplicate entity‑time combinations are checked; if `balance` is requested, duplicates are
-#' automatically removed (first occurrence kept) and a message is issued.
+#' Then duplicate entity‑time combinations are checked:
+#' \itemize{
+#'   \item If duplicates are found and **no** `balance` is requested, a message lists the duplicates but the data are not altered.
+#'   \item If duplicates are found **and** a `balance` method is supplied, the function stops with an error.
+#' }
 #'
 #' @seealso
 #' See also [describe_dimensions()], [describe_balance()], [describe_periods()].
@@ -90,7 +93,7 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
 
   valid_balance <- c("entities", "periods", "rows")
   if (!is.null(balance) && !balance %in% valid_balance) {
-    stop("'balance' must be NULL, 'entities', 'periods', or 'all'")
+    stop("'balance' must be NULL, 'entities', 'periods', or 'rows'")
   }
 
   msg_printed <- FALSE
@@ -137,15 +140,21 @@ make_panel <- function(data, index, delta = NULL, balance = NULL) {
     examples <- utils::head(dup_combinations, 5)
     example_strings <- paste0(examples[[entity_var]], "-", examples[[time_var]])
     example_str <- paste(example_strings, collapse = ", ")
-    message(
-      n_dup,
-      " duplicate entity-time combinations found. Examples: ",
-      example_str
-    )
-    msg_printed <- TRUE
+
     if (!is.null(balance)) {
-      data <- data[!duplicated(data[c(entity_var, time_var)]), , drop = FALSE]
-      message("Duplicates removed (first occurrence kept) for balancing.")
+      stop(
+        "Duplicate entity-time combinations found when balance = '",
+        balance,
+        "'. ",
+        "Please resolve duplicates before balancing. Examples: ",
+        example_str
+      )
+    } else {
+      message(
+        n_dup,
+        " duplicate entity-time combinations found. Examples: ",
+        example_str
+      )
       msg_printed <- TRUE
     }
   }

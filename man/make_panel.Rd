@@ -13,7 +13,7 @@ make_panel(data, index, delta = NULL, balance = NULL)
 
 \item{delta}{An optional integer giving the expected interval between time periods.}
 
-\item{balance}{One \code{"entities"}, \code{"periods"}, or \code{"rows"}.
+\item{balance}{One of \code{"entities"}, \code{"periods"}, or \code{"rows"}.
 If specified, the panel is balanced according to the chosen method.}
 }
 \value{
@@ -55,8 +55,11 @@ in all other columns.}
 }
 \note{
 First, rows with missing values in the entity or time variables are removed and messages are printed.
-Then duplicate entity‑time combinations are checked; if \code{balance} is requested, duplicates are
-automatically removed (first occurrence kept) and a message is issued.
+Then duplicate entity‑time combinations are checked:
+\itemize{
+\item If duplicates are found and \strong{no} \code{balance} is requested, a message lists the duplicates but the data are not altered.
+\item If duplicates are found \strong{and} a \code{balance} method is supplied, the function stops with an error.
+}
 }
 \examples{
 data(production)
