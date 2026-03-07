@@ -1,4 +1,4 @@
-# panelDT: Panel DaTa analysis tools
+# bamboo: Panel DaTa analysis tools
 
 R package for exploring and describing panel data
 
