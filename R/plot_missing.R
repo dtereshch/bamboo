@@ -50,7 +50,7 @@
 #' # Selecting specific variables
 #' plot_missing(production, select = c("labor", "capital"), index = c("firm", "year"))
 #'
-#' # Custom colors (first color = most missing)
+#' # Custom colors
 #' plot_missing(production, index = c("firm", "year"), colors = c("black", "white"))
 #'
 #' # Access the returned list
