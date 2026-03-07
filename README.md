@@ -1,4 +1,4 @@
-# bamboo: Panel DaTa analysis tools
+# bamboo: Panel data analysis tools
 
 R package for exploring and describing panel data
 
