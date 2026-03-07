@@ -37,10 +37,10 @@
 #' @note
 #' The interpretation of missing counts may differ depending on whether the panel is balanced or unbalanced.
 #' In a balanced panel, each time period contains the same number of entities, so the raw NA counts per period
-#' (when `detail = TRUE`) are directly comparable across periods. In an unbalanced panel, the number of entities
-#' varies by period, so the raw NA counts should be interpreted relative to the number of observations available
-#' in each period. The function does not standardize the counts by period size; users should account for the
-#' panel structure when interpreting the results.
+#' are directly comparable across periods. In an unbalanced panel, the number of entities varies by period,
+#' so the raw NA counts should be interpreted relative to the number of observations available in each period.
+#' The function does not standardize the counts by period size; users should account for the panel structure
+#' when interpreting the results.
 #'
 #' @seealso
 #' See also [describe_incomplete()], [describe_patterns()], [describe_periods()].
@@ -54,6 +54,9 @@
 #' # With panel_data object
 #' panel <- make_panel(production, index = c("firm", "year"))
 #' summarize_missing(panel)
+#'
+#' # Selecting specific variables
+#' summarize_missing(production, select = c("labor", "capital"), index = c("firm", "year"))
 #'
 #' # Returning detailed results
 #' summarize_missing(production, index = c("firm", "year"), detail = TRUE)
