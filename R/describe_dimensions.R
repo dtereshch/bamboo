@@ -7,21 +7,15 @@
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #'        Not required if data has panel attributes.
 #'
-#' @return A data.frame with panel dimension counts.
+#' @return A data.frame containing panel dimension counts.
 #'
 #' @details
-#' The returned data.frame contains columns:
-#' \describe{
-#'   \item{\code{dimension}}{The name of the dimension: "entities", "periods", "rows", "variables".}
-#'   \item{\code{count}}{The corresponding count (integer).}
-#' }
-#'
-#' The counts are defined as follows:
+#' The returned data.frame has the following structure:
 #' \itemize{
-#'   \item{\bold{entities}}{ Number of distinct values in the entity variable.}
-#'   \item{\bold{periods}}{ Number of distinct values in the time variable.}
-#'   \item{\bold{rows}}{ Total number of rows in the data frame.}
-#'   \item{\bold{variables}}{ Number of substantive variables (all columns except entity and time).}
+#'   \item{\code{entities}}{ Number of distinct values in the entity variable.}
+#'   \item{\code{periods}}{ Number of distinct values in the time variable.}
+#'   \item{\code{rows}}{ Total number of rows in the data frame.}
+#'   \item{\code{variables}}{ Number of substantive variables (all columns except entity and time).}
 #' }
 #'
 #' The object has class `"panel_description"` and two additional attributes:
@@ -165,19 +159,13 @@ describe_dimensions <- function(data, index = NULL) {
   periods_vals <- sort_unique_preserve(time_orig)
   substantive_vars <- setdiff(names(data), c(entity_var, time_var))
 
-  # Create counts in desired order: entities, periods, rows, variables
-  counts <- c(
+  # Create output data frame (single row with named columns)
+  out <- data.frame(
     entities = length(entities_vals),
     periods = length(periods_vals),
     rows = nrow(data),
-    variables = length(substantive_vars)
-  )
-
-  out <- data.frame(
-    dimension = names(counts),
-    count = as.integer(counts),
-    stringsAsFactors = FALSE,
-    row.names = NULL
+    variables = length(substantive_vars),
+    stringsAsFactors = FALSE
   )
 
   metadata <- list(

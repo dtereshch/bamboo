@@ -13,25 +13,19 @@ describe_dimensions(data, index = NULL)
 Not required if data has panel attributes.}
 }
 \value{
-A data.frame with panel dimension counts.
+A data.frame containing panel dimension counts.
 }
 \description{
 This function provides basic dimension counts for panel data:
 number of rows, unique entities, unique time periods, and substantive variables.
 }
 \details{
-The returned data.frame contains columns:
-\describe{
-\item{\code{dimension}}{The name of the dimension: "entities", "periods", "rows", "variables".}
-\item{\code{count}}{The corresponding count (integer).}
-}
-
-The counts are defined as follows:
+The returned data.frame has the following structure:
 \itemize{
-\item{\bold{entities}}{ Number of distinct values in the entity variable.}
-\item{\bold{periods}}{ Number of distinct values in the time variable.}
-\item{\bold{rows}}{ Total number of rows in the data frame.}
-\item{\bold{variables}}{ Number of substantive variables (all columns except entity and time).}
+\item{\code{entities}}{ Number of distinct values in the entity variable.}
+\item{\code{periods}}{ Number of distinct values in the time variable.}
+\item{\code{rows}}{ Total number of rows in the data frame.}
+\item{\code{variables}}{ Number of substantive variables (all columns except entity and time).}
 }
 
 The object has class \code{"panel_description"} and two additional attributes:
