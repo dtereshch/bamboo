@@ -224,12 +224,12 @@ plot_periods <- function(
   x_min <- max(1, min(time_coverage))
   x_max <- max(time_coverage)
   x_padding <- 0.8
-  y_padding <- max(hist_data$counts) * 0.05
+  upper_limit <- max(hist_data$counts) * 1.02
 
   plot(
     NA,
     xlim = c(x_min - x_padding, x_max + x_padding),
-    ylim = c(0, max(hist_data$counts) * 1.05 + y_padding),
+    ylim = c(0, upper_limit),
     xlab = x_label,
     ylab = "Count",
     main = "",
