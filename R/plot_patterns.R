@@ -365,7 +365,8 @@ plot_patterns <- function(
   # --- Plot ---
   old_par <- par(no.readonly = TRUE)
   on.exit(par(old_par))
-  par(mar = c(3, 1, 2.5, 1) + 0.1)
+
+  par(mar = c(3, 1, 3.5, 1) + 0.1)
 
   presence_rev <- 1 - presence_mat_sorted
   nr <- nrow(presence_rev)
@@ -419,7 +420,7 @@ plot_patterns <- function(
     horiz = TRUE,
     xpd = TRUE,
     bty = "n",
-    inset = c(0, -0.04),
+    inset = c(0, -0.1),
     cex = 0.9
   )
 
