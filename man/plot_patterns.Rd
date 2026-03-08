@@ -40,8 +40,8 @@ Rows are ordered by pattern frequency: the most frequent pattern is at the \stro
 Within each pattern block, entities appear in their original order.
 
 \strong{Effect of \code{delta}:}
-If \code{delta} is supplied, the time variable is coerced to numeric (if possible).
-The function checks for regular spacing and adds missing periods (with all zeros) to the plot.
+If \code{delta} is supplied, the function checks for regular spacing and adds missing periods
+(with all zeros) to the plot.
 A message lists missing periods unless the interval was inherited from panel attributes.
 The heatmap will therefore show columns for the full regular time sequence,
 with missing periods appearing entirely white (or the color for missing).

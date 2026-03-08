@@ -28,8 +28,7 @@
 #' }
 #'
 #' **Effect of `delta`:**
-#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
-#' The function checks that all observed time points are separated by multiples of `delta`.
+#' If `delta` is supplied, the function checks that all observed time points are separated by multiples of `delta`.
 #' If gaps are detected, a message lists the missing periods and the full sequence is stored in `details$periods_restored`.
 #'
 #' **Balancing the panel** (presence definition as in `describe_patterns`):

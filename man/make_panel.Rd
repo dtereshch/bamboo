@@ -40,8 +40,7 @@ the full sequence and missing periods.}
 }
 
 \strong{Effect of \code{delta}:}
-If \code{delta} is supplied, the time variable is coerced to numeric (if possible).
-The function checks that all observed time points are separated by multiples of \code{delta}.
+If \code{delta} is supplied, the function checks that all observed time points are separated by multiples of \code{delta}.
 If gaps are detected, a message lists the missing periods and the full sequence is stored in \code{details$periods_restored}.
 
 \strong{Balancing the panel} (presence definition as in \code{describe_patterns}):

@@ -34,8 +34,8 @@ i.e., entities with at least one row containing a non‑NA value in substantive 
 }
 
 \strong{Effect of \code{delta}:}
-If \code{delta} is supplied, the time variable is coerced to numeric (if possible).
-The function checks that all observed time points are separated by multiples of \code{delta}.
+If \code{delta} is supplied, the function checks that all observed time points
+are separated by multiples of \code{delta}.
 If gaps are detected, a message lists the missing periods
 (unless the interval was inherited from panel attributes).
 For each missing period, a row is added to the output with \code{count = 0} and \code{share = 0},

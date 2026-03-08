@@ -22,8 +22,8 @@
 #' }
 #'
 #' **Effect of `delta`:**
-#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
-#' The function checks that all observed time points are separated by multiples of `delta`.
+#' If `delta` is supplied, the function checks that all observed time points
+#' are separated by multiples of `delta`.
 #' If gaps are detected, a message lists the missing periods
 #' (unless the interval was inherited from panel attributes).
 #' For each missing period, a row is added to the output with `count = 0` and `share = 0`,

@@ -21,8 +21,8 @@
 #' Within each pattern block, entities appear in their original order.
 #'
 #' **Effect of `delta`:**
-#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
-#' The function checks for regular spacing and adds missing periods (with all zeros) to the plot.
+#' If `delta` is supplied, the function checks for regular spacing and adds missing periods
+#' (with all zeros) to the plot.
 #' A message lists missing periods unless the interval was inherited from panel attributes.
 #' The heatmap will therefore show columns for the full regular time sequence,
 #' with missing periods appearing entirely white (or the color for missing).

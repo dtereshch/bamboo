@@ -41,11 +41,9 @@
 #' When `format = "long"` and `detail = FALSE`, only `pattern`, time, and `presence` columns are returned.
 #'
 #' **Effect of `delta`:**
-#' If `delta` is supplied, the time variable is coerced to numeric (if possible).
-#' The function checks that all observed time points are separated by multiples of `delta`.
+#' If `delta` is supplied, the function checks that all observed time points are separated by multiples of `delta`.
 #' If gaps are detected, a message lists the missing periods (unless the interval was inherited from panel attributes),
-#' and columns for those missing periods are added to the presence matrix –
-#' and therefore to the output data.frame – with all zeros.
+#' and columns for those missing periods are added to the presence matrix – and therefore to the output data.frame – with all zeros.
 #' This ensures that the patterns reflect the full regular sequence of time periods.
 #'
 #' The object has class `"panel_description"` and two additional attributes:
