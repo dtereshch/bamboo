@@ -1,6 +1,6 @@
 #' Missing Values Heatmap by Period
 #'
-#' Creates a heatmap showing the number of missing values for each variable
+#' This function creates a heatmap showing the number of missing values for each variable
 #' across all time periods in panel data.
 #'
 #' @param data A data.frame containing panel data in a long format.

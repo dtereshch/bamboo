@@ -28,7 +28,7 @@ the second color the \strong{smallest} number. Default = \code{c("#1E4A3B", "#D4
 Invisibly returns a list with summary statistics and metadata.
 }
 \description{
-Creates a heatmap showing the number of missing values for each variable
+This function creates a heatmap showing the number of missing values for each variable
 across all time periods in panel data.
 }
 \details{
