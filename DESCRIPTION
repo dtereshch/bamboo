@@ -16,5 +16,6 @@ Roxygen: list(markdown = TRUE)  # Enable markdown parsing
 RoxygenNote: 7.3.2
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    quarto
 VignetteBuilder: quarto
