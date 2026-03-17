@@ -97,7 +97,7 @@ plot_periods(panel)
 describe_patterns(panel)
 ```
 
-You can also visualise these patterns with a heatmap using `plot_patterns()`.
+You can also visualize these patterns with a heatmap using `plot_patterns()`.
 
 ```{r}
 plot_patterns(panel)
@@ -141,7 +141,7 @@ You can optionally group by another variable, which does not necessarily have to
 summarize_numeric(panel, group = "year")
 ```
 
-`plot_heterogeneity()` visualises the distribution of a numeric variable across groups. We use `select = "sales"` to look at `sales`, and the function automatically uses the entity and time variables as groups because panel has panel attributes.
+`plot_heterogeneity()` visualizes the distribution of a numeric variable across groups. We use `select = "sales"` to look at `sales`, and the function automatically uses the entity and time variables as groups because panel has panel attributes.
 
 ```{r}
 plot_heterogeneity(panel, select = "sales")

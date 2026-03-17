@@ -21,7 +21,7 @@
 #' \describe{
 #'   \item{`metadata`}{List containing the function name, selection, group, and colors.}
 #'   \item{`details`}{List containing group-level statistics for each grouping variable,
-#'         each containing means, sd, and n per group.}
+#'         each containing means, standard deviations, and counts per group.}
 #' }
 #'
 #' @seealso
@@ -230,7 +230,7 @@ plot_heterogeneity <- function(
     # Return summary statistics for this group
     list(
       means = group_means,
-      sd = tapply(data_sub[[select]], x_var, sd, na.rm = TRUE),
+      std = tapply(data_sub[[select]], x_var, sd, na.rm = TRUE),
       count = tapply(data_sub[[select]], x_var, function(x) sum(!is.na(x)))
     )
   }
@@ -286,7 +286,7 @@ plot_heterogeneity <- function(
 
       results_list[[group_var]] <- list(
         means = tapply(data[[select]], x_var, mean, na.rm = TRUE),
-        sd = tapply(data[[select]], x_var, sd, na.rm = TRUE),
+        std = tapply(data[[select]], x_var, sd, na.rm = TRUE),
         count = tapply(data[[select]], x_var, function(x) sum(!is.na(x)))
       )
     }

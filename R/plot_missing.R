@@ -16,7 +16,7 @@
 #'
 #' @details
 #' The function creates a heatmap where rows are variables and columns are time periods.
-#' Cell colour reflects the number of missing values in that variable for that period,
+#' Cell color reflects the number of missing values in that variable for that period,
 #' using a continuous gradient from `colors[1]` (most missing) to `colors[2]` (least missing).
 #' Rows are ordered as the variables appear (first at the top). Columns are ordered chronologically.
 #'
@@ -239,7 +239,7 @@ plot_missing <- function(
   }
 
   # --- Prepare for plotting ---
-  # Reverse colour direction: first colour = max, second colour = min
+  # Reverse color direction: first color = max, second color = min
   ramp_colors <- colors[2:1] # now low -> second, high -> first
   min_val <- min(missing_mat, na.rm = TRUE)
   max_val <- max(missing_mat, na.rm = TRUE)
@@ -283,7 +283,7 @@ plot_missing <- function(
     )
   }
 
-  # --- Set up layout: top row for colour bar, bottom row for heatmap ---
+  # --- Set up layout: top row for color bar, bottom row for heatmap ---
   # Increased height of top row to give more room for legend and labels
   layout(matrix(c(1, 2), nrow = 2), heights = c(1.5, 6))
   old_par <- par(no.readonly = TRUE)

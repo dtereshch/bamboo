@@ -33,7 +33,7 @@ across all time periods in panel data.
 }
 \details{
 The function creates a heatmap where rows are variables and columns are time periods.
-Cell colour reflects the number of missing values in that variable for that period,
+Cell color reflects the number of missing values in that variable for that period,
 using a continuous gradient from \code{colors[1]} (most missing) to \code{colors[2]} (least missing).
 Rows are ordered as the variables appear (first at the top). Columns are ordered chronologically.
 

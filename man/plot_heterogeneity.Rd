@@ -38,7 +38,7 @@ The returned list contains the following components:
 \describe{
 \item{\code{metadata}}{List containing the function name, selection, group, and colors.}
 \item{\code{details}}{List containing group-level statistics for each grouping variable,
-each containing means, sd, and n per group.}
+each containing means, standard deviations, and counts per group.}
 }
 }
 \examples{
