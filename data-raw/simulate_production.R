@@ -223,4 +223,4 @@ production <- panel_data[, c(
 production <- production[order(production$firm, production$year), ]
 
 # Save to data/ directory
-save(production, file = "data/production.rda", compress = "xz")
+save(production, file = "data/production.rda", version = 2)
