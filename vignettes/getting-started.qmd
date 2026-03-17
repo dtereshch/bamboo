@@ -5,10 +5,20 @@ date: last-modified
 format: 
     html:
         toc: true
-vignette: true
+vignette: |
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
 ---
 
-The bamboo package provides a comprehensive set of tools for analyzing panel (longitudinal) data. It helps you explore the structure of your panel, examine missing value patterns, decompose numeric variables into between‑ and within‑entity components, and analyze transitions in categorical variables. The package is designed to work seamlessly with data frames that have been marked with panel structure using `make_panel()`, reducing repetitive specification of entity and time identifiers.
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The `bamboo` package provides a comprehensive set of tools for analyzing panel (longitudinal) data. It helps you explore the structure of your panel, examine missing value patterns, decompose numeric variables into between‑ and within‑entity components, and analyze transitions in categorical variables. The package is designed to work seamlessly with data frames that have been marked with panel structure using `make_panel()`, reducing repetitive specification of entity and time identifiers.
 
 This vignette walks you through the basic workflow using the built‑in production dataset, a simulated unbalanced panel of firms over six years. 
 
