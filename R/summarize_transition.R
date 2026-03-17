@@ -322,7 +322,7 @@ summarize_transition <- function(
     long_result$share,
     nrow = length(all_levels),
     ncol = length(all_levels),
-    byrow = FALSE,
+    byrow = TRUE, # <--- corrected line
     dimnames = list(from = all_levels, to = all_levels)
   )
   wide_result <- as.data.frame(wide_matrix)
