@@ -172,6 +172,42 @@ labor_na_indices <- sample(
 )
 panel_data$labor[labor_na_indices] <- NA
 
+# ------------------------------------------------------------
+# Generate ownership variable (stable but with occasional changes)
+# ------------------------------------------------------------
+ownership_levels <- c("private", "public", "mixed")
+# Initial ownership probabilities (can be adjusted)
+ownership_probs <- c(0.5, 0.3, 0.2)
+
+# Initialize ownership vector
+panel_data$ownership <- factor(NA, levels = ownership_levels)
+
+# For each firm, generate ownership over time
+for (f in 1:n_firms) {
+  firm_rows <- which(panel_data$firm == f)
+
+  # Year 1 ownership
+  current_own <- sample(ownership_levels, 1, prob = ownership_probs)
+  panel_data$ownership[firm_rows[1]] <- current_own
+
+  # Subsequent years: small probability of change
+  for (t in 2:n_years) {
+    if (runif(1) < 0.05) {
+      # 5% chance of change per year
+      # Change to a different ownership category
+      other_levels <- setdiff(ownership_levels, current_own)
+      current_own <- sample(other_levels, 1)
+    }
+    panel_data$ownership[firm_rows[t]] <- current_own
+  }
+}
+
+# Set ownership to NA for inactive periods
+panel_data$ownership[!panel_data$active] <- NA
+
+# Also set ownership to NA for the random missing positions?
+# We didn't explicitly add random NAs for ownership, but it's okay as is.
+
 # Remove the 'active' column and reorder
 production <- panel_data[, c(
   "firm",
@@ -179,7 +215,8 @@ production <- panel_data[, c(
   "industry",
   "sales",
   "capital",
-  "labor"
+  "labor",
+  "ownership"
 )]
 
 # Sort by firm and year
