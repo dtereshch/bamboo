@@ -32,8 +32,8 @@ The structure depends on \code{format}:
 When \code{format = "wide"}, a transition matrix as a data.frame:
 \describe{
 \item{\code{from_to}}{The originating state (row label).}
-\item{Columns for each destination state, containing the share of transitions from the
-row state to the column state (rounded to \code{digits}).}
+\item{\code{[state1], [state2], ...}}{Columns for each destination state,
+containing the share of transitions from the row state to the column state (rounded).}
 }
 
 When \code{format = "long"}, a data.frame with columns:
