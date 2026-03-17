@@ -14,8 +14,5 @@ LazyData: true
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)  # Enable markdown parsing
 RoxygenNote: 7.3.2
-Suggests: 
-    knitr,
-    rmarkdown,
-    quarto
+Suggests: quarto, knitr, rmarkdown
 VignetteBuilder: quarto
