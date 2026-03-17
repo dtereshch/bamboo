@@ -49,6 +49,9 @@
 #' out_plo_het$metadata
 #' out_plo_het$details
 #'
+#' @importFrom grDevices col2rgb rgb
+#' @importFrom graphics axis points lines legend par
+#' @importFrom stats sd
 #' @export
 plot_heterogeneity <- function(
   data,

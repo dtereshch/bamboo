@@ -104,6 +104,7 @@
 #' attr(out_dec_num, "metadata")
 #' attr(out_dec_num, "details")
 #'
+#' @importFrom stats complete.cases sd
 #' @export
 decompose_numeric <- function(
   data,

@@ -58,6 +58,8 @@
 #' out_plo_mis$metadata
 #' out_plo_mis$details
 #'
+#' @importFrom grDevices colorRamp rgb
+#' @importFrom graphics layout par plot.new plot.window rect text axis
 #' @export
 plot_missing <- function(
   data,

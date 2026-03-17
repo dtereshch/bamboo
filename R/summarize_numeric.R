@@ -72,6 +72,7 @@
 #' attr(out_sum_num, "metadata")
 #' attr(out_sum_num, "details")
 #'
+#' @importFrom stats sd quantile setNames
 #' @export
 summarize_numeric <- function(
   data,

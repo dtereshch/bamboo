@@ -75,6 +75,7 @@
 #' attr(out_dec_fac, "metadata")
 #' attr(out_dec_fac, "details")
 #'
+#' @importFrom stats complete.cases
 #' @export
 decompose_factor <- function(
   data,
