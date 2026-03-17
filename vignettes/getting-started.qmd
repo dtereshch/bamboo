@@ -1,0 +1,160 @@
+---
+title: "Getting Started with bamboo"
+author: "Dmitrii Tereshchenko"
+date: last-modified
+format: 
+    html:
+        toc: true
+vignette: true
+---
+
+The bamboo package provides a comprehensive set of tools for analyzing panel (longitudinal) data. It helps you explore the structure of your panel, examine missing value patterns, decompose numeric variables into between‑ and within‑entity components, and analyze transitions in categorical variables. The package is designed to work seamlessly with data frames that have been marked with panel structure using `make_panel()`, reducing repetitive specification of entity and time identifiers.
+
+This vignette walks you through the basic workflow using the built‑in production dataset, a simulated unbalanced panel of firms over six years. 
+
+For a comprehensive guide with detailed examples, case studies, and extended tutorials, 
+please visit the package web-book: <https://dtereshch.github.io/bambook/>
+
+## Installation
+
+If you haven't installed the package yet, you can get the stable version from CRAN.
+
+```{r, eval=FALSE}
+install.packages("bamboo")
+```
+
+Or you can install the development version from GitHub.
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("dtereshch/bamboo")
+```
+
+
+## Loading the package
+
+Load the package: 
+
+```{r}
+library(bamboo)
+```
+
+## Data import
+
+The package includes a simulated dataset called `production`. It contains information on 30 firms over up to 6 years, with variables such as `sales`, `capital`, `labor`, `industry`, and `ownership`. Missing values are present in some variables to mimic real‑world data.
+
+```{r}
+data(production)
+```
+
+To avoid repeatedly specifying the entity and time variables (firm and year), we create a panel_data object using `make_panel()`. This adds metadata that many subsequent functions will automatically use.
+
+```{r}
+panel <- make_panel(production, index = c("firm", "year"))
+```
+
+## Panel data structure analysis
+
+The first group of functions is designed to analyze the structure of the panel.
+
+`describe_dimensions()` returns the number of rows, distinct entities, distinct time periods, and substantive variables.
+
+```{r}
+describe_dimensions(panel)
+```
+
+`describe_periods()` shows, for each time period, how many entities have non‑missing data in any substantive variable, along with their share in the total number of entities.
+
+```{r}
+describe_periods(panel)
+```
+
+`describe_balance()` provides summary statistics for the distribution of entities per period and periods per entity.
+
+```{r}
+describe_balance(panel)
+```
+
+`plot_periods()` creates a histogram of the number of time periods covered by each entity.
+
+```{r}
+plot_periods(panel)
+```
+
+`describe_patterns()` tabulates the distinct patterns of presence/absence across time (e.g., which entities appear in which years).
+
+```{r}
+describe_patterns(panel)
+```
+
+You can also visualise these patterns with a heatmap using `plot_patterns()`.
+
+```{r}
+plot_patterns(panel)
+```
+
+## Missing values analysis
+
+The second group of functions is aimed at analyzing missing values, taking into account the nature of panel data. 
+
+`plot_missing()` creates a heatmap showing the number of missing values for each variable across all time periods. Darker cells indicate more missing values.
+
+```{r}
+plot_missing(panel)
+```
+
+`summarize_missing()` returns a table with overall missing counts, shares, and the number of entities and periods affected per variable.
+
+```{r}
+summarize_missing(panel)
+```
+
+`describe_incomplete()` lists entities that have at least one missing value, with details on which variables are incomplete. 
+
+```{r}
+describe_incomplete(panel)
+```
+
+## Numeric variables analysis
+
+The third group of functions is aimed at analyzing numeric variables, taking into account the nature of panel data.
+
+`summarize_numeric()` calculates basic statistics (count, mean, std, min, max) for numeric variables. 
+
+```{r}
+summarize_numeric(panel)
+```
+
+You can optionally group by another variable, which does not necessarily have to be a panel identifier. Here we use `year`.
+
+```{r}
+summarize_numeric(panel, group = "year")
+```
+
+`plot_heterogeneity()` visualises the distribution of a numeric variable across groups. We use `select = "sales"` to look at `sales`, and the function automatically uses the entity and time variables as groups because panel has panel attributes.
+
+```{r}
+plot_heterogeneity(panel, select = "sales")
+```
+
+`decompose_numeric()` splits the total variance of numeric variables into between‑entity and within‑entity components. 
+
+```{r}
+decompose_numeric(panel)
+```
+
+## Factor variables analysis
+
+The last group of functions is aimed at analyzing factor (categorical) variables, taking into account the nature of panel data.
+
+`decompose_factor()` breaks down the overall frequency of each category into between‑entity (how many entities ever have that category) and within‑entity (average share of time an entity spends in that category) components.
+
+```{r}
+decompose_factor(panel)
+```
+
+`summarize_transition()` computes transition counts and shares between states of a factor variable over consecutive time periods. Here we analyze transitions in `ownership`.
+
+```{r}
+summarize_transition(panel, select = "ownership")
+```
