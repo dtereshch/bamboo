@@ -212,10 +212,10 @@ panel_data$ownership[!panel_data$active] <- NA
 production <- panel_data[, c(
   "firm",
   "year",
-  "industry",
   "sales",
   "capital",
   "labor",
+  "industry",
   "ownership"
 )]
 

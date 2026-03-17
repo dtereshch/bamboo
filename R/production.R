@@ -9,9 +9,6 @@
 #' \describe{
 #'   \item{firm}{integer; firm identifier (1 to 30)}
 #'   \item{year}{integer; year identifier (1 to 6)}
-#'   \item{industry}{factor; industry affiliation with three levels:
-#'                   "Industry 1", "Industry 2", "Industry 3". Some firms change
-#'                   industry over time.}
 #'   \item{sales}{numeric; firm sales/output generated from a Cobb-Douglas
 #'                production function with industry-specific parameters and
 #'                technology shocks. Contains random missing values (~2%).}
@@ -21,6 +18,9 @@
 #'   \item{labor}{numeric; labor input, log‑normally distributed with
 #'                firm-specific effects and industry-specific time trends.
 #'                Contains random missing values (~2%).}
+#'   \item{industry}{factor; industry affiliation with three levels:
+#'                   "Industry 1", "Industry 2", "Industry 3". Some firms change
+#'                   industry over time.}
 #'   \item{ownership}{factor; ownership type with three levels:
 #'                    "private", "public", "mixed". The variable is stable over
 #'                    time but changes with a probability of 5% per year.}
@@ -46,7 +46,7 @@
 #'   \item Technology shocks affecting output.
 #' }
 #'
-#' @source Simulated data for econometric analysis and demonstration purposes
+#' @source Simulated data for econometric analysis and demonstration purposes.
 #'
 #' @examples
 #' data(production)
