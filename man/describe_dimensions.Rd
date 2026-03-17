@@ -21,7 +21,7 @@ number of rows, unique entities, unique time periods, and substantive variables.
 }
 \details{
 The returned data.frame has the following structure:
-\itemize{
+\describe{
 \item{\code{rows}}{ Total number of rows in the data frame.}
 \item{\code{entities}}{ Number of distinct values in the entity variable.}
 \item{\code{periods}}{ Number of distinct values in the time variable.}
