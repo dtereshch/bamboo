@@ -1,7 +1,6 @@
 ---
 title: "Getting Started with paneldesc"
 author: "Dmitrii Tereshchenko"
-date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: true
