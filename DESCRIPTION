@@ -2,7 +2,7 @@ Package: bamboo
 Type: Package
 Title: Descriptive Analysis and Visualization for Panel Data
 Version: 0.1.0
-Description: This package provides a comprehensive set of tools for describing and visualizing panel data structures,
+Description: Provides a comprehensive set of tools for describing and visualizing panel data structures,
              as well as for summarizing and visualizing variables within a panel data context.
 Authors@R: person("Dmitrii", "Tereshchenko", role = c("aut", "cre"), 
                    email = "dtereshch@gmail.com", 
