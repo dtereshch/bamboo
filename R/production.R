@@ -37,9 +37,9 @@
 #'   \item Ownership changes occur with 5% probability per year.
 #'   \item Industry-specific Cobb‑Douglas parameters:
 #'     \itemize{
-#'       \item Industry 1: α = 0.25, β = 0.65, A = 2.0 (labor‑intensive)
-#'       \item Industry 2: α = 0.35, β = 0.55, A = 2.2 (balanced, high productivity)
-#'       \item Industry 3: α = 0.30, β = 0.60, A = 1.8 (standard)
+#'       \item Industry 1: \eqn{\alpha = 0.25}, \eqn{\beta = 0.65}, \eqn{A = 2.0} (labor‑intensive)
+#'       \item Industry 2: \eqn{\alpha = 0.35}, \eqn{\beta = 0.55}, \eqn{A = 2.2} (balanced, high productivity)
+#'       \item Industry 3: \eqn{\alpha = 0.30}, \eqn{\beta = 0.60}, \eqn{A = 1.8} (standard)
 #'     }
 #'   \item Additional random missing values (approx. 2%) in sales, capital, and labor.
 #'   \item Firm-specific effects and industry-specific time trends in inputs.
