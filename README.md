@@ -4,7 +4,7 @@ Descriptive Analysis and Visualization for Panel Data
 
 ## Description
 
-This package provides a comprehensive set of tools for describing and visualizing panel data structures, as well as for summarizing and visualizing variables within a panel data context.
+Provides a comprehensive set of tools for describing and visualizing panel data structures, as well as for summarizing and visualizing variables within a panel data context.
 
 ## Installation
 
