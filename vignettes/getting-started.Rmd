@@ -1,20 +1,22 @@
 ---
 title: "Getting Started with bamboo"
 author: "Dmitrii Tereshchenko"
-date: last-modified
-format: 
-    html:
-        toc: true
-vignette: |
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
   %\VignetteIndexEntry{Getting Started}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width   = 6,
+  fig.height  = 4
 )
 ```
 
@@ -23,7 +25,7 @@ The `bamboo` package provides a comprehensive set of tools for analyzing panel (
 This vignette walks you through the basic workflow using the built‑in production dataset, a simulated unbalanced panel of firms over six years. 
 
 For a comprehensive guide with detailed examples, case studies, and extended tutorials, 
-please visit the package web-book: <https://dtereshch.github.io/bambook/>
+please visit the package web-book: <https://dtereshch.github.io/bambook/>.
 
 ## Installation
 
@@ -43,7 +45,7 @@ devtools::install_github("dtereshch/bamboo")
 
 ## Loading the package
 
-Load the package: 
+Load the package. 
 
 ```{r}
 library(bamboo)
