@@ -59,7 +59,7 @@
 #' out_plo_mis$details
 #'
 #' @importFrom grDevices colorRamp rgb pdf dev.off
-#' @importFrom graphics layout par plot.new plot.window rect text axis
+#' @importFrom graphics layout par plot.new plot.window rect text axis strwidth
 #' @export
 plot_missing <- function(
   data,
