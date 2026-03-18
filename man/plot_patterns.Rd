@@ -9,7 +9,7 @@ plot_patterns(
   index = NULL,
   delta = NULL,
   limits = NULL,
-  colors = c("#1E4A3B", "white")
+  colors = c("#D55E00", "white")
 )
 }
 \arguments{
@@ -25,7 +25,7 @@ or a vector of two integers (show patterns with ranks between the two values, in
 If not specified, all patterns are shown.}
 
 \item{colors}{A character vector of two colors for present and missing observations.
-Default = c("#1E4A3B", "white").}
+Default = c("#D55E00", "white").}
 }
 \value{
 Invisibly returns a list with summary statistics and metadata.

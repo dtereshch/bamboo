@@ -8,7 +8,7 @@ plot_missing(
   data,
   select = NULL,
   index = NULL,
-  colors = c("#1E4A3B", "#D4B87A")
+  colors = c("#D55E00", "#0072B2")
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ Not required if data has panel attributes.}
 
 \item{colors}{A character vector of two colors defining the gradient for the heatmap.
 The first color represents the \strong{largest} number of missing values,
-the second color the \strong{smallest} number. Default = \code{c("#1E4A3B", "#D4B87A")}.}
+the second color the \strong{smallest} number. Default = \code{c("#D55E00", "#0072B2")}.}
 }
 \value{
 Invisibly returns a list with summary statistics and metadata.

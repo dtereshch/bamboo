@@ -8,7 +8,7 @@ plot_heterogeneity(
   data,
   select,
   group = NULL,
-  colors = c("#1E4A3B", "#D4B87A")
+  colors = c("#D55E00", "#0072B2")
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ If data has panel attributes and group is not specified,
 both the entity and time variables will be used as grouping variables.}
 
 \item{colors}{A character vector of two colors: first for mean line and points, second for individual points.
-Default = c("#1E4A3B", "#D4B87A").}
+Default = c("#D55E00", "#0072B2").}
 }
 \value{
 Invisibly returns a list with summary statistics and metadata.

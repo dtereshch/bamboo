@@ -10,7 +10,7 @@
 #'        Not required if data has panel attributes.
 #' @param colors A character vector of two colors defining the gradient for the heatmap.
 #'        The first color represents the **largest** number of missing values,
-#'        the second color the **smallest** number. Default = `c("#1E4A3B", "#D4B87A")`.
+#'        the second color the **smallest** number. Default = `c("#D55E00", "#0072B2")`.
 #'
 #' @return Invisibly returns a list with summary statistics and metadata.
 #'
@@ -65,7 +65,7 @@ plot_missing <- function(
   data,
   select = NULL,
   index = NULL,
-  colors = c("#1E4A3B", "#D4B87A")
+  colors = c("#D55E00", "#0072B2")
 ) {
   # --- Initialisation (similar to summarize_missing) ---
   user_index <- index
