@@ -58,7 +58,7 @@
 #' out_plo_mis$metadata
 #' out_plo_mis$details
 #'
-#' @importFrom grDevices colorRamp rgb
+#' @importFrom grDevices colorRamp rgb pdf dev.off
 #' @importFrom graphics layout par plot.new plot.window rect text axis
 #' @export
 plot_missing <- function(
@@ -238,6 +238,13 @@ plot_missing <- function(
     }
   }
 
+  # --- Compute left margin to accommodate long variable names ---
+  pdf(NULL)
+  max_name_width <- max(strwidth(analyze_vars, units = "inches", cex = 0.9))
+  line_height_in <- par("csi") # height of one line in inches
+  dev.off()
+  left_margin <- max(4, ceiling(max_name_width / line_height_in + 1.5))
+
   # --- Prepare for plotting ---
   # Reverse color direction: first color = max, second color = min
   ramp_colors <- colors[2:1] # now low -> second, high -> first
@@ -284,7 +291,6 @@ plot_missing <- function(
   }
 
   # --- Set up layout: top row for color bar, bottom row for heatmap ---
-  # Increased height of top row to give more room for legend and labels
   layout(matrix(c(1, 2), nrow = 2), heights = c(1.5, 6))
   old_par <- par(no.readonly = TRUE)
   on.exit({
@@ -293,8 +299,8 @@ plot_missing <- function(
   })
 
   # ---- 1. Colour bar (legend) ----
-  # Margins: bottom 0, left 4 (to match heatmap left margin), top 2, right 1
-  par(mar = c(0, 4, 2, 1))
+  # Margins: bottom 0, left = left_margin, top 2, right 1
+  par(mar = c(0, left_margin, 2, 1))
   plot.new()
   # Use the same padded x‑limits as the heatmap, so the bar has identical surrounding space
   plot.window(xlim = xlim_heat, ylim = c(0, 1), xaxs = "i", yaxs = "i")
@@ -324,13 +330,13 @@ plot_missing <- function(
   )
 
   # ---- 2. Heatmap ----
-  # Margins: bottom 3 (for rotated labels), left 4, top 1, right 1
-  par(mar = c(3, 4, 1, 1) + 0.1)
+  # Margins: bottom 3, left = left_margin, top 1, right 1, plus 0.1 extra
+  par(mar = c(3, left_margin, 1, 1) + 0.1)
   plot(
     NA,
     xlim = xlim_heat,
     ylim = ylim_heat,
-    xlab = "", # no x-axis title
+    xlab = "",
     ylab = "",
     axes = FALSE,
     frame.plot = FALSE,
