@@ -1,5 +1,5 @@
 ---
-title: "Getting Started with bamboo"
+title: "Getting Started with paneldesc"
 author: "Dmitrii Tereshchenko"
 date: "`r Sys.Date()`"
 output: 
@@ -20,26 +20,26 @@ knitr::opts_chunk$set(
 )
 ```
 
-The `bamboo` package provides a comprehensive set of tools for analyzing panel (longitudinal) data. It helps you explore the structure of your panel, examine missing value patterns, decompose numeric variables into between‑ and within‑entity components, and analyze transitions in categorical variables. The package is designed to work seamlessly with data frames that have been marked with panel structure using `make_panel()`, reducing repetitive specification of entity and time identifiers.
+The `paneldesc` package provides a comprehensive set of tools for analyzing panel (longitudinal) data. It helps you explore the structure of your panel, examine missing value patterns, decompose numeric variables into between‑ and within‑entity components, and analyze transitions in categorical variables. The package is designed to work seamlessly with data frames that have been marked with panel structure using `make_panel()`, reducing repetitive specification of entity and time identifiers.
 
 This vignette walks you through the basic workflow using the built‑in production dataset, a simulated unbalanced panel of firms over six years. 
 
 For a comprehensive guide with detailed examples, case studies, and extended tutorials, 
-please visit the package web-book: <https://dtereshch.github.io/bambook/>.
+please visit the package web-book: <https://dtereshch.github.io/paneldesc-guides/>.
 
 ## Installation
 
 If you haven't installed the package yet, you can get the stable version from CRAN.
 
 ```{r, eval=FALSE}
-install.packages("bamboo")
+install.packages("paneldesc")
 ```
 
 Or you can install the development version from GitHub.
 
 ```{r, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github("dtereshch/bamboo")
+devtools::install_github("dtereshch/paneldesc")
 ```
 
 
@@ -48,7 +48,7 @@ devtools::install_github("dtereshch/bamboo")
 Load the package. 
 
 ```{r}
-library(bamboo)
+library(paneldesc)
 ```
 
 ## Data import
