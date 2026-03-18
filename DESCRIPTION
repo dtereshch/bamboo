@@ -1,4 +1,4 @@
-Package: bamboo
+Package: paneldesc
 Type: Package
 Title: Descriptive Analysis and Visualization for Panel Data
 Version: 0.1.0
@@ -8,8 +8,8 @@ Authors@R: person("Dmitrii", "Tereshchenko", role = c("aut", "cre"),
                    email = "dtereshch@gmail.com", 
                    comment = c(ORCID = "0000-0002-8973-542X"))
 License: GPL-3 + file LICENSE
-URL: https://github.com/dtereshch/bamboo, https://dtereshch.github.io/bambook/
-BugReports: https://github.com/dtereshch/bamboo/issues
+URL: https://github.com/dtereshch/paneldesc, https://dtereshch.github.io/paneldesc-guides/
+BugReports: https://github.com/dtereshch/paneldesc/issues
 LazyData: true
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)  # Enable markdown parsing

@@ -1,4 +1,4 @@
-# bamboo
+# paneldesc
 
 Descriptive Analysis and Visualization for Panel Data
 
@@ -10,12 +10,12 @@ Provides a comprehensive set of tools for describing and visualizing panel data 
 
 ```
 library(devtools)
-install_github("dtereshch/bamboo")
+install_github("dtereshch/paneldesc")
 ```
 
 ## Usage
 ```
-library(bamboo)
+library(paneldesc)
 
 ?decompose_factor
 ?decompose_numeric
@@ -41,4 +41,4 @@ This package was developed using [DeepSeek](https://www.deepseek.com/) as a codi
 
 ## Contribution
 
-If you think you have encountered a bug, please submit an [issue](https://github.com/dtereshch/bamboo/issues). 
+If you think you have encountered a bug, please submit an [issue](https://github.com/dtereshch/paneldesc/issues). 
