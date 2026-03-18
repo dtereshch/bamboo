@@ -8,7 +8,7 @@
 #'        If data has panel attributes and group is not specified,
 #'        both the entity and time variables will be used as grouping variables.
 #' @param colors A character vector of two colors: first for mean line and points, second for individual points.
-#'        Default = c("#D55E00", "#0072B2").
+#'        Default = c("darkblue", "gray").
 #'
 #' @return Invisibly returns a list with summary statistics and metadata.
 #'
@@ -57,7 +57,7 @@ plot_heterogeneity <- function(
   data,
   select,
   group = NULL,
-  colors = c("#D55E00", "#0072B2")
+  colors = c("darkblue", "gray")
 ) {
   # Check if data has panel attributes
   has_panel_attrs <- inherits(data, "panel_data")

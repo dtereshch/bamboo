@@ -7,7 +7,7 @@
 #' @param index A character vector of length 2 specifying the names of the entity and time variables.
 #'        Not required if data has panel attributes.
 #' @param colors A character vector of length 2 specifying the fill color and line color for the histogram.
-#'        First color is for fill, second color is for the border line. Default = c("#D55E00", "white").
+#'        First color is for fill, second color is for the border line. Default = c("darkblue", "white").
 #'
 #' @return Invisibly returns a list with summary statistics and metadata.
 #'
@@ -51,7 +51,7 @@
 plot_periods <- function(
   data,
   index = NULL,
-  colors = c("#D55E00", "white")
+  colors = c("darkblue", "white")
 ) {
   # --- Initialisation ---
   user_index <- index

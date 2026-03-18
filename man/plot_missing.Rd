@@ -4,12 +4,7 @@
 \alias{plot_missing}
 \title{Missing Values Heatmap by Period}
 \usage{
-plot_missing(
-  data,
-  select = NULL,
-  index = NULL,
-  colors = c("#D55E00", "#0072B2")
-)
+plot_missing(data, select = NULL, index = NULL, colors = c("darkblue", "gray"))
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
@@ -22,7 +17,7 @@ Not required if data has panel attributes.}
 
 \item{colors}{A character vector of two colors defining the gradient for the heatmap.
 The first color represents the \strong{largest} number of missing values,
-the second color the \strong{smallest} number. Default = \code{c("#D55E00", "#0072B2")}.}
+the second color the \strong{smallest} number. Default = c("darkblue", "gray").}
 }
 \value{
 Invisibly returns a list with summary statistics and metadata.

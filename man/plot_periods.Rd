@@ -4,7 +4,7 @@
 \alias{plot_periods}
 \title{Time Coverage Distribution Visualization}
 \usage{
-plot_periods(data, index = NULL, colors = c("#D55E00", "white"))
+plot_periods(data, index = NULL, colors = c("darkblue", "white"))
 }
 \arguments{
 \item{data}{A data.frame containing panel data in a long format.}
@@ -13,7 +13,7 @@ plot_periods(data, index = NULL, colors = c("#D55E00", "white"))
 Not required if data has panel attributes.}
 
 \item{colors}{A character vector of length 2 specifying the fill color and line color for the histogram.
-First color is for fill, second color is for the border line. Default = c("#D55E00", "white").}
+First color is for fill, second color is for the border line. Default = c("darkblue", "white").}
 }
 \value{
 Invisibly returns a list with summary statistics and metadata.

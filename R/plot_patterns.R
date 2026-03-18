@@ -10,7 +10,7 @@
 #'        or a vector of two integers (show patterns with ranks between the two values, inclusive).
 #'        If not specified, all patterns are shown.
 #' @param colors A character vector of two colors for present and missing observations.
-#'        Default = c("#D55E00", "white").
+#'        Default = c("darkblue", "white").
 #'
 #' @return Invisibly returns a list with summary statistics and metadata.
 #'
@@ -75,7 +75,7 @@ plot_patterns <- function(
   index = NULL,
   delta = NULL,
   limits = NULL,
-  colors = c("#D55E00", "white")
+  colors = c("darkblue", "white")
 ) {
   # --- Initialisation ---
   user_index <- index
